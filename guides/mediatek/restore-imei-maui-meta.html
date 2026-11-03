@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restore Baseband &amp; IMEI via Maui META Tool | Tech Learn</title>
+<meta name="description" content="Fix Baseband: Unknown and IMEI: Null/Invalid on MediaTek devices using Maui META low-level NVRAM writing.">
+<link rel="stylesheet" href="../../../styles/style.css">
+<link rel="stylesheet" href="../../../styles/guide.css">
+<link rel="stylesheet" href="../../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Restore Baseband &amp; IMEI via Maui META</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>MTK devices with NVRAM corruption</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Legal warning:</strong> only restore the <strong>original IMEI of your own device</strong>. IMEI modification is illegal in most countries and traceable. IMEI is printed on the box or battery label.</p>
+  </div>
+
+  <p>When a MediaTek device experiences complete NVRAM corruption, it reports <strong>Baseband: Unknown</strong> and <strong>IMEI: Null / Invalid</strong>. Unlike basic tools that only patch runtime values, <strong>Maui META</strong> interfaces directly with the baseband processor in low-level META mode, parsing exact database files (<code>BPLGU</code>) and writing recalibration parameters permanently into <code>nvram</code> and <code>nvdata</code>.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MediaTek CDC Serial &amp; VCOM drivers installed.</li>
+        <li>Maui META Tool (v9.x) or Modem META v10.x (Helio/Dimensity).</li>
+        <li>Official stock firmware matching the target model and build version.</li>
+        <li><strong>BPLGU</strong> modem database file from firmware.</li>
+        <li>Original 15-digit IMEI numbers (box or battery label).</li>
+        <li>Quality USB cable + charged device.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Configure Maui META</h3>
+      <ol>
+        <li>Extract and launch <code>MauiMETA.exe</code> as Administrator.</li>
+        <li>Menu <strong>Options</strong> → check <strong>Connect Smart Phone into META Mode</strong>.</li>
+        <li>Set <strong>Connection Type</strong> → <code>USB COM</code>.</li>
+        <li>Click <strong>Reconnect</strong> on the right — the indicator begins flashing green/yellow (listening for device).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Force device into META Mode</h3>
+      <ol>
+        <li>Power off the phone completely.</li>
+        <li>Connect USB.</li>
+        <li><em>Boot keys:</em> on most models plugging in auto-powers into META. On locked models, hold <kbd>Volume Down</kbd> or <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd> while plugging.</li>
+        <li>Windows detects the MediaTek USB CDC port. Phone screen shows logo or static display — <strong>META Mode</strong>.</li>
+        <li>Maui META handshakes; the status indicator turns solid yellow/green.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Load BPLGU &amp; rebuild IMEI</h3>
+      <ol>
+        <li>From the tool dropdown, select <strong>IMEI Download</strong>.</li>
+        <li>Click <strong>Change NVRAM Database File</strong>.</li>
+        <li>Browse to <code>BPLGU...</code> in your firmware folder → Open.</li>
+        <li>In the IMEI Download tab:
+          <ul>
+            <li>Enter first 14 digits of <strong>IMEI 1</strong> — the 15th checksum digit auto-calculates.</li>
+            <li>For dual SIM, choose SIM 2 tab or enable Dual IMEI → enter IMEI 2.</li>
+          </ul>
+        </li>
+        <li>Click <strong>Download To Flash</strong>.</li>
+        <li>Log shows: <code>Write IMEI to NVRAM successful</code>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Restore baseband calibration</h3>
+      <p>If "Baseband: Unknown" persists:</p>
+      <ol>
+        <li>Switch the tool dropdown from <em>IMEI Download</em> to <strong>NVRAM Editor</strong> or <strong>Update Parameter</strong>.</li>
+        <li>Click <strong>Load From File</strong> → select <code>BPLGU</code> if prompted.</li>
+        <li>Click <strong>Upload From Flash</strong> to read active NVRAM.</li>
+        <li>Locate <code>NVRAM_EF_RF_CAL_LID</code> or <code>CALIBRATION_DATA</code>.</li>
+        <li>Click <strong>Write To Flash</strong> to force modem re-index.</li>
+        <li>Click <strong>Disconnect</strong> to safely exit META and reboot.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Troubleshooting</h3>
+
+      <p><strong>Stuck on 'Connect Smart Phone into META Mode'</strong></p>
+      <p>Fix: install MTK CDC/VCOM drivers, disable Driver Signature Enforcement, check Device Manager for COM port.</p>
+
+      <p><strong>NVRAM Database File mismatch</strong></p>
+      <p>Fix: extract fresh BPLGU from the exact stock firmware matching your current software version, or re-flash full stock firmware via SP Flash Tool first.</p>
+
+      <p><strong>[META] Timeout error</strong></p>
+      <p>Fix: on modern SLA/DAA-protected chips, run MTK Auth Bypass tool / MTKClient first to disable security, then retry META connection.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="restore-imei-sn-write-tool.html">Restore IMEI via SN Write Tool</a></li>
+      <li><a href="mtk-database-bplgu-mddb.html">Find BPLGU &amp; MDDB files</a></li>
+      <li><a href="backup-nvram-nvdata-imei.html">Backup NVRAM / IMEI</a></li>
+      <li><a href="mediatek-partition-map-explained.html">Partition map</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

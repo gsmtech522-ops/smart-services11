@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۳: آپریٹرز (Operators) اور کنڈیشنز (if, else, switch)</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #2563eb;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-color: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .category {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #475569;
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent-color);
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        ul, ol {
+            margin-right: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            dir: ltr;
+            display: inline-block;
+        }
+
+        .interactive-editor-box {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .editor-toolbar {
+            background: #1e293b;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 6px;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .editor-toolbar .actions button.run-btn:hover {
+            background: #15803d;
+        }
+
+        .code-input-area {
+            width: 100%;
+            height: 250px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+            tab-size: 4;
+        }
+
+        .code-input-area:focus {
+            outline: none;
+        }
+
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 140px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <div class="container">
+        <span class="category">JavaScript گائیڈ</span>
+        <h1>سبق ۳: آپریٹرز (Operators) اور کنڈیشنز (if, else, switch)</h1>
+        
+        <div class="description">
+            آپریٹرز سے حساب، موازنہ اور منطقی فیصلے کیے جاتے ہیں۔ کنڈیشنز (if, else, switch) سے پروگرام کو فیصلہ کرنے کی طاقت ملتی ہے — 'اگر ایسا ہو تو یہ کرو، ورنہ وہ کرو'۔
+        </div>
+
+        <h3>1. Arithmetic Operators (حسابی)</h3>
+        <ul>
+            <li><code>+</code> جمع، <code>-</code> تفریق، <code>*</code> ضرب، <code>/</code> تقسیم</li>
+            <li><code>%</code> باقی (Modulus) — <code>10 % 3 = 1</code></li>
+            <li><code>**</code> طاقت — <code>2 ** 3 = 8</code></li>
+        </ul>
+
+        <h3>2. Comparison Operators (موازنہ)</h3>
+        <ul>
+            <li><code>==</code> برابر (قدر)، <code>===</code> برابر (قدر + ٹائپ) — <strong>=== بہتر ہے</strong></li>
+            <li><code>!=</code>, <code>!==</code> نا برابر</li>
+            <li><code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code></li>
+        </ul>
+
+        <h3>3. Logical Operators (منطقی)</h3>
+        <ul>
+            <li><code>&amp;&amp;</code> اور (دونوں سچ ہوں)</li>
+            <li><code>||</code> یا (کوئی ایک سچ ہو)</li>
+            <li><code>!</code> نہیں (الٹ)</li>
+        </ul>
+
+        <h3>4. if / else if / else</h3>
+        <h3>5. switch — کئی صورتوں کے لیے</h3>
+
+        <h3>کوڈ کی مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>JavaScript کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">// حسابی آپریٹرز
+let a = 10, b = 3;
+console.log("جمع:", a + b);        // 13
+console.log("تفریق:", a - b);      // 7
+console.log("ضرب:", a * b);        // 30
+console.log("تقسیم:", a / b);      // 3.33...
+console.log("باقی:", a % b);       // 1
+console.log("طاقت:", a ** b);      // 1000
+
+// if / else
+let marks = 75;
+if (marks >= 80) {
+    console.log("گریڈ: A+");
+} else if (marks >= 70) {
+    console.log("گریڈ: A");
+} else if (marks >= 60) {
+    console.log("گریڈ: B");
+} else {
+    console.log("گریڈ: F — دوبارہ کوشش کریں");
+}
+
+// logical operators
+let age = 20;
+let hasID = true;
+if (age >= 18 && hasID) {
+    console.log("داخلہ اجازت ہے");
+} else {
+    console.log("داخلہ نہیں");
+}
+
+// switch
+let day = "جمعہ";
+switch (day) {
+    case "پیر":
+        console.log("ہفتے کا پہلا دن");
+        break;
+    case "جمعہ":
+        console.log("چھٹی کا دن قریب ہے");
+        break;
+    case "اتوار":
+        console.log("چھٹی!");
+        break;
+    default:
+        console.log("عام دن");
+}</textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ (Console):</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>اہم باتیں اور قواعد</h3>
+        <ul>
+            <li><strong>== بمقابلہ ===:</strong> <code>"5" == 5</code> سچ ہے، لیکن <code>"5" === 5</code> جھوٹ — ہمیشہ <code>===</code> استعمال کریں۔</li>
+            <li><strong>Truthy / Falsy:</strong> <code>0</code>, <code>""</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code> جھوٹے ہیں — باقی سب سچے۔</li>
+            <li><strong>Ternary:</strong> <code>let result = marks >= 50 ? "پاس" : "فیل";</code></li>
+            <li><strong>switch میں break:</strong> بھولنے سے اگلا case بھی چل جائے گا (fall-through)۔</li>
+        </ul>
+
+        <h3>عمل / مشق (Task)</h3>
+        <ol>
+            <li>ایک ویری ایبل میں نمبر رکھیں اور if/else سے چیک کریں کہ وہ جفت (Even) ہے یا طاق (Odd)۔</li>
+            <li>ایک switch بنائیں جو مہینے کا نمبر لے کر اس کا نام دکھائے۔</li>
+        </ol>
+    </div>
+
+    <script>
+        async function copyCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const codeText = textArea.value;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(codeText);
+                } else {
+                    textArea.select();
+                    document.execCommand('copy');
+                }
+
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = "Copied! ✅";
+                buttonElement.style.backgroundColor = "#16a34a";
+
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    buttonElement.style.backgroundColor = "";
+                }, 2000);
+            } catch (err) {
+                console.error('کپی کرنے میں ناکامی:', err);
+                alert('کپی کرنے میں مسئلہ پیش آیا!');
+            }
+        }
+
+        function runCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const iframe = editorBox.querySelector('.preview-iframe');
+            
+            const code = textArea.value;
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            const wrappedCode = code.includes('<html') ? code : `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 10px; background: #1e293b; color: #f8fafc; font-size: 13px; }
+                        .log { color: #38bdf8; margin-bottom: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <div id="console-output"></div>
+                    <script>
+                        const output = document.getElementById('console-output');
+                        const origLog = console.log;
+                        console.log = function(...args) {
+                            origLog.apply(console, args);
+                            const div = document.createElement('div');
+                            div.className = 'log';
+                            div.textContent = '> ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+                            output.appendChild(div);
+                        };
+                        try {
+                            ${code}
+                        } catch(e) {
+                            console.log('Error: ' + e.message);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            iframeDoc.write(wrappedCode);
+            iframeDoc.close();
+        }
+    </script>
+</body>
+</html>

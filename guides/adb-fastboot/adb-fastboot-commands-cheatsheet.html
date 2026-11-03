@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate ADB and Fastboot Commands Cheat Sheet | Tech Learn</title>
+<meta name="description" content="Complete list of ADB and Fastboot commands for Android flashing, bootloader unlocking, partition management, log tracking and troubleshooting.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>The Ultimate ADB and Fastboot Commands Cheat Sheet</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Quick Reference</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Use</dt>
+    <dd>Bookmark — search (Ctrl+F) to find any command fast</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>The complete list of useful ADB and Fastboot commands for Android flashing, bootloader unlocking, partition management and troubleshooting.</p>
+
+  <p>Whether you are a seasoned mobile software technician or a developer initializing your first custom ROM setup, remembering every command is impossible. This cheat sheet organizes all essential commands by function.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Category 1 — Basic ADB connection commands</h3>
+      <p>Commands used while the phone is powered on normally.</p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb devices</code></td><td>Lists all connected Android devices with USB debugging authorized.</td></tr>
+          <tr><td><code>adb start-server</code></td><td>Starts the ADB background process on your PC.</td></tr>
+          <tr><td><code>adb kill-server</code></td><td>Stops the ADB server (useful if a tool freezes or fails to detect a port).</td></tr>
+          <tr><td><code>adb version</code></td><td>Displays the version number of your installed ADB platform tools.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>2. Category 2 — Reboot &amp; boot mode commands</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb reboot</code></td><td>Restarts your device normally.</td></tr>
+          <tr><td><code>adb reboot bootloader</code> / <code>adb reboot fastboot</code></td><td>Forces the phone to reboot into Fastboot Mode.</td></tr>
+          <tr><td><code>adb reboot recovery</code></td><td>Restarts directly into Recovery Mode.</td></tr>
+          <tr><td><code>adb reboot edl</code></td><td>Forces supported Qualcomm devices into Emergency Download Mode (9008).</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>3. Category 3 — File management &amp; app installation</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb install app_name.apk</code></td><td>Installs an Android application from your PC.</td></tr>
+          <tr><td><code>adb install -r app_name.apk</code></td><td>Reinstalls or updates while keeping user data.</td></tr>
+          <tr><td><code>adb uninstall package_name</code></td><td>Uninstalls an app by package name (e.g. <code>com.instagram.android</code>).</td></tr>
+          <tr><td><code>adb push C:\file.txt /sdcard/</code></td><td>Copies a file from PC to the phone's internal storage.</td></tr>
+          <tr><td><code>adb pull /sdcard/photo.jpg C:\Users\Desktop</code></td><td>Copies a file from the phone back to your PC.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>4. Category 4 — Log tracking &amp; device info</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb logcat</code></td><td>Displays live system logs (Ctrl+C to stop).</td></tr>
+          <tr><td><code>adb logcat &gt; c:\log.txt</code></td><td>Saves the log output to a text file.</td></tr>
+          <tr><td><code>adb get-serialno</code></td><td>Displays the phone's unique hardware serial number.</td></tr>
+          <tr><td><code>adb shell getprop ro.build.version.release</code></td><td>Shows the current Android version.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>5. Category 5 — Advanced ADB shell commands</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb shell pm list packages</code></td><td>Lists every app package installed on the system.</td></tr>
+          <tr><td><code>adb shell pm list packages -3</code></td><td>Lists only third-party (user-installed) apps.</td></tr>
+          <tr><td><code>adb shell pm uninstall -k --user 0 package_name</code></td><td>Forcefully removes system bloatware without root.</td></tr>
+          <tr><td><code>adb shell screencap -p /sdcard/screenshot.png</code></td><td>Takes a screenshot and saves it to storage.</td></tr>
+          <tr><td><code>adb shell screenrecord /sdcard/video.mp4</code></td><td>Records the screen to a video file.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>6. Category 6 — Fastboot mode commands (bootloader)</h3>
+      <p>These commands only work when the phone is in Fastboot / Bootloader mode.</p>
+
+      <p><strong>Connection &amp; info</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot devices</code></td><td>Lists devices recognized in Fastboot mode. If empty, check bootloader drivers.</td></tr>
+          <tr><td><code>fastboot getvar all</code></td><td>Dumps hardware details: IMEI status, CPU type, bootloader state, baseband.</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Unlocking bootloader</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot oem unlock</code></td><td>Unlock on older or generic models.</td></tr>
+          <tr><td><code>fastboot flashing unlock</code></td><td>Unlock on newer devices (Android 8+).</td></tr>
+          <tr><td><code>fastboot oem lock</code> / <code>fastboot flashing lock</code></td><td>Re-lock to return to standard security.</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Flashing partitions (use with caution)</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot flash recovery recovery.img</code></td><td>Flashes a custom recovery (TWRP / OrangeFox).</td></tr>
+          <tr><td><code>fastboot flash boot boot.img</code></td><td>Flashes kernel / boot image (Magisk root).</td></tr>
+          <tr><td><code>fastboot flash system system.img</code></td><td>Flashes the Android OS partition.</td></tr>
+          <tr><td><code>fastboot boot recovery.img</code></td><td>Temporarily boots a recovery without flashing it.</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Wiping &amp; resets</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot erase cache</code></td><td>Wipes the cache partition.</td></tr>
+          <tr><td><code>fastboot format userdata</code> / <code>fastboot -w</code></td><td>Full factory reset via Fastboot.</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Leaving Fastboot</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot reboot</code></td><td>Exits Fastboot and restarts the device.</td></tr>
+          <tr><td><code>fastboot reboot recovery</code></td><td>Exits Fastboot and boots into Recovery.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> bookmark this page and use <kbd>Ctrl</kbd>+<kbd>F</kbd> to search the exact command syntax.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-setup-windows.html">How to Setup ADB &amp; Fastboot on Windows PC</a></li>
+      <li><a href="enable-usb-debugging-oem-unlocking.html">Enable USB Debugging &amp; OEM Unlocking</a></li>
+      <li><a href="adb-fastboot-errors-troubleshooting.html">ADB &amp; Fastboot Errors Troubleshooting</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

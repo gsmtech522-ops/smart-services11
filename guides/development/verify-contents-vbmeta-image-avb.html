@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Verify vbmeta Image Contents &amp; AVB Signatures | Tech Learn</title>
+<meta name="description" content="Complete guide to verify Android vbmeta.img contents, AVB signatures, hash descriptors and hashtree descriptors using avbtool and avbroot.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Verify vbmeta Image Contents &amp; AVB Signatures</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Reference Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Android 8+ devices with AVB 2.0</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Android's <code>vbmeta.img</code> is the central "root of trust" for Verified Boot. It contains the signatures and hash descriptors that the bootloader uses to verify every other partition (<code>boot</code>, <code>system</code>, <code>vendor</code>, etc.). If a single byte is modified in a partition without re-signing, the bootloader rejects it. This guide shows how to <strong>inspect</strong> a vbmeta image, <strong>verify</strong> its internal signature, and <strong>compare</strong> hash descriptors against actual partition images using <code>avbtool</code> and <code>avbroot</code>.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What's inside vbmeta.img?</h3>
+      <p>A vbmeta image has three main sections:</p>
+      <table>
+        <thead>
+          <tr><th>Section</th><th>Content</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Header</strong></td><td>Version, algorithm, flags, descriptor offsets</td></tr>
+          <tr><td><strong>Authentication Data</strong></td><td>RSA signature over the header + auxiliary data</td></tr>
+          <tr><td><strong>Auxiliary Data</strong></td><td>Hash descriptors, hashtree descriptors, chained vbmeta descriptors</td></tr>
+        </tbody>
+      </table>
+      <p>Descriptors are the "contract" — they say "the <code>boot</code> partition must hash to X with salt Y" [citation:9].</p>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Python 3.5+</strong></li>
+        <li><strong>avbtool</strong> — from AOSP <code>external/avb</code> or bundled with Magisk</li>
+        <li><strong>avbroot</strong> (optional) — for on-device verification [citation:8]</li>
+        <li>Your <code>vbmeta.img</code> extracted from firmware</li>
+        <li>The corresponding partition images (<code>boot.img</code>, <code>system.img</code>, etc.)</li>
+      </ul>
+
+      <p><strong>Get avbtool:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">git clone https://android.googlesource.com/platform/external/avb
+cd avb
+python3 avbtool.py --help</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Inspect the vbmeta image contents</h3>
+      <p>The <code>info_image</code> command dumps all metadata and descriptors without modifying anything [citation:7][citation:9]:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 avbtool.py info_image --image vbmeta.img</code></pre>
+      </div>
+      <p>Output includes:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">Minimum libavb version:   1.0
+Header Block:             256 bytes
+Authentication Block:     576 bytes
+Auxiliary Block:          3456 bytes
+Algorithm:                SHA256_RSA4096
+Rollback Index:           0
+Flags:                    0
+Release String:           'avbtool 1.1.0'
+Descriptors:
+    Hashtree descriptor:
+      Version of dm-verity:  1
+      Image Size:            1056714752 bytes
+      Tree Offset:           1056714752
+      Tree Size:             8327168 bytes
+      Data Block Size:       4096 bytes
+      Hash Block Size:       4096 bytes
+      FEC num roots:         2
+      Hash Algorithm:        sha256
+      Partition Name:        system
+      Salt:                  baa1ce5d7db69d1b3943a78b5b142ae4d77b4ed60b9885c8661e845172b29a13
+      Root Digest:           ec7cb1ad89fed3104a03191434d5487b5b4acc78e6bfeb84d7178af40df7db75
+      Flags:                 0
+    Hash descriptor:
+      Image Size:            35553280 bytes
+      Hash Algorithm:        sha256
+      Partition Name:        boot
+      Salt:                  cdbb77177f731920bbe0a0f94f84d9038ae0617d
+      Digest:                2597c218aae470a130f61162feaae70afd97f011
+      Flags:                 0</code></pre>
+      </div>
+      <p><strong>Key fields:</strong></p>
+      <ul>
+        <li><strong>Algorithm:</strong> signature algorithm (e.g. <code>SHA256_RSA4096</code>)</li>
+        <li><strong>Flags:</strong> bit 0 = HASHTREE_DISABLED, bit 1 = VERIFICATION_DISABLED [citation:9]</li>
+        <li><strong>Descriptors:</strong> one entry per partition — lists partition name, salt, digest/root digest</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Verify the vbmeta signature itself</h3>
+      <p>The <code>verify_image</code> command checks the internal signature against the embedded public key [citation:3]:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 avbtool.py verify_image --image vbmeta.img</code></pre>
+      </div>
+      <p>Output on success:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">vbmeta: Successfully verified SHA256_RSA4096 hash of vbmeta.img</code></pre>
+      </div>
+      <p>If the output says "FAILED" or "signature verification failed", the vbmeta image has been tampered with or is corrupt.</p>
+      <div class="note">
+        <p><strong>What this verifies:</strong> the signature covers the header + auxiliary data (descriptors). It does <strong>not</strong> verify the actual partitions — that is a separate step.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Verify a partition against its hash descriptor</h3>
+      <p>To check if a partition image (<code>boot.img</code>, <code>system.img</code>) matches what vbmeta expects, use <code>verify_image</code> with the <code>--key</code> flag pointing to the public key:</p>
+
+      <p><strong>Extract the public key from vbmeta first:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 avbtool.py extract_public_key --key vbmeta.img --output public_key.bin</code></pre>
+      </div>
+
+      <p><strong>Verify the partition:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 avbtool.py verify_image --image boot.img --key public_key.bin</code></pre>
+      </div>
+      <p>On success:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">boot: Successfully verified SHA256_RSA4096 hash of boot.img</code></pre>
+      </div>
+      <p>If it fails, <code>boot.img</code> does not match the vbmeta descriptor — it has been modified or is a different build.</p>
+
+      <div class="warning">
+        <p><strong>Hashtree vs hash:</strong> <code>boot.img</code> uses a <strong>hash descriptor</strong> (simple SHA256). <code>system.img</code> uses a <strong>hashtree descriptor</strong> (dm-verity tree). The same <code>verify_image</code> command handles both, but the failure message differs.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Manual hash verification (educational)</h3>
+      <p>To understand how AVB hashing works, you can manually recompute the digest. AVB hashes <strong>salt ‖ first Image Size bytes</strong> of the partition — not the whole partition [citation:5].</p>
+
+      <p><strong>Example for boot.img:</strong></p>
+      <ol>
+        <li>From <code>info_image</code> output, note:
+          <ul>
+            <li><code>Image Size</code> (e.g. 35553280 bytes)</li>
+            <li><code>Salt</code> (hex string)</li>
+            <li><code>Digest</code> (expected hash)</li>
+          </ul>
+        </li>
+        <li>Convert salt hex to binary:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 -c "import binascii; open('salt.bin','wb').write(binascii.unhexlify('YOUR_SALT_HEX'))"</code></pre>
+      </div>
+      <ol start="3">
+        <li>Compute hash over salt + first N bytes of the partition:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cat salt.bin <(dd if=boot.img bs=1 count=35553280 2>/dev/null) | sha256sum</code></pre>
+      </div>
+      <ol start="4">
+        <li>Compare the result with the <code>Digest</code> value from <code>info_image</code>. If they match, the partition is intact [citation:5].</li>
+      </ol>
+      <div class="note">
+        <p><strong>Why this matters:</strong> understanding the salt + Image Size mechanic is essential for debugging why a partition "looks" correct but fails verification — usually because you hashed the entire partition instead of just the Image Size portion.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Step 5 — On-device verification with avbroot</h3>
+      <p><code>avbroot</code> adds a powerful <code>avb verify-device</code> command that runs on the Android device itself and verifies all partitions against the live vbmeta [citation:8]:</p>
+
+      <p><strong>Requirements:</strong> rooted device, ADB shell access.</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Push avbroot binary to device
+adb push avbroot /data/local/tmp/
+adb shell chmod +x /data/local/tmp/avbroot
+
+# Run verification as root
+adb shell su -c "/data/local/tmp/avbroot avb verify-device"</code></pre>
+      </div>
+      <p>Output shows each partition and whether it matches the vbmeta descriptor [citation:8]:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">INFO vbmeta has a signed vbmeta header
+INFO Verifying hash descriptor for: boot
+INFO Verifying hash descriptor for: vendor_boot
+INFO Verifying hash tree descriptor for: system
+INFO Verifying hash tree descriptor for: vendor
+INFO Successfully verified all vbmeta signatures and hashes</code></pre>
+      </div>
+      <p>If any partition fails, avbroot reports it clearly — this is the fastest way to diagnose why a device boots with a "corrupt" warning.</p>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Cause</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>avbtool: not a vbmeta image</code></td><td>Wrong file — maybe you passed a partition image instead</td><td>Check file with <code>file vbmeta.img</code></td></tr>
+          <tr><td><code>verify_image: FAILED</code></td><td>Signature mismatch — vbmeta was modified</td><td>Re-extract vbmeta from stock firmware</td></tr>
+          <tr><td><code>extract_public_key: no embedded key</code></td><td>vbmeta is not signed (empty vbmeta)</td><td>Use stock signed vbmeta</td></tr>
+          <tr><td>Partition verify fails but image looks correct</td><td>You hashed the whole partition instead of Image Size bytes</td><td>Use <code>avbtool verify_image</code> instead of manual hashing</td></tr>
+          <tr><td>avbroot device-verify fails</td><td>Partition was modified after last boot</td><td>Re-flash stock partition or re-sign vbmeta</td></tr>
+          <tr><td>Manual hash doesn't match</td><td>Salt included as hex string instead of binary</td><td>Use <code>binascii.unhexlify</code> to convert salt to binary</td></tr>
+          <tr><td>Cannot read vbmeta on device</td><td>Root required for block device access</td><td>Use <code>su -c</code> or pull vbmeta to PC</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Install avbtool ----
+git clone https://android.googlesource.com/platform/external/avb
+cd avb
+
+# ---- Inspect vbmeta contents ----
+python3 avbtool.py info_image --image vbmeta.img
+
+# ---- Verify vbmeta signature ----
+python3 avbtool.py verify_image --image vbmeta.img
+
+# ---- Extract public key ----
+python3 avbtool.py extract_public_key --key vbmeta.img --output public_key.bin
+
+# ---- Verify a partition against vbmeta ----
+python3 avbtool.py verify_image --image boot.img --key public_key.bin
+python3 avbtool.py verify_image --image system.img --key public_key.bin
+
+# ---- Manual hash verification ----
+# 1. Get salt and image size from info_image
+# 2. Convert salt hex to binary
+python3 -c "import binascii; open('salt.bin','wb').write(binascii.unhexlify('SALT_HEX'))"
+# 3. Hash salt + first N bytes
+cat salt.bin <(dd if=boot.img bs=1 count=IMAGE_SIZE 2>/dev/null) | sha256sum
+
+# ---- On-device verification (avbroot) ----
+adb push avbroot /data/local/tmp/
+adb shell chmod +x /data/local/tmp/avbroot
+adb shell su -c "/data/local/tmp/avbroot avb verify-device"
+
+# ---- Check AVB flags ----
+python3 avbtool.py info_image --image vbmeta.img | grep -i flags</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Always verify vbmeta signature before relying on its descriptors.</li>
+        <li>✅ Use <code>verify_image</code> instead of manual hashing when possible.</li>
+        <li>✅ Extract the public key from the exact vbmeta you are checking against.</li>
+        <li>✅ Remember: hash descriptors cover <strong>Image Size</strong> bytes, not the whole partition.</li>
+        <li>✅ On-device <code>avbroot verify-device</code> is the fastest diagnostic for "corrupt" boot warnings.</li>
+        <li>✅ Keep stock vbmeta images for each build — you need them to restore a device.</li>
+        <li>✅ If a partition verify fails, the partition is modified — re-flash stock or re-sign.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if your device shows "Your device is corrupt" after flashing, run <code>avbtool verify_image</code> on each partition against the vbmeta public key. The failing partition tells you exactly what to re-flash or re-sign.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="unpack-signed-boot-recovery-system-img.html">Unpack Signed boot/recovery/system Images (AVB)</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="patch-boot-img-magisk-root-guide.html">Patch boot.img with Magisk</a></li>
+      <li><a href="unpack-repack-android-boot-recovery-img.html">Unpack &amp; Repack boot.img / recovery.img</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

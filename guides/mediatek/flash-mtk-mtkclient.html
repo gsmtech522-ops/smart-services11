@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash MediaTek Firmware via MTKClient | Tech Learn</title>
+<meta name="description" content="Bypass SLA/DAA and flash raw partition images or full firmware folder on modern MediaTek devices using MTKClient.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Flash MediaTek Firmware via MTKClient</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Modern Helio/Dimensity chips with SLA/DAA protection</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern MTK devices (Helio, Dimensity) block SP Flash Tool without OEM auth. <strong>MTKClient</strong> exploits BROM to bypass SLA/DAA entirely, letting you flash raw partition binaries or full firmware folders completely free.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MTKClient (Python environment) set up.</li>
+        <li>MediaTek VCOM drivers installed.</li>
+        <li>LibUSB-win32 filter or UsbDk driver installed.</li>
+        <li>Unpacked firmware images (<code>.img</code> files) or full firmware folder.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Flash via GUI (visual method)</h3>
+      <ol>
+        <li>Open CMD inside <code>mtkclient</code>.</li>
+        <li>Launch GUI:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk_gui.py</code></pre>
+      </div>
+      <ol start="3">
+        <li>Power off phone.</li>
+        <li>Hold <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd>, connect USB.</li>
+        <li>MTKClient bypasses auth and shows partition table.</li>
+        <li>Go to <strong>Write Partition(s)</strong> tab.</li>
+        <li>Select partition (<code>boot</code>, <code>recovery</code>, <code>vbmeta</code>, <code>super</code>…).</li>
+        <li>Click <strong>Browse</strong> → select corresponding <code>.img</code>.</li>
+        <li>Click <strong>Write Partition(s)</strong> and wait for 100%.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Flash via CLI (faster)</h3>
+      <ol>
+        <li>Open CMD inside <code>mtkclient</code> as Administrator.</li>
+        <li>Place your <code>.img</code> files in the folder or note their paths.</li>
+        <li>Execute the write command (turn off phone, hold volume keys, plug USB for each execution):</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Flash boot
+python mtk w boot boot.img
+
+# Flash recovery
+python mtk w recovery recovery.img
+
+# Flash vbmeta
+python mtk w vbmeta vbmeta.img
+
+# Flash super (dynamic partitions)
+python mtk w super super.img</code></pre>
+      </div>
+
+      <p><strong>Flash full firmware folder:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk wl path/to/firmware_folder/</code></pre>
+      </div>
+      <p>MTKClient auto-matches image names to GPT and sequentially flashes every partition.</p>
+    </li>
+
+    <li>
+      <h3>4. Step 4 — Factory reset &amp; reboot</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk e metadata,userdata</code></pre>
+      </div>
+      <p>Unplug, hold Power 10s to exit BROM and boot.</p>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting</h3>
+
+      <p><strong>LIBUSB_ERROR_NOT_SUPPORTED / device disconnecting</strong></p>
+      <p>Fix: reinstall UsbDk drivers, or filter the MediaTek USB port with LibUSB Filter Driver.</p>
+
+      <p><strong>FAILED (remote: Write protected)</strong></p>
+      <p>Fix: some partitions (preloader, bootloader) are write-protected. Run <code>python mtk da spa</code> first.</p>
+
+      <p><strong>Stuck on first boot loop</strong></p>
+      <p>Fix: boot into Stock Recovery → Wipe Data / Factory Reset, or run <code>python mtk e userdata</code>.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="mtkclient-overview-setup.html">MTKClient setup</a></li>
+      <li><a href="backup-mtk-mtkclient.html">Backup via MTKClient</a></li>
+      <li><a href="flash-mtk-master-guide.html">Flash MTK — master guide</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Tutorials – Install, Command Line, Servers, Docker &amp; Local AI | Tech Learn</title>
+<meta name="description" content="Linux tutorials for Ubuntu, Debian, Fedora and Arch: installation, command line, packages, networking, servers, Docker and local AI.">
+<link rel="stylesheet" href="styles/style.css">
+<link rel="stylesheet" href="styles/guide.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<!--
+  HOW TO ADD A GUIDE
+  1. Copy a file from guides/ and edit it.
+  2. Find the topic below and turn it into a link:
+     <li><a href="guides/your-file.html">Topic name</a> <span class="tag">Beginner</span></li>
+  3. To add a new topic, copy any <li> line inside the right category.
+  Topics without a link are planned guides (shown in grey).
+  Add open to a <details> tag to make that category start expanded.
+-->
+
+<!-- ==================== HEADER ==================== -->
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🐧</span>
+    <h1>Linux</h1>
+    <p>Linux guides from first install to servers, containers and local AI. Commands are for Ubuntu/Debian unless stated.</p>
+  </div>
+  <nav class="header-info">
+    <a href="index.html">← Computer Technique</a>
+    <span class="badge">Ubuntu / Debian</span>
+    <span class="badge badge-green">Fedora / Arch</span>
+  </nav>
+</header>
+
+<!-- ==================== BREADCRUMB ==================== -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="index.html">Computer Technique</a></li>
+    <li>Linux</li>
+  </ol>
+</nav>
+
+<!-- ==================== GUIDES ==================== -->
+<article>
+  <p>Tap a category to open its guides. Grey items are planned.</p>
+
+  <!-- 1 ==================== Getting Started ==================== -->
+  <details class="level-group" id="getting-started" open>
+    <summary>Getting Started</summary>
+    <ul class="guide-index">
+      <li><a href="guides/linux-install-ubuntu-usb.html">Create a live USB and install Ubuntu</a> <span class="tag">Beginner</span></li>
+      <li class="planned">What is Linux, and which distro to choose</li>
+      <li class="planned">Dual boot with Windows</li>
+      <li class="planned">Try Linux in a virtual machine first</li>
+    </ul>
+  </details>
+
+  <!-- 2 ==================== Desktop & Everyday Use ==================== -->
+  <details class="level-group" id="desktop-everyday-use">
+    <summary>Desktop &amp; Everyday Use</summary>
+    <ul class="guide-index">
+      <li class="planned">GNOME, KDE Plasma and XFCE compared</li>
+      <li class="planned">Settings, themes and extensions</li>
+      <li class="planned">Software centers</li>
+      <li class="planned">Keyboard shortcuts</li>
+    </ul>
+  </details>
+
+  <!-- 3 ==================== Files, Apps & Packages ==================== -->
+  <details class="level-group" id="files-apps-packages">
+    <summary>Files, Apps &amp; Packages</summary>
+    <ul class="guide-index">
+      <li class="planned">File system layout explained</li>
+      <li class="planned">apt, dnf and pacman</li>
+      <li class="planned">Snap, Flatpak and AppImage</li>
+      <li class="planned">Repositories and PPAs</li>
+      <li class="planned">Build software from source</li>
+    </ul>
+  </details>
+
+  <!-- 4 ==================== Command Line & Shells ==================== -->
+  <details class="level-group" id="command-line-shells">
+    <summary>Command Line &amp; Shells</summary>
+    <ul class="guide-index">
+      <li class="planned">Terminal basics and navigation</li>
+      <li class="planned">File commands: ls, cp, mv, rm, find</li>
+      <li class="planned">Pipes, grep and redirects</li>
+      <li class="planned">nano and vim basics</li>
+      <li class="planned">Reading man pages</li>
+    </ul>
+  </details>
+
+  <!-- 5 ==================== Users, Permissions & Security ==================== -->
+  <details class="level-group" id="users-permissions-security">
+    <summary>Users, Permissions &amp; Security</summary>
+    <ul class="guide-index">
+      <li class="planned">chmod and chown</li>
+      <li class="planned">Users, groups and sudo</li>
+      <li class="planned">Disk encryption with LUKS</li>
+      <li class="planned">SELinux and AppArmor</li>
+      <li class="planned">SSH hardening and fail2ban</li>
+    </ul>
+  </details>
+
+  <!-- 6 ==================== Networking ==================== -->
+  <details class="level-group" id="networking">
+    <summary>Networking</summary>
+    <ul class="guide-index">
+      <li class="planned">Fix Wi-Fi and DNS problems</li>
+      <li class="planned">SSH and key-based login</li>
+      <li class="planned">Firewall with ufw and nftables</li>
+      <li class="planned">Samba and NFS file sharing</li>
+      <li class="planned">VPN and WireGuard</li>
+    </ul>
+  </details>
+
+  <!-- 7 ==================== Drivers & Hardware ==================== -->
+  <details class="level-group" id="drivers-hardware">
+    <summary>Drivers &amp; Hardware</summary>
+    <ul class="guide-index">
+      <li class="planned">NVIDIA and AMD GPU drivers</li>
+      <li class="planned">CUDA setup</li>
+      <li class="planned">Kernel modules</li>
+      <li class="planned">Printers and Bluetooth</li>
+      <li class="planned">Laptop power and battery</li>
+    </ul>
+  </details>
+
+  <!-- 8 ==================== Automation & Scripting ==================== -->
+  <details class="level-group" id="automation-scripting">
+    <summary>Automation &amp; Scripting</summary>
+    <ul class="guide-index">
+      <li class="planned">Bash scripting basics</li>
+      <li class="planned">cron jobs</li>
+      <li class="planned">systemd timers</li>
+      <li class="planned">Python scripts</li>
+      <li class="planned">Ansible</li>
+    </ul>
+  </details>
+
+  <!-- 9 ==================== Local Servers ==================== -->
+  <details class="level-group" id="local-servers">
+    <summary>Local Servers</summary>
+    <ul class="guide-index">
+      <li class="planned">Apache and Nginx</li>
+      <li class="planned">MySQL and PostgreSQL</li>
+      <li class="planned">Reverse proxy</li>
+      <li class="planned">Free SSL with Let's Encrypt</li>
+    </ul>
+  </details>
+
+  <!-- 10 ==================== Containers & Virtualization ==================== -->
+  <details class="level-group" id="containers-virtualization">
+    <summary>Containers &amp; Virtualization</summary>
+    <ul class="guide-index">
+      <li class="planned">Docker and Docker Compose</li>
+      <li class="planned">Podman</li>
+      <li class="planned">KVM/QEMU virtual machines</li>
+      <li class="planned">VirtualBox</li>
+      <li class="planned">Kubernetes basics</li>
+    </ul>
+  </details>
+
+  <!-- 11 ==================== Local AI & Media ==================== -->
+  <details class="level-group" id="local-ai-media">
+    <summary>Local AI &amp; Media</summary>
+    <ul class="guide-index">
+      <li class="planned">Python virtual environments and CUDA</li>
+      <li class="planned">Run LLMs with Ollama</li>
+      <li class="planned">Text-to-speech tools</li>
+      <li class="planned">ComfyUI image and video generation</li>
+      <li class="planned">FFmpeg</li>
+    </ul>
+  </details>
+
+  <!-- 12 ==================== Development ==================== -->
+  <details class="level-group" id="development">
+    <summary>Development</summary>
+    <ul class="guide-index">
+      <li class="planned">Git setup</li>
+      <li class="planned">Compilers and build tools</li>
+      <li class="planned">Python, Node.js and Go setup</li>
+      <li class="planned">IDEs and editors</li>
+    </ul>
+  </details>
+
+  <!-- 13 ==================== Maintenance & Backup ==================== -->
+  <details class="level-group" id="maintenance-backup">
+    <summary>Maintenance &amp; Backup</summary>
+    <ul class="guide-index">
+      <li class="planned">Keep the system updated</li>
+      <li class="planned">Snapshots with Timeshift</li>
+      <li class="planned">Backups with rsync</li>
+      <li class="planned">Free disk space</li>
+    </ul>
+  </details>
+
+  <!-- 14 ==================== Troubleshooting ==================== -->
+  <details class="level-group" id="troubleshooting">
+    <summary>Troubleshooting</summary>
+    <ul class="guide-index">
+      <li class="planned">Boot failures and GRUB repair</li>
+      <li class="planned">Black screen after login</li>
+      <li class="planned">Broken packages</li>
+      <li class="planned">Disk full</li>
+      <li class="planned">Recovery mode and reading logs</li>
+    </ul>
+  </details>
+
+  <!-- 15 ==================== Administration ==================== -->
+  <details class="level-group" id="administration">
+    <summary>Administration</summary>
+    <ul class="guide-index">
+      <li class="planned">systemd services and journalctl</li>
+      <li class="planned">Processes and monitoring</li>
+      <li class="planned">Kernel tuning</li>
+      <li class="planned">Server hardening</li>
+      <li class="planned">LDAP and deployment</li>
+    </ul>
+  </details>
+</article>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+</body>
+</html>

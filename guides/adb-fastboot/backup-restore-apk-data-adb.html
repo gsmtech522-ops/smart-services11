@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup &amp; Restore APK + App Data Using ADB | Tech Learn</title>
+<meta name="description" content="Learn how to backup and restore Android APKs, app data and settings using ADB commands without root access.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Backup &amp; Restore APK + App Data Using ADB</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When upgrading your phone, performing a factory reset or preparing a device for a software flash, keeping your apps and their data safe is a top priority. With ADB you can create a complete, secure backup of your apps and data — no root required.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>ADB &amp; Fastboot installed</strong> — see <a href="adb-fastboot-setup-windows.html">setup guide</a>.</li>
+        <li><strong>USB Debugging</strong> enabled (Settings → Developer Options → USB Debugging).</li>
+        <li>Phone connected to the PC with the "Allow USB Debugging" prompt accepted.</li>
+        <li>You must know the target app's <strong>package name</strong> (e.g. <code>com.whatsapp</code>).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Backup commands</h3>
+      <p>Open PowerShell in your Platform Tools folder and verify the connection:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb devices</code></pre>
+      </div>
+
+      <p><strong>Option A — Backup a specific app and its data (recommended):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb backup -f my_app_backup.ab -apk com.whatsapp</code></pre>
+      </div>
+      <p>This creates <code>my_app_backup.ab</code> on your PC.</p>
+
+      <p><strong>Option B — Backup all installed apps and their data:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb backup -f all_apps_backup.ab -apk -all</code></pre>
+      </div>
+
+      <p><strong>Option C — Backup app data only (skip the APK):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb backup -f my_app_data.ab -noapk com.whatsapp</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Restore the backup</h3>
+      <p>To restore in the future:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb restore my_app_backup.ab</code></pre>
+      </div>
+      <p>The phone will prompt you to confirm the restore.</p>
+    </li>
+
+    <li>
+      <h3>4. Notes &amp; limitations</h3>
+      <ul>
+        <li><strong>Deprecated in Android 12+</strong> — <code>adb backup</code> may be blocked or partially work on newer Android versions.</li>
+        <li>Some apps (with backup disabled in their manifest) cannot be backed up via ADB.</li>
+        <li>Google account, passwords and encrypted data are not included.</li>
+        <li>Use this for local, offline backups — not as a replacement for Google cloud backup.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="backup-android-firmware-adb-fastboot.html">Backup Android firmware</a></li>
+      <li><a href="find-app-package-name-uid-adb.html">Find package name &amp; UID</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

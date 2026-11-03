@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>موبائل سافٹ وئیر ریموٹ سروس | ٹیک ورکشاپ</title>
+<meta name="description" content="کمپیوٹر کے ذریعے آن لائن موبائل فلیشنگ، ان لاک اور سافٹ وئیر مسائل کا حل۔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@500;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F4EF;--card:#FFFFFF;--ink:#1C2B2D;--muted:#5B6B6E;--line:#D5DAD3;
+  --c:#1F7A3E;--tint:#E4F2E8;--on-c:#FFFFFF;
+  --warn-bg:#FBEFD9;--warn-line:#B38600;--warn-ink:#4B3A06;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14201F;--card:#1C2C2B;--ink:#E9EFEA;--muted:#9DB0AD;--line:#2F4443;
+    --c:#6FD08F;--tint:#1F3A2D;--on-c:#0B1A12;
+    --warn-bg:#3A3216;--warn-line:#E8C04A;--warn-ink:#F2E3A9;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;background:var(--paper);color:var(--ink);font-size:1.05rem;line-height:1.95}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--c);outline-offset:2px;border-radius:6px}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+
+.topbar{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:54px}
+.brand{font-family:"Noto Nastaliq Urdu",serif;font-weight:700;font-size:1.15rem;line-height:2;text-decoration:none}
+.back{color:var(--c);font-weight:600;text-decoration:none}
+.back:hover{text-decoration:underline}
+
+.crumbs{margin-top:22px;font-size:.9rem;color:var(--muted)}
+.crumbs a{text-decoration:none;color:var(--c)}
+.hero{padding:6px 0 10px}
+.hero h1{font-family:"Noto Nastaliq Urdu",serif;font-weight:700;font-size:clamp(1.7rem,5vw,2.5rem);line-height:2.1}
+.hero p{color:var(--muted);max-width:52ch}
+.cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-block;background:var(--c);color:var(--on-c);font:inherit;font-weight:600;border:0;border-radius:10px;padding:6px 22px;text-decoration:none;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--c);border:1.5px solid var(--c)}
+.btn.ghost:hover{background:var(--c);color:var(--on-c)}
+
+section{margin-top:42px;scroll-margin-top:70px}
+h2.sec{
+  font-family:"Noto Nastaliq Urdu",serif;font-weight:700;font-size:1.45rem;line-height:2.1;
+  color:var(--c);border-bottom:3px solid var(--c);padding-bottom:2px;margin-bottom:16px;
+}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--c);border-radius:8px;padding:10px 16px}
+.card h3{font-size:1.08rem;line-height:1.7}
+.card p{color:var(--muted);font-size:.93rem;line-height:1.75;margin-top:2px}
+
+.steps{list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:14px;padding:8px 0;position:relative}
+.steps li::before{
+  content:counter(s);flex:none;width:36px;height:36px;border-radius:50%;
+  background:var(--c);color:var(--on-c);display:grid;place-items:center;font-weight:600;line-height:1;z-index:1;
+}
+.steps li:not(:last-child)::after{
+  content:"";position:absolute;inset-inline-start:17px;top:44px;bottom:-8px;width:2px;background:var(--line);
+}
+.steps b{display:block;line-height:1.7}
+.steps span{color:var(--muted);font-size:.95rem;display:block;line-height:1.75}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:680px){.two{grid-template-columns:1fr}}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 18px}
+.box h3{font-size:1.05rem;color:var(--c);line-height:1.9}
+.box ul{padding-inline-start:22px;margin:4px 0 8px}
+.box li{margin:2px 0;font-size:.98rem}
+.box.warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn-ink)}
+.box.warn h3{color:inherit}
+
+.note{background:var(--warn-bg);color:var(--warn-ink);border-inline-start:4px solid var(--warn-line);border-radius:8px;padding:8px 16px;margin-top:14px;font-size:.97rem}
+
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:420px}
+th,td{padding:8px 16px;text-align:start;border-bottom:1px solid var(--line)}
+th{background:var(--tint);color:var(--c);font-weight:600}
+tr:last-child td{border-bottom:0}
+.ph{font-family:ui-monospace,Consolas,monospace;direction:ltr;unicode-bidi:isolate;display:inline-block;font-weight:600}
+.tbl-note{color:var(--muted);font-size:.9rem;margin-top:8px}
+
+.faq{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;border-inline-start:5px solid var(--c)}
+.faq-btn{width:100%;display:flex;align-items:center;gap:12px;background:transparent;border:0;color:var(--ink);font:inherit;font-weight:600;text-align:start;cursor:pointer;padding:8px 16px}
+.faq-btn span{flex:1;line-height:1.8}
+.chev{width:20px;height:20px;stroke:var(--muted);flex:none;transition:transform .2s}
+.faq-btn[aria-expanded="true"] .chev{transform:rotate(180deg);stroke:var(--c)}
+.faq-btn[aria-expanded="true"]{color:var(--c)}
+.panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s ease}
+.panel > .inner{overflow:hidden;visibility:hidden;transition:visibility .25s}
+.faq.open .panel{grid-template-rows:1fr}
+.faq.open .panel > .inner{visibility:visible}
+.panel p{padding:2px 20px 12px;margin:0 16px;border-top:1px dashed var(--line);padding-top:8px;color:var(--ink)}
+
+.form{background:var(--card);border:2px solid var(--c);border-radius:12px;padding:16px 20px;display:grid;gap:12px}
+.form label{display:block;font-weight:600;font-size:.97rem;line-height:1.8}
+.form input,.form select,.form textarea{
+  width:100%;font:inherit;font-size:1rem;color:var(--ink);background:var(--paper);
+  border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;
+}
+.form textarea{min-height:100px;resize:vertical}
+.form input:focus,.form select:focus,.form textarea:focus{border-color:var(--c);outline:none}
+.form .hint{color:var(--muted);font-size:.9rem}
+.err{color:#C0392B;font-size:.9rem;display:none}
+
+.related{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.related a{text-decoration:none;background:var(--card);border:1px solid var(--line);border-inline-start:5px solid var(--c);border-radius:8px;padding:8px 16px;display:block}
+.related a:hover{border-color:var(--c)}
+.related b{display:block}
+.related span{color:var(--muted);font-size:.9rem}
+
+.fab{
+  position:fixed;bottom:18px;inset-inline-start:18px;z-index:25;
+  background:var(--c);color:var(--on-c);text-decoration:none;font-weight:600;
+  border-radius:999px;padding:6px 20px;box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+footer{margin-top:50px;border-top:1px solid var(--line);padding:22px 0 80px;color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.panel,.panel>.inner,.chev{transition:none}}
+</style>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../index.html">ٹیک ورکشاپ</a>
+    <a class="back" href="../index.html#remote">← ریموٹ سروس</a>
+  </div>
+</div>
+
+<main class="wrap">
+  <p class="crumbs"><a href="../index.html">ہوم</a> / <a href="../index.html#remote">ریموٹ سروس</a> / موبائل سافٹ وئیر ریموٹ سروس</p>
+
+  <header class="hero">
+    <h1>موبائل سافٹ وئیر ریموٹ سروس</h1>
+    <p>دکان آنے کی ضرورت نہیں۔ اپنا فون کمپیوٹر سے جوڑیں، ہم ریموٹ کنیکشن کے ذریعے سافٹ وئیر کا کام کر دیں گے۔</p>
+    <div class="cta-row">
+      <a class="btn" href="#order">سروس آرڈر کریں</a>
+      <a class="btn ghost" href="#price">ریٹ دیکھیں</a>
+    </div>
+  </header>
+
+  <section id="services">
+    <h2 class="sec">ہم کیا کرتے ہیں</h2>
+    <div class="grid">
+      <div class="card"><h3>فلیشنگ اور فرم وئیر</h3><p>اسٹاک رام انسٹال کر کے ہینگ، سست یا خراب سافٹ وئیر والا فون درست کرنا۔</p></div>
+      <div class="card"><h3>بوٹ لوپ اور ڈیڈ فون</h3><p>لوگو پر اٹکا ہوا یا آن نہ ہونے والا فون، جہاں خرابی سافٹ وئیر کی ہو۔</p></div>
+      <div class="card"><h3>اسکرین لاک</h3><p>پیٹرن، پن یا پاس ورڈ بھول جانے کی صورت میں، ملکیت کے ثبوت پر۔</p></div>
+      <div class="card"><h3>FRP / گوگل اکاؤنٹ لاک</h3><p>ری سیٹ کے بعد اکاؤنٹ مانگنے والا لاک، ملکیت کے ثبوت پر۔</p></div>
+      <div class="card"><h3>اپڈیٹ اور ڈاؤن گریڈ</h3><p>سافٹ وئیر ورژن اپڈیٹ کرنا یا مسئلہ پیدا کرنے والی اپڈیٹ سے پیچھے جانا۔</p></div>
+      <div class="card"><h3>نیٹ ورک اور ایرر</h3><p>سگنل، موبائل ڈیٹا اور سسٹم ایرر جیسے سافٹ وئیر مسائل کی جانچ۔</p></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <h2 class="sec">سروس کیسے ملتی ہے</h2>
+    <ol class="steps">
+      <li><div><b>رابطہ کریں</b><span>فون کا برانڈ، ماڈل اور مسئلہ بتائیں۔ آرڈر فارم سب سے آسان ہے۔</span></div></li>
+      <li><div><b>ریٹ اور وقت طے</b><span>ماڈل دیکھ کر کام ممکن ہے یا نہیں، ریٹ اور وقت پہلے بتا دیا جاتا ہے۔</span></div></li>
+      <li><div><b>کمپیوٹر تیار کریں</b><span>AnyDesk انسٹال کریں اور فون کو اصلی USB کیبل سے کمپیوٹر سے جوڑیں۔</span></div></li>
+      <li><div><b>ریموٹ کنیکشن</b><span>آپ کوڈ بھیجتے ہیں، ہم آپ کے سامنے کام شروع کرتے ہیں۔ آپ پوری اسکرین دیکھ سکتے ہیں۔</span></div></li>
+      <li><div><b>جانچ اور اختتام</b><span>فون آن ہونے پر آپ خود چیک کریں، پھر کنیکشن بند کر دیا جاتا ہے۔</span></div></li>
+    </ol>
+  </section>
+
+  <section id="needs">
+    <h2 class="sec">آپ کو کیا چاہیے</h2>
+    <div class="two">
+      <div class="box">
+        <h3>تیاری</h3>
+        <ul>
+          <li>ونڈوز کمپیوٹر یا لیپ ٹاپ</li>
+          <li>فون کی اصلی USB کیبل</li>
+          <li>مستحکم انٹرنیٹ اور AnyDesk</li>
+          <li>فون میں کم از کم 50 فیصد چارج</li>
+          <li>ماڈل نمبر اور مسئلے کی صاف تفصیل</li>
+          <li>لاک والے کام کے لیے ملکیت کا ثبوت (ڈبہ، بل یا IMEI)</li>
+        </ul>
+      </div>
+      <div class="box warn">
+        <h3>یاد رکھیں</h3>
+        <ul>
+          <li>ہارڈ ویئر کی خرابی (پانی، ٹوٹا بورڈ، چارجنگ آئی سی) ریموٹ پر ٹھیک نہیں ہوتی۔</li>
+          <li>فلیشنگ اور ریسیٹ سے فون کا ڈیٹا ختم ہو سکتا ہے، ممکن ہو تو پہلے بیک اپ لیں۔</li>
+          <li>نئے ماڈلز اور تازہ سیکیورٹی پیچ والے فونز پر کامیابی کی ضمانت نہیں ہوتی۔</li>
+          <li>ملکیت ثابت نہ ہو یا فون مشکوک ہو تو لاک ہٹانے کا کام نہیں کیا جاتا۔</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">حفاظت: ریموٹ سیشن میں ہم صرف وہی کام کرتے ہیں جو طے ہوا ہو۔ اپنے بینک، واٹس ایپ یا ای میل کے پاس ورڈ کسی کو نہ بتائیں، ہمیں بھی نہیں۔ کام ختم ہوتے ہی AnyDesk بند کر دیں۔</p>
+  </section>
+
+  <section id="price">
+    <h2 class="sec">ریٹ اور وقت</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>سروس</th><th>ریٹ</th><th>عموماً وقت</th></tr></thead>
+        <tbody>
+          <tr><td>فلیشنگ / فرم وئیر</td><td><span class="ph">300</span> روپے</td><td>30 سے 60 منٹ</td></tr>
+          <tr><td>بوٹ لوپ / ڈیڈ فون (سافٹ وئیر)</td><td><span class="ph">300</span> روپے</td><td>45 سے 90 منٹ</td></tr>
+          <tr><td>اسکرین لاک ہٹانا</td><td><span class="ph">200</span> روپے</td><td>15 سے 45 منٹ</td></tr>
+          <tr><td>FRP لاک</td><td><span class="ph">300</span> روپے سے شروع</td><td>15 سے 60 منٹ</td></tr>
+          <tr><td>اپڈیٹ / ڈاؤن گریڈ</td><td><span class="ph">XXX</span> روپے</td><td>30 سے 45 منٹ</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tbl-note">ریٹ ماڈل اور مسئلے کے مطابق بدلتا ہے۔ کام شروع ہونے سے پہلے آخری ریٹ طے کر دیا جاتا ہے۔</p>
+  </section>
+
+  <section id="faq">
+    <h2 class="sec">اکثر پوچھے جانے والے سوالات</h2>
+    <div class="faq">
+      <button class="faq-btn" aria-expanded="false" aria-controls="a1" id="q1" type="button"><span>کیا میرا ڈیٹا ختم ہو جائے گا؟</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="panel" id="a1" role="region" aria-labelledby="q1"><div class="inner"><p>فلیشنگ اور بوٹ لوپ کے کئی حل میں فون ری سیٹ ہو جاتا ہے اور ڈیٹا مٹ جاتا ہے۔ فون آن ہو تو پہلے بیک اپ لے لیں۔ کام سے پہلے ہم بتا دیتے ہیں کہ آپ کے ماڈل میں ڈیٹا بچ سکتا ہے یا نہیں۔</p></div></div>
+    </div>
+    <div class="faq">
+      <button class="faq-btn" aria-expanded="false" aria-controls="a2" id="q2" type="button"><span>ریموٹ سروس میں کتنا وقت لگتا ہے؟</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="panel" id="a2" role="region" aria-labelledby="q2"><div class="inner"><p>زیادہ تر کام ایک گھنٹے کے اندر ہو جاتے ہیں۔ فرم وئیر کا سائز اور آپ کے انٹرنیٹ کی رفتار وقت بڑھا سکتی ہے۔</p></div></div>
+    </div>
+    <div class="faq">
+      <button class="faq-btn" aria-expanded="false" aria-controls="a3" id="q3" type="button"><span>اگر کام نہ ہو سکا تو؟</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="panel" id="a3" role="region" aria-labelledby="q3"><div class="inner"><p>ماڈل دیکھ کر پہلے ہی بتا دیا جاتا ہے کہ کامیابی کے کتنے امکانات ہیں۔ کام نہ ہونے کی صورت میں ریٹ کی شرائط پہلے سے طے ہوتی ہیں، اس لیے آرڈر سے پہلے ان کا پوچھ لیں۔</p></div></div>
+    </div>
+    <div class="faq">
+      <button class="faq-btn" aria-expanded="false" aria-controls="a4" id="q4" type="button"><span>ملکیت کا ثبوت کیوں مانگا جاتا ہے؟</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="panel" id="a4" role="region" aria-labelledby="q4"><div class="inner"><p>چوری شدہ یا کسی اور کا فون ان لاک کرنے سے ہم انکار کرتے ہیں۔ اصل مالک کے لیے ڈبہ، خریداری کی رسید یا IMEI کی تصویر کافی ہے۔</p></div></div>
+    </div>
+    <div class="faq">
+      <button class="faq-btn" aria-expanded="false" aria-controls="a5" id="q5" type="button"><span>کیا کوئی بھی USB کیبل چل جائے گی؟</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="panel" id="a5" role="region" aria-labelledby="q5"><div class="inner"><p>نہیں۔ سستی یا صرف چارجنگ والی کیبل میں ڈیٹا کنیکشن کمزور ہوتا ہے اور فلیشنگ بیچ میں رک سکتی ہے۔ فون کے ساتھ آنے والی کیبل استعمال کریں۔</p></div></div>
+    </div>
+    <div class="faq">
+      <button class="faq-btn" aria-expanded="false" aria-controls="a6" id="q6" type="button"><span>کیا میرا کمپیوٹر محفوظ رہتا ہے؟</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="panel" id="a6" role="region" aria-labelledby="q6"><div class="inner"><p>ہم صرف اتنا ہی کام کرتے ہیں جو طے ہوا ہو، اور آپ پورا وقت اسکرین دیکھ رہے ہوتے ہیں۔ آپ جب چاہیں AnyDesk بند کر کے کنیکشن ختم کر سکتے ہیں۔</p></div></div>
+    </div>
+  </section>
+
+  <section id="order">
+    <h2 class="sec">آرڈر فارم</h2>
+    <form class="form" id="orderForm" novalidate>
+      <div><label for="f1">آپ کا نام *</label><input id="f1" type="text" data-label="آپ کا نام" placeholder="نام" required></div>
+      <div><label for="f2">فون کا برانڈ اور ماڈل *</label><input id="f2" type="text" data-label="فون کا برانڈ اور ماڈل" placeholder="مثلاً Samsung A12 (SM-A125F)" required></div>
+      <div><label for="f3">درکار سروس *</label><select id="f3" data-label="درکار سروس" required><option value="">منتخب کریں</option><option>فلیشنگ / فرم وئیر</option><option>بوٹ لوپ / ڈیڈ فون</option><option>اسکرین لاک</option><option>FRP لاک</option><option>اپڈیٹ / ڈاؤن گریڈ</option><option>دیگر</option></select></div>
+      <div><label for="f4">کمپیوٹر</label><select id="f4" data-label="کمپیوٹر"><option value="">منتخب کریں</option><option>ونڈوز 10</option><option>ونڈوز 11</option><option>ونڈوز 7</option><option>معلوم نہیں</option></select></div>
+      <div><label for="f5">مسئلہ بیان کریں</label><textarea id="f5" data-label="مسئلہ بیان کریں" placeholder="فون کب سے خراب ہے، کیا ہوا تھا، اسکرین پر کیا لکھا آ رہا ہے"></textarea></div>
+      <p class="err" id="err">براہ کرم ستارے والے خانے پُر کریں۔</p>
+      <button class="btn" type="submit">واٹس ایپ پر بھیجیں</button>
+      <p class="hint">بٹن دبانے پر واٹس ایپ کھلے گا اور آپ کی معلومات پیغام کی شکل میں پہلے سے لکھی ہوئی ہوں گی۔</p>
+    </form>
+  </section>
+
+  <section id="more">
+    <h2 class="sec">دیگر ریموٹ سروسز</h2>
+    <div class="related">
+      <a href="pc-remote.html"><b>کمپیوٹر ریموٹ سپورٹ</b><span>ونڈوز، سافٹ وئیر، ڈرائیورز اور پرنٹر سیٹ اپ</span></a>
+      <a href="web-service.html"><b>ویب سائٹ بنوانا</b><span>آپ کے کاروبار کے لیے سائٹ کی تیاری</span></a>
+    </div>
+  </section>
+</main>
+
+<a class="fab" href="#order">آرڈر کریں</a>
+
+<footer>
+  <div class="wrap">© <span id="yr"></span> ٹیک ورکشاپ۔ تمام حقوق محفوظ ہیں۔</div>
+</footer>
+
+<script>
+/* اپنا واٹس ایپ نمبر یہاں لکھیں: ملک کے کوڈ کے ساتھ، بغیر + اور صفر کے */
+const WA_NUMBER = "923425407621";
+const WA_INTRO  = "السلام علیکم، مجھے موبائل ریموٹ سروس چاہیے۔";
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* سوالات کا اکارڈین */
+document.querySelectorAll('.faq').forEach(f => {
+  const b = f.querySelector('.faq-btn');
+  b.addEventListener('click', () => {
+    const open = !f.classList.contains('open');
+    f.classList.toggle('open', open);
+    b.setAttribute('aria-expanded', open);
+  });
+});
+
+/* فارم سے واٹس ایپ پیغام */
+const form = document.getElementById('orderForm');
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  let ok = true, lines = [WA_INTRO, ""];
+  form.querySelectorAll('[data-label]').forEach(el => {
+    const v = el.value.trim();
+    if (el.required && !v) { ok = false; el.style.borderColor = '#C0392B'; }
+    else { el.style.borderColor = ''; }
+    if (v) lines.push(el.dataset.label + ": " + v);
+  });
+  document.getElementById('err').style.display = ok ? 'none' : 'block';
+  if (!ok) return;
+  window.open("https://wa.me/" + WA_NUMBER + "?text=" + encodeURIComponent(lines.join("\n")), "_blank", "noopener");
+});
+</script>
+</body>
+</html>

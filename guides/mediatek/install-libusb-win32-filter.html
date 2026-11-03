@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Install LibUSB-win32 Filter Driver for MTK/Qualcomm Bypass | Tech Learn</title>
+<meta name="description" content="Install LibUSB-win32 filter driver for MediaTek BROM and Qualcomm EDL capture with auth bypass tools.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Install LibUSB-win32 Filter Driver</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Setup Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>MediaTek BROM &amp; Qualcomm EDL tools</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern MTK/Qualcomm devices require a <strong>USB filter driver</strong> to bypass SLA/DAA (MTK) or read raw storage via EDL (Qualcomm). <strong>LibUSB-win32</strong> captures the temporary BROM/EDL port before the phone reboots, allowing tools like MTK Auth Bypass Tool, MTKClient, SP Flash Tool, and UnlockTool to work.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>Windows 7 / 8 / 10 / 11 (64-bit recommended).</li>
+        <li>Driver Signature Enforcement disabled.</li>
+        <li>MediaTek VCOM or Qualcomm USB drivers pre-installed.</li>
+        <li>LibUSB-win32 Filter Driver package downloaded.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Launch LibUSB setup</h3>
+      <ol>
+        <li>Extract the LibUSB-win32 installer package.</li>
+        <li>Right-click <code>libusb-win32-devel-filter-1.2.x.x.exe</code> (or <code>install-filter-driver.exe</code>) → <strong>Run as Administrator</strong>.</li>
+        <li>Choose <strong>Install a device filter</strong> → <strong>Next</strong>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Put phone into Flash / BROM mode</h3>
+      <p>BROM and EDL ports appear for a split second — timing matters:</p>
+      <ol>
+        <li>Power off the phone completely.</li>
+        <li>Open the LibUSB filter installation window on PC.</li>
+        <li>Hold <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd> (or test-point for hard-bricked).</li>
+        <li>Connect USB.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Capture &amp; install filter</h3>
+      <ol>
+        <li>The device list in LibUSB shows a new entry:
+          <ul>
+            <li><code>MediaTek USB Port</code> / <code>Preloader USB VCOM</code> (MTK)</li>
+            <li><code>QHUSB_BULK</code> / <code>Qualcomm HS-USB QDLoader 9008</code> (Qualcomm)</li>
+          </ul>
+        </li>
+        <li>Click the entry immediately → <strong>Install</strong>.</li>
+        <li>Confirmation: <em>"Filter driver installed successfully."</em></li>
+        <li>Unplug the phone.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Verify installation</h3>
+      <ol>
+        <li>Open LibUSB-win32 Filter Installer again.</li>
+        <li>Select <strong>Remove a device filter</strong> → Next.</li>
+        <li>Your MediaTek or Qualcomm hardware ID should appear in the active filter list.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Pro tip:</strong> if your tool says "Device not recognized" or "LibUSB driver missing", re-run <code>install-filter-driver.exe</code> → Install a device filter → reconnect with boot keys held.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Remove / uninstall</h3>
+      <ol>
+        <li>Open LibUSB setup as Administrator.</li>
+        <li>Select <strong>Remove a device filter</strong> → Next.</li>
+        <li>Select your installed filter → <strong>Remove</strong>.</li>
+        <li>Reboot PC.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Alternative:</strong> if LibUSB conflicts with Miracle Box or UnlockTool, install <strong>UsbDk</strong> instead — it runs silently and works well with MTKClient without breaking normal drivers.</p>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="install-mtk-vcom-drivers.html">Install MTK VCOM drivers</a></li>
+      <li><a href="bypass-mediatek-sla-daa.html">Bypass SLA/DAA</a></li>
+      <li><a href="mtkclient-overview-setup.html">MTKClient setup</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

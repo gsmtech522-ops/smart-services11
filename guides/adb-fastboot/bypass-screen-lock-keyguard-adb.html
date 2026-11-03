@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bypass Screen Lock / Keyguard via ADB (Own Device) | Tech Learn</title>
+<meta name="description" content="Complete guide to bypass screen lock and keyguard on unlocked bootloader devices using ADB. Only for your own device — covers data retention, FBE caveats, and legal warnings.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Bypass Screen Lock / Keyguard via ADB</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Unlocked-bootloader devices (own device only)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Legal warning:</strong> this guide is <strong>ONLY</strong> for your own device or a device you are <strong>explicitly authorized</strong> to service (e.g. a customer’s device with written consent). Bypassing the screen lock on someone else’s phone without permission is <strong>illegal</strong> in most countries and can be traced back to you.</p>
+  </div>
+
+  <div class="warning">
+    <p><strong>Encryption warning (Android 10+):</strong> modern devices use <strong>File-Based Encryption (FBE)</strong>. User data is locked behind hardware-backed keymaster keys tied to the user PIN. Deleting <code>locksettings.db</code> on encrypted stock ROMs <strong>unbinds keymaster keys and renders user data permanently inaccessible</strong> until a factory reset. Only use Method 1 in a custom recovery on unencrypted/legacy devices — otherwise your data is lost, not recovered.</p>
+  </div>
+
+  <p>When servicing devices with forgotten PINs, patterns, or damaged touch digitizers where data retention is essential, standard factory resets are not an option. On devices with an <strong>unlocked bootloader</strong>, technicians can leverage ADB elevated privileges (or TWRP/custom recovery terminal access) to remove or bypass keyguard database files, force-disable the screen lock overlay, or temporarily inject input events.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>An Android device with an <strong>unlocked bootloader</strong>.</li>
+        <li>ADB &amp; Fastboot installed on the PC.</li>
+        <li><strong>Root access</strong> via ADB shell, or a custom recovery (TWRP/OrangeFox) with ADB enabled.</li>
+        <li>USB Debugging active, or recovery mode connected via USB.</li>
+        <li><strong>Full data backup</strong> — if methods below go wrong on encrypted devices, you lose data.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Remove keyguard files via ADB / TWRP terminal</h3>
+      <p>The classic technique: delete the lock state database files directly without wiping user data. Only works reliably on <strong>legacy / unencrypted</strong> storage, or inside a custom recovery.</p>
+
+      <ol>
+        <li>Boot the device into TWRP/OrangeFox recovery, or boot into Android with rooted ADB active.</li>
+        <li>Open Command Prompt and start the shell:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell</code></pre>
+      </div>
+      <ol start="3">
+        <li>If in booted Android, request root:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">su</code></pre>
+      </div>
+      <ol start="4">
+        <li>Remove all lock-related database and key files:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">rm -f /data/system/gatekeeper.password.key
+rm -f /data/system/gatekeeper.pattern.key
+rm -f /data/system/locksettings.db
+rm -f /data/system/locksettings.db-wal
+rm -f /data/system/locksettings.db-shm
+rm -f /data/system/gesture.key
+rm -f /data/system/password.key</code></pre>
+      </div>
+      <ol start="5">
+        <li>Reboot normally:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">reboot</code></pre>
+      </div>
+      <ol start="6">
+        <li>When the system loads, swipe up — any pattern or PIN prompt should be bypassed.</li>
+      </ol>
+
+      <div class="warning">
+        <p><strong>FBE caveat:</strong> if the device is encrypted (Android 10+), this method will likely cause a bootloop or leave the data partition encrypted with lost keys. Read the encryption warning above before proceeding.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Disable lockscreen via settings injection (Android 8–11)</h3>
+      <p>If lock database files regenerate because of hardware keystore enforcement, force the lock setting values directly.</p>
+
+      <ol>
+        <li>Open ADB shell as root:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell
+su</code></pre>
+      </div>
+      <ol start="2">
+        <li>Disable keyguard lock flags:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">locksettings set-disabled true</code></pre>
+      </div>
+      <ol start="3">
+        <li>Clear the existing PIN/password if you know the old value:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">locksettings clear --old 0000</code></pre>
+      </div>
+      <p>If the old PIN is unknown, <code>set-disabled true</code> can force the keyguard overlay to stop showing — but does not decrypt the device.</p>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — Unlock via ADB input events (broken touch screen)</h3>
+      <p>If you know the PIN/pattern but the digitizer is cracked and unresponsive, emulate touch input via ADB.</p>
+
+      <p><strong>1. Wake the screen:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell input keyevent 26</code></pre>
+      </div>
+
+      <p><strong>2. Swipe up to reveal PIN entry:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell input swipe 300 1000 300 300</code></pre>
+      </div>
+
+      <p><strong>3. Type the PIN (example: 1234) and press Enter:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell input text 1234
+adb shell input keyevent 66</code></pre>
+      </div>
+      <p><em>Keyevent 66 = Enter. Once unlocked, immediately pull your data:</em></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb pull /sdcard/ D:\backup\</code></pre>
+      </div>
+
+      <div class="note">
+        <p><strong>Coordinates are device-specific:</strong> the swipe <code>300 1000 300 300</code> works on 1080×2400 screens. For other resolutions, adjust proportionally. Use <code>adb shell wm size</code> to check.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Method 4 — Direct property override (custom ROMs only)</h3>
+      <p>For custom development ROMs or test builds, keyguard can be suppressed without modifying on-disk files:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su -c "setprop keystore.no_matching_objects true"
+adb shell su -c "wm dismiss-keyguard"</code></pre>
+      </div>
+      <p>This only works on ROMs that allow this property — it will not work on stock firmware with hardware keymaster.</p>
+    </li>
+
+    <li>
+      <h3>6. Crucial security &amp; compatibility notes</h3>
+
+      <p><strong>File-Based Encryption (FBE) on Android 10+</strong></p>
+      <p>Modern devices use <strong>File-Based Encryption (FBE)</strong> and hardware-backed keymaster. User data is not just protected by a database file — it is cryptographically locked behind a key derived from the PIN. Deleting <code>locksettings.db</code> on modern encrypted stock ROMs will:</p>
+      <ul>
+        <li>Unbind the keymaster keys tied to the PIN</li>
+        <li>Make the user data partition unreadable</li>
+        <li>Force a full factory reset to make the device usable</li>
+      </ul>
+      <p><strong>Bottom line:</strong> Method 1 only works reliably on <strong>legacy</strong> devices or in custom recovery before data is encrypted. On modern stock encrypted devices, no data-retaining lock bypass exists — this is by design.</p>
+
+      <p><strong>Immediate action after successful bypass</strong></p>
+      <ul>
+        <li>Open <em>Settings → Developer Options</em> to verify ADB backup still works.</li>
+        <li>Run <code>adb pull /sdcard/</code> to pull user files.</li>
+        <li>Change the PIN immediately or re-enable lock with a known value.</li>
+        <li>Document the operation for any customer-device service record.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>rm</code> command returns "Operation not permitted"</td><td>Not rooted, or ADB shell is not root. Run <code>su</code> first.</td></tr>
+          <tr><td>Lock files reappear immediately</td><td>Keystore regenerated them. Use <code>locksettings set-disabled true</code> (Method 2) instead.</td></tr>
+          <tr><td>Bootloop after deleting locksettings.db</td><td>Encrypted device — data partition lost keys. Full factory reset required.</td></tr>
+          <tr><td><code>locksettings</code> command not found</td><td>Android 8+ required. On older Android, only Method 1 works.</td></tr>
+          <tr><td>ADB unauthorized</td><td>Enable USB Debugging. On locked screen you may need <code>adb shell input keyevent 26</code> to wake first.</td></tr>
+          <tr><td>Touch screen broken, swipe miss</td><td>Use <code>adb shell input tap X Y</code> for digit button presses. Get coordinates from screen resolution via <code>wm size</code>.</td></tr>
+          <tr><td>Customer phone — legal issue</td><td>Always get <strong>written authorization</strong> before attempting any lock bypass.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>8. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Enter ADB shell and elevate ----
+adb shell
+su
+
+# ---- Method 1: Remove keyguard lock files ----
+rm -f /data/system/gatekeeper.password.key
+rm -f /data/system/gatekeeper.pattern.key
+rm -f /data/system/locksettings.db
+rm -f /data/system/locksettings.db-wal
+rm -f /data/system/locksettings.db-shm
+rm -f /data/system/gesture.key
+rm -f /data/system/password.key
+reboot
+
+# ---- Method 2: Disable via locksettings ----
+locksettings set-disabled true
+locksettings clear --old 0000
+
+# ---- Method 3: Emulate input on broken screen ----
+adb shell input keyevent 26              # wake
+adb shell input swipe 300 1000 300 300   # swipe up
+adb shell input text 1234                # type PIN
+adb shell input keyevent 66              # press Enter
+
+# ---- Verify resolution for accurate swipe ----
+adb shell wm size
+adb shell wm density
+
+# ---- Method 4: Custom ROM property override ----
+adb shell su -c "setprop keystore.no_matching_objects true"
+adb shell su -c "wm dismiss-keyguard"
+
+# ---- After bypass — backup data ----
+adb pull /sdcard/ D:\backup\</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>9. Best practices</h3>
+      <ul>
+        <li>✅ Only bypass the lock on <strong>your own device</strong> or with <strong>written authorization</strong>.</li>
+        <li>✅ Back up all data first via <code>adb pull</code> if the device allows it.</li>
+        <li>✅ Confirm whether the device is encrypted before attempting Method 1.</li>
+        <li>✅ Use custom recovery (TWRP) for Method 1 — safest place to modify system files.</li>
+        <li>✅ Use Method 3 (input events) whenever the PIN is known but the screen is broken.</li>
+        <li>✅ Change the PIN immediately after successful bypass.</li>
+        <li>✅ Document every customer-device operation.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> If the goal is only to <strong>recover data</strong> from a broken-screen device with a known PIN, Method 3 (input events) is by far the safest. It doesn’t modify any files and preserves encryption integrity. Always pull data to PC before returning the device.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">ADB &amp; Fastboot Commands Cheat Sheet</a></li>
+      <li><a href="reboot-from-bricked-soft-bricked-loop.html">Recover from bricked / soft-bricked loop</a></li>
+      <li><a href="../android-generic/find-usb-vid-pid.html">Find USB VID &amp; PID</a></li>
+      <li><a href="../mediatek/erase-frp-pin-mtkclient.html">Erase FRP &amp; PIN via MTKClient</a></li>
+      <li><a href="../../android.html#pattern-unlock">Pattern / Screen Lock Unlock category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

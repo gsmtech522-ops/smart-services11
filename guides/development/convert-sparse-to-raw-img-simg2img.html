@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convert Sparse Image to Raw with simg2img (Android) | Tech Learn</title>
+<meta name="description" content="Complete guide to convert Android sparse images (system.img, vendor.img, super.img) to raw ext4 using simg2img, and back to sparse with img2simg on Windows and Linux.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Convert Sparse Image to Raw with simg2img</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Technical Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Android system.img, vendor.img, super.img, product.img, odm.img</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Android OTA packages and many firmware dumps ship partition images in <strong>sparse</strong> format — a compressed binary structure that only stores the blocks that actually contain data. Standard tools like 7-Zip, <code>e2fsck</code>, <code>fsck.erofs</code> and most file inspectors <strong>cannot read sparse images directly</strong>. You must convert them to <strong>raw</strong> first with <code>simg2img</code>.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What is a sparse image?</h3>
+      <p>Google introduced sparse images to reduce OTA size. Instead of writing every byte of a partition, sparse format stores:</p>
+      <ul>
+        <li><strong>Headers</strong> — describing chunk type and size</li>
+        <li><strong>Data chunks</strong> — actual bytes present in the partition</li>
+        <li><strong>Fill chunks</strong> — repeated bytes (e.g. zeros) compressed as "fill with 0x00 × N"</li>
+        <li><strong>Skip chunks</strong> — blocks that are all zeros and omitted entirely</li>
+      </ul>
+      <p>A raw <code>system.img</code> might be <strong>4 GB</strong>, while its sparse form is often <strong>1–2 GB</strong>. Sparse saves disk and download bandwidth, but blocks many tools.</p>
+    </li>
+
+    <li>
+      <h3>2. How to identify a sparse image</h3>
+      <p>Check the first 4 bytes of the file. Sparse magic is <code>3A FF 26 ED</code>.</p>
+
+      <p><strong>Windows PowerShell:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">$b = [System.IO.File]::ReadAllBytes("C:\firmware\system.img")[0..3]
+[System.BitConverter]::ToString($b)</code></pre>
+      </div>
+      <p>Output if sparse: <code>3A-FF-26-ED</code></p>
+      <p>Output if raw ext4: <code>53-EF</code> appears at offset 1080 (after 1024 bytes of padding).</p>
+
+      <p><strong>Linux / WSL:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file system.img
+xxd -l 16 system.img</code></pre>
+      </div>
+      <p>If <code>file</code> says "Android sparse image", it's sparse.</p>
+    </li>
+
+    <li>
+      <h3>3. Install simg2img (Windows)</h3>
+      <p>The easiest route on Windows is the <strong>Android SDK Platform Tools</strong> alternative — a pre-built <code>simg2img.exe</code> binary.</p>
+
+      <p><strong>Option A — Pre-built Windows binary:</strong></p>
+      <ol>
+        <li>Search GitHub for <code>simg2img windows</code> — many portable builds exist.</li>
+        <li>Download the ZIP, extract to <code>C:\platform-tools\</code> or any folder in your PATH.</li>
+        <li>Verify:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">simg2img.exe --help</code></pre>
+      </div>
+
+      <p><strong>Option B — WSL (recommended for technicians):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">wsl --install -d Ubuntu</code></pre>
+      </div>
+      <p>Inside Ubuntu:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo apt update
+sudo apt install android-sdk-libsparse-utils -y
+which simg2img img2simg</code></pre>
+      </div>
+      <p>This installs both <code>simg2img</code> and <code>img2simg</code> system-wide.</p>
+
+      <p><strong>Option C — Build from source (Linux):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">git clone https://github.com/anestisb/android-simg2img.git
+cd android-simg2img
+make
+sudo cp simg2img img2simg /usr/local/bin/</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Convert sparse → raw with simg2img</h3>
+      <p><strong>Basic usage:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img system.img system_raw.img</code></pre>
+      </div>
+      <p>That's it. <code>system_raw.img</code> is now a plain ext4 (or EROFS) filesystem that e2fsck, 7-Zip, mount, and all other tools can read.</p>
+
+      <p><strong>With progress and sparse chunk details:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img -v system.img system_raw.img</code></pre>
+      </div>
+
+      <p><strong>Multiple images at once:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">for img in *.img; do
+  case "$img" in
+    *_raw.img) continue ;;
+  esac
+  simg2img -v "$img" "${img%.img}_raw.img"
+done</code></pre>
+      </div>
+
+      <div class="note">
+        <p><strong>Disk space:</strong> a 2 GB sparse image can expand to 4–8 GB raw. Ensure you have at least 2× the sparse size free on disk before running the conversion.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Verify the raw image</h3>
+      <p>After conversion, confirm the raw image is valid:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file system_raw.img
+xxd -l 64 -s 1024 system_raw.img</code></pre>
+      </div>
+      <p>For a valid ext4 image, offset 1080 will show <code>53 EF</code>:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">00000438: 53ef 0100 0000 ...</code></pre>
+      </div>
+
+      <p>Run a quick filesystem check:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo e2fsck -n -f system_raw.img</code></pre>
+      </div>
+      <p>For EROFS:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">dump.erofs system_raw.img</code></pre>
+      </div>
+
+      <p><strong>Or just open in 7-Zip</strong> — if it opens and shows <code>/system/...</code>, the conversion was successful.</p>
+    </li>
+
+    <li>
+      <h3>6. Convert raw → sparse with img2simg</h3>
+      <p>After modifying a raw image (e.g. adding apps to <code>/system/app</code>), you should convert it back to sparse before flashing — especially if your device's bootloader expects sparse (<code>fastboot flash system</code> requires raw, but SP Flash Tool / Odin handle both; OTA packages always need sparse).</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">img2simg system_raw.img system_sparse.img</code></pre>
+      </div>
+
+      <p><strong>Set a custom block size (optional):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">img2simg -b 4096 system_raw.img system_sparse.img</code></pre>
+      </div>
+      <p>Default block size (4096) works for most devices. Only change if the target scatter file or fastboot expects a different size.</p>
+    </li>
+
+    <li>
+      <h3>7. Working with super.img (dynamic partitions)</h3>
+      <p>On Android 10+ devices, <code>super.img</code> is a container holding <code>system</code>, <code>vendor</code>, <code>product</code>, <code>odm</code>, <code>system_ext</code> as logical partitions. It's usually sparse.</p>
+
+      <p><strong>Convert to raw:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img super.img super_raw.img</code></pre>
+      </div>
+
+      <p><strong>Extract individual logical partitions from raw super:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Install lpunpack
+sudo apt install android-sdk-libsparse-utils lpunpack -y
+
+# Extract all logical partitions
+lpunpack super_raw.img ./output_folder/
+
+# This produces:
+# system.img  vendor.img  product.img  odm.img  system_ext.img</code></pre>
+      </div>
+
+      <p><strong>Repack a new super.img (advanced):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Requires lpmake (part of lpunpack package)
+lpmake --device-size 4294967296 \
+  --metadata-size 65536 \
+  --metadata-slots 2 \
+  --group main:4294967296 \
+  --partition system:readonly:1073741824:main \
+  --partition vendor:readonly:536870912:main \
+  --image system=system.img \
+  --image vendor=vendor.img \
+  --output super_new.img</code></pre>
+      </div>
+      <p>Then convert back to sparse:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">img2simg super_new.img super_new_sparse.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Complete workflow example</h3>
+      <p>Repacking <code>system.img</code> from an OTA firmware to add a custom app:</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># 1. Verify it's sparse
+file system.img                       # "Android sparse image"
+
+# 2. Convert to raw
+simg2img system.img system_raw.img
+
+# 3. Verify raw image
+file system_raw.img                   # "Linux rev 1.0 ext4 filesystem data"
+sudo e2fsck -n -f system_raw.img      # should be clean
+
+# 4. Mount and modify
+sudo mkdir /mnt/sysimg
+sudo mount -o loop,rw system_raw.img /mnt/sysimg
+sudo cp ~/MyApp.apk /mnt/sysimg/system/app/MyApp/MyApp.apk
+sudo chmod 644 /mnt/sysimg/system/app/MyApp/MyApp.apk
+sudo umount /mnt/sysimg
+
+# 5. Check for corruption after modification
+sudo e2fsck -f -y system_raw.img
+
+# 6. Convert back to sparse
+img2simg system_raw.img system_modified.img
+
+# 7. Flash to device
+fastboot flash system system_modified.img
+# or use SP Flash Tool / Odin depending on device</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Identify sparse image ----
+file system.img
+xxd -l 16 system.img               # 3AFF26ED = sparse
+xxd -l 4 -s 1080 system.img        # 53EF = ext4 raw
+
+# ---- Install tools ----
+sudo apt install android-sdk-libsparse-utils -y
+# Also installs: img2simg, simg2img, lpunpack, lpmake
+
+# ---- Sparse → raw ----
+simg2img system.img system_raw.img
+simg2img -v system.img system_raw.img      # verbose
+
+# ---- Raw → sparse ----
+img2simg system_raw.img system_sparse.img
+img2simg -b 4096 system_raw.img system_sparse.img
+
+# ---- Verify raw image ----
+file system_raw.img
+sudo e2fsck -n -f system_raw.img           # ext4
+dump.erofs system_raw.img                  # EROFS
+
+# ---- Mount and modify (Linux only) ----
+sudo mkdir /mnt/sysimg
+sudo mount -o loop,rw system_raw.img /mnt/sysimg
+# ... modify files ...
+sudo umount /mnt/sysimg
+
+# ---- super.img (dynamic partitions) ----
+simg2img super.img super_raw.img
+lpunpack super_raw.img ./output/
+# modify system.img inside output/
+lpmake --device-size ... --output super_new.img ...
+img2simg super_new.img super_new_sparse.img
+
+# ---- Windows only (simg2img.exe) ----
+simg2img.exe system.img system_raw.img
+img2simg.exe system_raw.img system_sparse.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>simg2img: invalid sparse magic</code></td><td>Image is not actually sparse — it might be raw already, or truncated. Check with <code>xxd</code>.</td></tr>
+          <tr><td><code>simg2img: cannot allocate memory</code></td><td>Not enough RAM. Use a machine with more memory, or increase swap.</td></tr>
+          <tr><td><code>simg2img: cannot write output</code></td><td>Not enough disk space. Raw image can be 2× the sparse size.</td></tr>
+          <tr><td><code>e2fsck: Bad magic number</code></td><td>Raw image is not ext4 — could be EROFS. Use <code>dump.erofs</code>.</td></tr>
+          <tr><td>Output image opens but has no files</td><td>Image is <strong>sparse + empty</strong> — convert failure, or the source was already corrupted.</td></tr>
+          <tr><td>Windows <code>simg2img.exe</code> hangs</td><td>File is too big for 32-bit binary. Use the 64-bit build or WSL.</td></tr>
+          <tr><td><code>lpunpack: invalid super header</code></td><td>Convert to raw first with <code>simg2img</code> — lpunpack only reads raw super images.</td></tr>
+          <tr><td>Flash fails with "invalid sparse file"</td><td>You're trying to flash raw where fastboot expects sparse (or vice versa). Convert with <code>img2simg</code> if needed.</td></tr>
+          <tr><td>Modifications don't survive reboot</td><td>dm-verity is active — disable verity/vbmeta first (see DM-Verity guide).</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>11. Best practices</h3>
+      <ul>
+        <li>✅ Always keep the original sparse image — never overwrite it.</li>
+        <li>✅ Verify free disk space before conversion (raw ≈ 2× sparse).</li>
+        <li>✅ Use <code>simg2img -v</code> for progress visibility on large files.</li>
+        <li>✅ Check raw image with <code>file</code> before mounting.</li>
+        <li>✅ Run <code>e2fsck -n</code> (check-only) first after every modification.</li>
+        <li>✅ Convert back to sparse with <code>img2simg</code> when flashing via SP Flash Tool or OTA.</li>
+        <li>✅ For <code>super.img</code>, use <code>lpunpack</code> + <code>lpmake</code> — do not treat as a single ext4.</li>
+        <li>✅ Test on a copy, never on the only working image.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if you're on Windows and don't want to install WSL, many repair technicians use the <strong>portable simg2img.exe</strong> built from the Android source — place it in your Platform Tools folder alongside <code>adb.exe</code> and <code>fastboot.exe</code> for a one-stop toolchain.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="check-file-system-system-img-windows.html">Check &amp; Repair system.img File System on Windows</a></li>
+      <li><a href="../development/extract-boot-payload-bin.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="../development/extract-recovery-img-lz4.html">Extract recovery.img from .lz4</a></li>
+      <li><a href="../development/create-flashable-zip.html">Create a custom flashable ZIP</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

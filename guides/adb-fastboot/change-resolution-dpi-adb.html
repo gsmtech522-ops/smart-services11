@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Change Display Resolution &amp; DPI via ADB Shell | Tech Learn</title>
+<meta name="description" content="Change Android display resolution and DPI density via ADB wm commands to improve performance, save battery or fix scaling issues.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Change Display Resolution &amp; DPI via ADB</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android 7+ devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modifying resolution and DPI improves gaming performance, reduces GPU load, saves battery or fixes UI scaling on phones with replacement screens. All done via the Window Manager (<code>wm</code>) shell tool — no root needed.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>ADB &amp; Fastboot installed.</li>
+        <li>USB Debugging enabled.</li>
+        <li>Phone connected and authorized.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Check current resolution &amp; density</h3>
+      <p>Record your default values before changing anything.</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell wm size
+# Example output: Physical size: 1080x2400
+
+adb shell wm density
+# Example output: Physical density: 420</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Change resolution</h3>
+      <p>Lowering resolution (e.g. 1080p → 720p) reduces GPU load for gaming.</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell wm size 720x1600</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>Aspect ratio:</strong> always keep the same ratio (16:9, 18:9, 20:9) — otherwise the UI stretches or leaves black bars.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Change density (DPI)</h3>
+      <ul>
+        <li><strong>Lower DPI:</strong> smaller elements, more on-screen content.</li>
+        <li><strong>Higher DPI:</strong> larger elements for readability.</li>
+      </ul>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell wm density 360</code></pre>
+      </div>
+      <p>The screen flickers briefly and refreshes with the new scaling.</p>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Restore defaults</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell wm size reset
+adb shell wm density reset</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Emergency recovery</h3>
+      <p>If the screen goes black, touch stops aligning, or System UI crashes:</p>
+      <ol>
+        <li><strong>Keep the USB cable connected</strong> (do not disconnect).</li>
+        <li>Run both reset commands immediately:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell wm size reset
+adb shell wm density reset</code></pre>
+      </div>
+      <ol start="3">
+        <li>If System UI is still frozen, force-restart the graphical interface:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell stop && adb shell start</code></pre>
+      </div>
+
+      <p><strong>Recommended DPI ranges:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Resolution Class</th><th>Typical Resolution</th><th>Recommended DPI</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>HD / HD+</td><td>720 × 1280 / 720 × 1600</td><td>280 – 320</td></tr>
+          <tr><td>FHD / FHD+</td><td>1080 × 1920 / 1080 × 2400</td><td>380 – 440</td></tr>
+          <tr><td>QHD / QHD+</td><td>1440 × 2560 / 1440 × 3200</td><td>510 – 560</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="screenshot-screen-record-adb.html">Screenshots &amp; screen recording</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

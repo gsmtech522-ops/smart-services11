@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۲: Variables اور Data Types</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #2563eb;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .category {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #475569;
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent-color);
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        ul, ol {
+            margin-right: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 14px;
+            border-radius: 8px;
+            direction: ltr;
+            text-align: left;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        .interactive-editor-box {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .editor-toolbar {
+            background: #1e293b;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: #ffffff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 6px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .code-input-area {
+            width: 100%;
+            height: 250px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .code-input-area:focus {
+            outline: none;
+        }
+
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 120px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <div class="container">
+        <span class="category">Python گائیڈ</span>
+        <h1>سبق ۲: Variables اور Data Types</h1>
+        
+        <div class="description">
+            Variables — ڈیٹا کے ڈبے، جس کا نام ہے۔ Python میں dynamically typed — type خود سمجھ جاتی ہے۔ Data types: int، float، str، bool، None۔ Type conversion، f-strings، multiple assignment، constants — سب۔ یہ ہر پروگرام کی بنیاد ہے۔
+        </div>
+
+        <h3>1. Variables</h3>
+        <pre>
+name = "علی"
+age = 25
+height = 5.9
+is_student = True
+        </pre>
+        <ul>
+            <li><strong>= assignment:</strong> right → left۔</li>
+            <li><strong>نام:</strong> حروف، اعداد، underscore — ہندسے سے شروع نہیں۔</li>
+            <li><strong>snake_case:</strong> Python convention — <code>user_name</code>۔</li>
+        </ul>
+
+        <h3>2. Data Types</h3>
+        <ul>
+            <li><strong>int:</strong> پورے اعداد — <code>25</code>، <code>-10</code>، <code>0</code>۔</li>
+            <li><strong>float:</strong> اعشاریہ — <code>5.9</code>، <code>3.14</code>۔</li>
+            <li><strong>str:</strong> متن — <code>"سلام"</code>، <code>'hello'</code>۔</li>
+            <li><strong>bool:</strong> <code>True</code> / <code>False</code> (capital)۔</li>
+            <li><strong>None:</strong> کوئی قدر نہیں — <code>None</code>۔</li>
+            <li><strong>list, tuple, dict, set:</strong> collections — اگلے اسباق۔</li>
+        </ul>
+
+        <h3>3. type() — ٹائپ معلوم کریں</h3>
+        <pre>
+>>> type(25)
+&lt;class 'int'&gt;
+>>> type("سلام")
+&lt;class 'str'&gt;
+>>> type(True)
+&lt;class 'bool'&gt;
+        </pre>
+
+        <h3>4. Type Conversion</h3>
+        <ul>
+            <li><strong>int():</strong> <code>int("25")</code> → <code>25</code>۔</li>
+            <li><strong>float():</strong> <code>float("3.14")</code> → <code>3.14</code>۔</li>
+            <li><strong>str():</strong> <code>str(25)</code> → <code>"25"</code>۔</li>
+            <li><strong>bool():</strong> <code>bool(0)</code> → <code>False</code>، <code>bool(1)</code> → <code>True</code>۔</li>
+        </ul>
+
+        <h3>5. F-strings — جدید</h3>
+        <pre>
+name = "علی"
+age = 25
+print(f"سلام {name}، آپ کی عمر {age} سال ہے")
+
+# حساب
+print(f"اگلے سال {age + 1}")
+print(f"دوگنا {age * 2}")
+
+# Formatting
+pi = 3.14159
+print(f"Pi: {pi:.2f}")  # 3.14
+        </pre>
+
+        <h3>6. کوڈ کی مکمل مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>Python — variables.py</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area"># Variables — مختلف types
+name = "علی"
+age = 25
+height = 5.9
+is_student = True
+address = None
+
+print("=== Basic Variables ===")
+print(f"نام: {name}")
+print(f"عمر: {age}")
+print(f"قد: {height}")
+print(f"طالب علم: {is_student}")
+print(f"پتہ: {address}")
+
+# Types
+print("
+=== Types ===")
+print(f"name: {type(name)}")
+print(f"age: {type(age)}")
+print(f"height: {type(height)}")
+print(f"is_student: {type(is_student)}")
+print(f"address: {type(address)}")
+
+# Type conversion
+print("
+=== Conversion ===")
+num_str = "42"
+num_int = int(num_str)
+print(f"'{num_str}' → int: {num_int} (type: {type(num_int).__name__})")
+
+price_str = "99.99"
+price_float = float(price_str)
+print(f"'{price_str}' → float: {price_float}")
+
+num = 100
+num_str2 = str(num)
+print(f"100 → string: '{num_str2}'")
+
+# Multiple assignment
+print("
+=== Multiple Assignment ===")
+x, y, z = 10, 20, 30
+print(f"x={x}, y={y}, z={z}")
+
+# Same value
+a = b = c = 0
+print(f"a={a}, b={b}, c={c}")
+
+# Swap — Python کا جادو
+p, q = 1, 2
+print(f"Before swap: p={p}, q={q}")
+p, q = q, p
+print(f"After swap: p={p}, q={q}")
+
+# Formatting numbers
+print("
+=== Number Formatting ===")
+pi = 3.14159
+big_num = 1234567
+price = 1234.5
+
+print(f"Pi (2 decimals): {pi:.2f}")
+print(f"Big (comma): {big_num:,}")
+print(f"Price (Rs.): Rs. {price:,.2f}")
+
+# Operations
+print("
+=== Operations ===")
+print(f"{age} + 5 = {age + 5}")
+print(f"{age} * 2 = {age * 2}")
+print(f"{age} % 2 = {age % 2} (0 = even)")
+
+# String operations
+full_name = name + " احمد"
+print(f"Full name: {full_name}")
+print(f"Length: {len(full_name)}")
+print(f"Uppercase (English): {'hello'.upper()}")
+
+# Constants — capital convention
+PI = 3.14159
+MAX_USERS = 1000
+print(f"
+Constants: PI={PI}, MAX_USERS={MAX_USERS}")</textarea>
+            <div class="preview-container">
+                <div class="preview-title">Terminal میں چلائیں: <code>python variables.py</code></div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>7. Naming Conventions</h3>
+        <ul>
+            <li><strong>snake_case:</strong> variables — <code>user_name</code>۔</li>
+            <li><strong>UPPER_CASE:</strong> constants — <code>MAX_SIZE</code>۔</li>
+            <li><strong>PascalCase:</strong> classes — <code>UserProfile</code>۔</li>
+            <li><strong>_private:</strong> داخلی — <code>_helper</code>۔</li>
+            <li><strong>معنی خیز:</strong> <code>x</code> نہیں — <code>count</code>۔</li>
+        </ul>
+
+        <h3>8. اہم باتیں</h3>
+        <ul>
+            <li>✅ <strong>f-string:</strong> ہمیشہ — <code>format()</code> یا <code>%</code> سے بہتر۔</li>
+            <li>✅ <strong>type() سے چیک:</strong> debugging میں مدد۔</li>
+            <li>✅ <strong>None:</strong> کوئی قدر نہیں — JavaScript کا <code>null</code>۔</li>
+            <li>✅ <strong>Snake_case:</strong> Python convention۔</li>
+            <li>✅ <strong>Multiple assignment:</strong> swap کے لیے بہترین۔</li>
+            <li>✅ <strong>Type conversion:</strong> احتیاط سے — <code>int("abc")</code> error۔</li>
+        </ul>
+
+        <h3>عمل / مشق (Task)</h3>
+        <ol>
+            <li>5 variables — مختلف types کے۔</li>
+            <li>type() سے ہر ایک کا type پرنٹ۔</li>
+            <li>string سے int، float میں convert۔</li>
+            <li>do variables swap — بغیر تیسرے کے۔</li>
+            <li>f-string سے formatted output۔</li>
+        </ol>
+    </div>
+
+    <script>
+        async function copyCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const codeText = textArea.value;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(codeText);
+                } else {
+                    textArea.select();
+                    document.execCommand('copy');
+                }
+
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = "Copied! ✅";
+                buttonElement.style.backgroundColor = "#16a34a";
+
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    buttonElement.style.backgroundColor = "";
+                }, 2000);
+            } catch (err) {
+                console.error('کاپی کرنے میں ناکامی:', err);
+                alert('کپی کرنے میں مسئلہ پیش آیا!');
+            }
+        }
+
+        function runCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const iframe = editorBox.querySelector('.preview-iframe');
+            
+            const code = textArea.value;
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 10px; background: #0f172a; color: #38bdf8; font-size: 13px; margin: 0; }
+                        .log { color: #38bdf8; margin-bottom: 4px; border-bottom: 1px solid #1e293b; padding-bottom: 2px; }
+                        .info { color: #94a3b8; font-style: italic; margin-bottom: 6px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="info">> Terminal Output Simulation:</div>
+                    <div id="console-output"></div>
+                    <script>
+                        const output = document.getElementById('console-output');
+                        function appendLog(msg) {
+                            const div = document.createElement('div');
+                            div.className = 'log';
+                            div.textContent = '> ' + msg;
+                            output.appendChild(div);
+                        }
+                        const codeStr = ${JSON.stringify(code)};
+                        const lines = codeStr.split('\n');
+                        lines.forEach(l => {
+                            let trimmed = l.trim();
+                            if(trimmed.startsWith('print(')) {
+                                let content = trimmed.substring(6, trimmed.length - 1);
+                                appendLog(content);
+                            }
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+        }
+    </script>
+</body>
+</html>

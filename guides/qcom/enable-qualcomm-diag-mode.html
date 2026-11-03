@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enable Qualcomm Diagnostic (Diag) Mode on Android | Tech Learn</title>
+<meta name="description" content="Complete guide to enable Qualcomm Diag Mode on Android for IMEI repair, QCN backup and baseband repair. Covers dial codes, ADB setprop, servicing tools and Samsung codes.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🔵</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#qualcomm">Qualcomm</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Enable Qualcomm Diagnostic (Diag) Mode on Android</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Xiaomi, Redmi, POCO, Vivo, iQOO, Oppo, Realme, Samsung Snapdragon, Lenovo</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Advanced Qualcomm servicing — <strong>IMEI repair</strong>, <strong>QCN backup/restore</strong>, <strong>baseband repair</strong>, <strong>network recalibration</strong> — requires your PC to talk directly to the phone's Qualcomm modem. To enable that, the device must be in <strong>Qualcomm Diagnostic Mode (Diag Mode)</strong>. Once enabled, Windows Device Manager detects the device as <strong>Qualcomm HS-USB Diagnostics 900E / 9091 / 9025 (COMxx)</strong>.</p>
+
+  <div class="warning">
+    <p><strong>Legal warning:</strong> Diag mode is used for <strong>your own device</strong> or a device you are authorized to service. IMEI modification is illegal in most countries. Only use these methods for backup, restore, and repair of devices you own.</p>
+  </div>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>Qualcomm USB Drivers</strong> installed on your PC (both QDLoader 9008 and Diagnostics drivers).</li>
+        <li><strong>USB Debugging</strong> enabled (Settings → Developer Options → USB Debugging).</li>
+        <li><strong>ADB &amp; Fastboot</strong> installed on your PC.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Dial pad secret codes (no root required)</h3>
+      <p>The simplest method — works on many stock and older Qualcomm devices.</p>
+      <ol>
+        <li>Open the <strong>Phone Dialer</strong> app on the device.</li>
+        <li>Enter the secret code for your brand:</li>
+      </ol>
+
+      <table>
+        <thead>
+          <tr><th>Brand</th><th>Code / Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Xiaomi / Redmi / POCO</strong></td><td><code>*#*#717717#*#*</code> or <code>*#*#13491#*#*</code></td></tr>
+          <tr><td><strong>Vivo / iQOO</strong></td><td><code>*#558#</code> → Quality verification test → Port → tick "Development Port"</td></tr>
+          <tr><td><strong>Oppo / Realme</strong></td><td><code>*#801#</code> or <code>*#6776#</code> → Engineer Mode → Switch Diag ON</td></tr>
+          <tr><td><strong>Generic Qualcomm / Lenovo</strong></td><td><code>*#*#197328640#*#*</code> or <code>*#*#2432546#*#*</code></td></tr>
+        </tbody>
+      </table>
+
+      <ol start="3">
+        <li>If successful, a toast message like <strong>"Diag Mode Enabled"</strong> appears, or an Engineer Menu opens.</li>
+        <li>Connect the phone to PC via USB and check <strong>Device Manager → Ports (COM &amp; LPT)</strong>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Enable Diag Mode via ADB (root required)</h3>
+      <p>If dial codes are blocked by the OEM, force-enable the Diagnostic port using ADB on a rooted device.</p>
+      <ol>
+        <li>Connect the phone with <strong>USB Debugging</strong> on.</li>
+        <li>Open Command Prompt or PowerShell.</li>
+        <li>Verify the device is recognized:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb devices</code></pre>
+      </div>
+      <ol start="4">
+        <li>Authorize the USB debugging prompt on the phone screen if requested.</li>
+        <li>Grant root access:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su</code></pre>
+      </div>
+      <p>Approve the SuperSU / Magisk prompt on the phone.</p>
+      <ol start="6">
+        <li>Run the <code>setprop</code> command matching your device:</li>
+      </ol>
+
+      <p><strong>Command Set A — Standard Qualcomm devices:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">setprop sys.usb.config diag,adb</code></pre>
+      </div>
+
+      <p><strong>Command Set B — Xiaomi / Redmi / OnePlus:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">setprop sys.usb.config diag,diag_mdm,adb</code></pre>
+      </div>
+
+      <p><strong>Command Set C — Stubborn or dual-SIM devices:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">setprop sys.usb.config rndis,diag,adb</code></pre>
+      </div>
+
+      <ol start="7">
+        <li>As soon as you press Enter, Windows plays a device connection sound, and <strong>Qualcomm HS-USB Diagnostics</strong> appears in Device Manager.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — Servicing tools (one-click, no root)</h3>
+      <p>If you have no root access and secret codes are disabled, modern servicing tools can temporarily enable Diag mode via ADB or Fastboot.</p>
+
+      <p><strong>UnlockTool / Miracle Box / UFI Box / EMT:</strong></p>
+      <ol>
+        <li>Connect the phone in ADB mode (USB Debugging ON).</li>
+        <li>Go to the <strong>Qualcomm / Special</strong> tab in your tool.</li>
+        <li>Click <strong>Enable Diag</strong> / <strong>Enable Diag (No Root)</strong>.</li>
+      </ol>
+
+      <p><strong>Fastboot method (Xiaomi / POCO):</strong></p>
+      <ol>
+        <li>Boot into Fastboot (Volume Down + Power).</li>
+        <li>Open the tool (e.g. UnlockTool or Xiaomi Special Tools).</li>
+        <li>Click <strong>Enable Diag in Fastboot Mode</strong>.</li>
+        <li>The tool sends a temporary payload to open the Diag port — no data is wiped.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Method 4 — Samsung Snapdragon Diag codes</h3>
+      <p>Samsung devices powered by Snapdragon processors use different hidden menus:</p>
+      <ol>
+        <li>Open the Samsung phone dialer.</li>
+        <li>Dial <code>*#0808#</code> to open USB Settings.</li>
+        <li>Select <strong>DM + MODEM + ADB</strong> or <strong>RNDIS + DM + ADB</strong>.</li>
+        <li>Tap OK / Reboot.</li>
+        <li><strong>Alternative code:</strong> dial <code>*#9090#</code> → Diagnostic Configuration → choose USB.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Verify Diag Mode connection on PC</h3>
+      <ol>
+        <li>Press <kbd>Win</kbd>+<kbd>X</kbd> → <strong>Device Manager</strong>.</li>
+        <li>Expand <strong>Ports (COM &amp; LPT)</strong>.</li>
+        <li>Look for <strong>Qualcomm HS-USB Diagnostics 900E</strong> (or <strong>9091</strong>, <strong>9025</strong>, <strong>901D</strong>) followed by a COM port number, e.g. <code>COM12</code>.</li>
+        <li>If a yellow warning icon appears, right-click → <strong>Update driver → Browse → Let me pick from a list…</strong> → choose <strong>Qualcomm HS-USB Diagnostics</strong> from the installed driver package.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>7. Disable Diag Mode (return to normal USB)</h3>
+      <p>Once servicing is complete, always turn off Diag mode so USB file transfer works normally.</p>
+      <ul>
+        <li><strong>Via Dialer:</strong> re-enter the dial code (e.g. <code>*#*#717717#*#*</code> on Xiaomi) to toggle it OFF.</li>
+        <li><strong>Via ADB (root):</strong></li>
+      </ul>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su
+setprop sys.usb.config mtp,adb</code></pre>
+      </div>
+      <ul>
+        <li><strong>Via Phone Settings:</strong> unplug USB → Settings → Developer Options → toggle USB Debugging OFF and ON, or select <strong>File Transfer (MTP)</strong> from the USB notification.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Dial code does nothing</td><td>OEM blocked it. Use ADB (Method 2) or a servicing tool (Method 3).</td></tr>
+          <tr><td>Device not showing Diag in Device Manager</td><td>Missing Qualcomm Diagnostics driver. Install full Qualcomm USB driver package.</td></tr>
+          <tr><td>Port appears with yellow warning</td><td>Right-click → Update driver → manual selection → Qualcomm HS-USB Diagnostics.</td></tr>
+          <tr><td><code>setprop</code> command ignored</td><td>Root not granted, or device not on the correct Android version. Try Command Set B or C.</td></tr>
+          <tr><td>Diag mode works but QCN tool can't connect</td><td>Wrong COM port selected — check which COM the Diag port uses in Device Manager.</td></tr>
+          <tr><td>Phone becomes unresponsive after Diag</td><td>Reboot the phone. Some modem states need a fresh boot.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command cheat sheet</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Verify ADB connection ----
+adb devices
+
+# ---- Grant root ----
+adb shell su
+
+# ---- Enable Diag Mode ----
+# Standard Qualcomm:
+setprop sys.usb.config diag,adb
+
+# Xiaomi / Redmi / OnePlus:
+setprop sys.usb.config diag,diag_mdm,adb
+
+# Stubborn / Dual-SIM:
+setprop sys.usb.config rndis,diag,adb
+
+# ---- Restore normal USB ----
+setprop sys.usb.config mtp,adb
+
+# ---- Verify in Windows ----
+# Device Manager → Ports (COM &amp; LPT)
+# Should show: Qualcomm HS-USB Diagnostics 900E (COMxx)
+
+# ---- Samsung ----
+# Dial: *#0808# → DM + MODEM + ADB
+# Dial: *#9090# → Diagnostic Configuration → USB
+
+# ---- Xiaomi dial ----
+# *#*#717717#*#*   (toggle on/off)
+# *#*#13491#*#*    (alternative)</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Only enable Diag mode when actively servicing a device.</li>
+        <li>✅ Disable Diag mode before returning the phone to normal use.</li>
+        <li>✅ Verify the port in Device Manager before running QCN/IMEI tools.</li>
+        <li>✅ Back up EFS/QCN before any repair operation (see related guides).</li>
+        <li>✅ Never modify IMEI on someone else's device — it's illegal.</li>
+        <li>✅ Keep a note of the COM port number for the servicing tool.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> after every reboot, Diag mode resets to normal USB mode — you must re-enable it each session. Use the ADB <code>setprop</code> commands for quickest re-enable on rooted devices.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="backup-restore-efs-imei-twrp.html">Backup &amp; Restore EFS / IMEI via TWRP</a></li>
+      <li><a href="../mediatek/restore-imei-maui-meta.html">Restore Baseband &amp; IMEI via Maui META (MTK)</a></li>
+      <li><a href="../mediatek/restore-imei-sn-write-tool.html">Repair IMEI via SN Write Tool</a></li>
+      <li><a href="../android-generic/find-usb-vid-pid.html">Find USB VID &amp; PID</a></li>
+      <li><a href="../../android.html#qualcomm">Qualcomm category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

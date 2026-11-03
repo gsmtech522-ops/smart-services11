@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup &amp; Restore MTK NVRAM, NVDATA and IMEI Data | Tech Learn</title>
+<meta name="description" content="Complete guide to backup and restore MediaTek NVRAM, NVDATA, PROTECT1/2 and IMEI security partitions.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Backup &amp; Restore MTK NVRAM, NVDATA and IMEI</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Critical Backup Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>On MediaTek devices, system partitions (<code>system</code>, <code>vendor</code>) hold the OS, but critical security data — IMEI numbers, Wi-Fi MAC, Bluetooth MAC, baseband calibration — lives in <code>nvram</code> and <code>nvdata</code>. If these get wiped, you get:</p>
+  <ul>
+    <li>"Invalid IMEI" or "IMEI Null" errors</li>
+    <li>"NVRAM WARNING: Err = 0x10" in Wi-Fi settings</li>
+    <li>No network signal / Emergency calls only</li>
+  </ul>
+
+  <div class="warning">
+    <p><strong>Legal note:</strong> only back up and restore <strong>your own device's</strong> NVRAM/IMEI. Modifying IMEI is illegal in most countries. This guide is for <strong>backup/restore</strong> only — not modification.</p>
+  </div>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Key security partitions</h3>
+      <table>
+        <thead>
+          <tr><th>Partition</th><th>Function</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>nvram</code></td><td>Primary calibration, IMEI structure, Wi-Fi/BT MAC</td></tr>
+          <tr><td><code>nvdata</code></td><td>Runtime cellular data and dynamic radio settings</td></tr>
+          <tr><td><code>nvram_bt</code> / <code>nvram_wifi</code></td><td>Bluetooth/Wi-Fi configuration tables (modern Helio)</td></tr>
+          <tr><td><code>seccfg</code></td><td>Bootloader lock state</td></tr>
+          <tr><td><code>protect1</code> / <code>protect2</code></td><td>SIM lock info and radio frequency tuning</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Backup via SP Flash Tool (scatter method)</h3>
+      <ol>
+        <li>Open SP Flash Tool, load your scatter file.</li>
+        <li>Open the scatter in Notepad, search for <code>partition_name: nvram</code> and <code>nvdata</code>.</li>
+        <li>Note each partition's <code>physical_start_addr</code> and <code>partition_size</code>.</li>
+        <li>Switch to <strong>Readback</strong> tab, click <strong>Add</strong>.</li>
+        <li>Add two entries:
+          <ul>
+            <li>Entry 1 → <code>nvram.bin</code> with nvram addresses</li>
+            <li>Entry 2 → <code>nvdata.bin</code> with nvdata addresses</li>
+          </ul>
+        </li>
+        <li>Click <strong>Readback</strong>, power off, connect with volume keys held.</li>
+      </ol>
+
+      <p><strong>To restore via SP Flash Tool:</strong> enable Advanced Mode (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>V</kbd>), use <strong>Write Memory</strong> to write <code>nvram.bin</code> and <code>nvdata.bin</code> back to their original addresses.</p>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — One-click via MTKClient (recommended)</h3>
+      <p>MTKClient auto-detects partitions — no hex addresses needed.</p>
+      <ol>
+        <li>Open CMD inside your <code>mtkclient</code> folder.</li>
+        <li>Power off the phone and connect with volume keys held (BROM mode).</li>
+        <li>Dump the security partitions:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk r nvram,nvdata,protect1,protect2,seccfg nvram_backup/</code></pre>
+      </div>
+      <p><strong>To restore:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk w nvram,nvdata,protect1,protect2,seccfg nvram_backup/nvram.bin,nvram_backup/nvdata.bin,nvram_backup/protect1.bin,nvram_backup/protect2.bin,nvram_backup/seccfg.bin</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — ADB shell (rooted device)</h3>
+      <p>If the phone is rooted and powered on:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su
+dd if=/dev/block/by-name/nvram of=/sdcard/nvram.img
+dd if=/dev/block/by-name/nvdata of=/sdcard/nvdata.img
+exit
+adb pull /sdcard/nvram.img C:\MTK_Security_Backup\
+adb pull /sdcard/nvdata.img C:\MTK_Security_Backup\</code></pre>
+      </div>
+
+      <p><strong>To restore:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell
+su
+dd if=/sdcard/nvram.img of=/dev/block/by-name/nvram
+dd if=/sdcard/nvdata.img of=/dev/block/by-name/nvdata
+reboot</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. ⚠️ Golden rule for MTK technicians</h3>
+      <div class="warning">
+        <p><strong>Never</strong> use "Format All + Download" in SP Flash Tool without first backing up <code>nvram</code> and <code>nvdata</code>. Full erase without a security dump wipes your device's factory IMEI and network calibration permanently.</p>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="restore-imei-sn-write-tool.html">Restore IMEI via SN Write Tool</a></li>
+      <li><a href="restore-imei-maui-meta.html">Restore Baseband &amp; IMEI via Maui META</a></li>
+      <li><a href="mediatek-partition-map-explained.html">Partition map</a></li>
+      <li><a href="backup-mtk-mtkclient.html">Backup via MTKClient</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

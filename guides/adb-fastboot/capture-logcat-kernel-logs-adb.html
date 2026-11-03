@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capture Logcat &amp; Kernel Logs via ADB for Bug Diagnosis | Tech Learn</title>
+<meta name="description" content="How to capture Android Logcat and kernel dmesg logs via ADB for bug diagnosis, crash analysis and driver troubleshooting.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Capture Logcat &amp; Kernel Logs via ADB</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When an Android app crashes, a framework service fails, or the device hits a kernel panic, visual diagnostics are not enough. Capturing real-time Logcat and kernel dmesg logs gives you stack traces, error codes and driver events to find the exact root cause.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>ADB &amp; Fastboot</strong> installed.</li>
+        <li><strong>USB Debugging</strong> enabled.</li>
+        <li>Phone connected and authorized via <code>adb devices</code>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Part 1 — Android system logs (Logcat)</h3>
+      <p><strong>Stream live:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb logcat</code></pre>
+      </div>
+      <p>Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to stop.</p>
+
+      <p><strong>Dump to a text file:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb logcat -d > logcat_dump.txt</code></pre>
+      </div>
+      <p>The <code>-d</code> flag dumps the current buffer and exits.</p>
+
+      <p><strong>Clear the buffer before reproducing a bug:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb logcat -c
+adb logcat -d > fresh_crash_log.txt</code></pre>
+      </div>
+
+      <p><strong>Filter by severity (V/D/I/W/E/F):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb logcat *:E > errors_only.txt
+
+# Filter by specific app tag
+adb logcat -s ActivityManager:I AndroidRuntime:E</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Part 2 — Specific buffer dumps</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Radio / SIM / network
+adb logcat -b radio -d > radio_network.txt
+
+# System events
+adb logcat -b events -d > system_events.txt
+
+# Combined buffers
+adb logcat -b main -b system -b crash -d > full_system.txt</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Part 3 — Low-level kernel logs</h3>
+      <p>Use this for driver failures, sudden reboots, Wi-Fi/Bluetooth chip crashes or mount errors.</p>
+
+      <p><strong>Live kernel ring buffer:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell dmesg > kernel_log.txt</code></pre>
+      </div>
+
+      <p><strong>Panic logs after a crash or random reboot (Android 10 and older):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /proc/last_kmsg > last_kernel_crash.txt</code></pre>
+      </div>
+
+      <p><strong>Panic logs (Android 11+ with pstore):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /sys/fs/pstore/console-ramoops > last_kernel_crash.txt</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Part 4 — Full Android bug report</h3>
+      <p>Captures Logcat, dmesg, battery stats, memory, dumpsys and device state in a single zip.</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Android 8.0 and newer
+adb bugreport bugreport.zip
+
+# Older devices (Android 7.1 and older)
+adb bugreport > full_bugreport.txt</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Troubleshooting</h3>
+
+      <p><strong>Issue: <code>dmesg: read kernel buffer failed: Permission denied</code></strong></p>
+      <p>Cause: Android restricts kernel ring buffer access on user builds without root.</p>
+      <p>Fix — request root in the shell:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell
+su
+dmesg > /sdcard/kernel_log.txt</code></pre>
+      </div>
+
+      <p><strong>Issue: logcat output gets truncated too quickly</strong></p>
+      <p>Cause: default 256 KB buffer overflows under heavy log activity.</p>
+      <p>Fix — increase buffer to 16 MB before testing:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb logcat -G 16M</code></pre>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="adb-fastboot-errors-troubleshooting.html">Errors troubleshooting</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

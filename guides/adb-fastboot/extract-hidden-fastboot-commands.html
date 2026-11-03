@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discover &amp; Extract Hidden Fastboot Commands | Tech Learn</title>
+<meta name="description" content="Extract undocumented OEM fastboot command strings from firmware binaries or live bootloader partitions.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Discover &amp; Extract Hidden Fastboot Commands</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>OEMs like Xiaomi, OnePlus, Vivo, Oppo, Huawei</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Most technicians know the standard Fastboot commands — <code>fastboot reboot</code>, <code>fastboot flash</code>, <code>fastboot devices</code>. But manufacturers bake hidden, undocumented Fastboot strings into bootloaders. These can force EDL mode, trigger diagnostics, or write to non-volatile partitions.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Where commands live in bootloader firmware</h3>
+      <p>The ASCII strings that match incoming CLI inputs reside inside specific bootloader binaries:</p>
+      <table>
+        <thead>
+          <tr><th>Chipset</th><th>File location</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Qualcomm Snapdragon</strong></td><td><code>abl.elf</code> / <code>abl.img</code> (or legacy <code>xbl.elf</code>)</td></tr>
+          <tr><td><strong>MediaTek</strong></td><td><code>lk.bin</code> or <code>lk-verified.img</code> (Little Kernel)</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li>Official stock firmware package <strong>OR</strong> active device with USB Debugging + root.</li>
+        <li>Windows environment: Git Bash, WSL, or a hex editor (HxD).</li>
+        <li>ADB &amp; Fastboot binaries configured.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Method 1 — Extract from stock firmware (offline)</h3>
+
+      <p><strong>Step 1 — Locate the bootloader image:</strong></p>
+      <ul>
+        <li>Extract the firmware zip/tar/tgz with 7-Zip or WinRAR.</li>
+        <li>Find <code>lk.bin</code> (MediaTek) or <code>abl.elf</code> / <code>abl.img</code> (Qualcomm).</li>
+      </ul>
+
+      <p><strong>Step 2A — Linux <code>strings</code> utility:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">strings abl.elf | grep -i "oem "
+strings lk.bin | grep -i "fastboot:"</code></pre>
+      </div>
+
+      <p><strong>Step 2B — Manual analysis with HxD:</strong></p>
+      <ol>
+        <li>Open <code>lk.bin</code> or <code>abl.elf</code> in HxD.</li>
+        <li>Press <kbd>Ctrl</kbd>+<kbd>F</kbd>, set Datatype to <strong>Text-string</strong>, search for <code>oem</code> or <code>unlock</code>.</li>
+        <li>Press <kbd>F3</kbd> to cycle through matches until you hit the block of valid command strings.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Method 2 — Extract from live device via ADB</h3>
+      <p>Instead of gigabytes of firmware, dump the bootloader partition directly.</p>
+
+      <p><strong>Step 1 — Identify partition block:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su
+ls -l /dev/block/by-name/</code></pre>
+      </div>
+      <p>Find <code>abl</code> (Qualcomm) or <code>lk</code> (MediaTek). A/B devices use <code>abl_a</code> / <code>abl_b</code> or <code>lk_a</code> / <code>lk_b</code>.</p>
+
+      <p><strong>Step 2 — Dump and pull:</strong></p>
+      <div class="code-container">
+        <button class="copy-btn" type="button" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">dd if=/dev/block/by-name/abl of=/sdcard/abl_dump.bin
+exit
+adb pull /sdcard/abl_dump.bin ./</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Filter strings:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">strings abl_dump.bin | grep -i "oem "</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Common hidden OEM commands</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Effect</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot oem edl</code></td><td>Force Qualcomm HS-USB QDLoader 9008 mode without test-point shorting</td></tr>
+          <tr><td><code>fastboot oem reboot-recovery</code></td><td>Direct switch into Recovery Mode</td></tr>
+          <tr><td><code>fastboot oem writeimei [NUMBER]</code></td><td>Low-level engineering trigger present on some factory bootloaders</td></tr>
+          <tr><td><code>fastboot oem poweroff</code></td><td>Full battery decoupling</td></tr>
+          <tr><td><code>fastboot oem get_token</code></td><td>Pull OEM unlock tokens for manufacturer unlock key generation</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>6. ⚠️ Technician risk warning</h3>
+      <div class="warning">
+        <p>Undocumented factory commands can erase non-volatile partitions (<code>nvram</code>, <code>nvdata</code>, <code>persist</code>), destroying factory calibration, MAC addresses and security certificates. Always test unknown commands on dedicated lab devices with full partition backups in hand.</p>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="backup-android-firmware-adb-fastboot.html">Backup Android firmware</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

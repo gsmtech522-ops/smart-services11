@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fastbootd Mode vs Standard Fastboot Mode (Complete Guide) | Tech Learn</title>
+<meta name="description" content="Technical comparison of Standard Fastboot and Fastbootd Mode in modern Android 10+ devices, including dynamic partitions and troubleshooting.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Fastbootd Mode vs Standard Fastboot Mode</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Technical Comparison</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Read Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Android 10+ devices with dynamic partitions</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Starting with Android 10, Google introduced <strong>Dynamic Partitions</strong> and split Fastboot into two distinct modes: <strong>Standard Fastboot</strong> (Bootloader level) and <strong>Fastbootd</strong> (Userspace level). Understanding the difference is essential when servicing modern devices, flashing GSI, or modifying dynamic partitions.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Standard Fastboot Mode</h3>
+      <p>Implemented inside the device's <strong>bootloader firmware</strong> (Boot ROM / LK). Runs at the lowest hardware level before any OS or recovery kernel loads.</p>
+      <ul>
+        <li><strong>Execution level:</strong> Hardware / Bootloader stage</li>
+        <li><strong>Responsibilities:</strong> Unlock bootloaders, flash baseband/radio, boot temporary recovery/boot images, switch A/B slots, modify core static partitions (<code>boot</code>, <code>dtbo</code>, <code>recovery</code>, <code>vbmeta</code>)</li>
+        <li><strong>Limitation:</strong> cannot read or modify dynamic logical partitions inside <code>super</code></li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Fastbootd Mode</h3>
+      <p>A <strong>userspace Fastboot daemon</strong> running inside the Android recovery environment (Linux kernel level). Created specifically for dynamic partitions.</p>
+      <ul>
+        <li><strong>Execution level:</strong> Userspace / Recovery Kernel stage</li>
+        <li><strong>Responsibilities:</strong> Resize, create, delete and flash logical partitions (<code>system</code>, <code>vendor</code>, <code>product</code>, <code>system_ext</code>, <code>odm</code>) inside <code>super.img</code></li>
+        <li><strong>Appearance:</strong> On-screen menu titled <strong>"fastbootd"</strong> with reboot options</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Side-by-side comparison</h3>
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>Standard Fastboot</th><th>Fastbootd</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Level</td><td>Bootloader (low-level)</td><td>Userspace / recovery kernel</td></tr>
+          <tr><td>Introduced</td><td>Early Android releases</td><td>Android 10 (dynamic partitions)</td></tr>
+          <tr><td>Entry command</td><td><code>adb reboot bootloader</code></td><td><code>adb reboot fastboot</code></td></tr>
+          <tr><td>Core target files</td><td><code>boot.img</code>, <code>vbmeta.img</code>, <code>recovery.img</code></td><td><code>system.img</code>, <code>vendor.img</code>, <code>product.img</code></td></tr>
+          <tr><td>Super partition access</td><td>Flashes <code>super.img</code> as whole</td><td>Resizes &amp; flashes sub-partitions inside <code>super</code></td></tr>
+          <tr><td>Bootloader unlock/lock</td><td>Supported</td><td>Not supported</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>4. How to enter Fastbootd</h3>
+      <p><strong>From active Android OS (ADB):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot fastboot</code></pre>
+      </div>
+
+      <p><strong>From Standard Fastboot Mode:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot fastboot</code></pre>
+      </div>
+
+      <p><strong>From Recovery:</strong> boot into recovery, navigate to <strong>Enter Fastboot</strong> or <strong>Reboot to Fastboot</strong>.</p>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting</h3>
+
+      <p><strong>Error: <code>Flashing is not allowed in Bootloader mode</code> / <code>partition table doesn't exist</code></strong></p>
+      <p>Cause: trying to flash a dynamic partition (<code>system.img</code>, <code>vendor.img</code>) from standard Fastboot on Android 10+.</p>
+      <p>Fix:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot fastboot
+fastboot flash system system.img</code></pre>
+      </div>
+
+      <p><strong>Error: <code>Not enough space to resize partition</code></strong></p>
+      <p>Cause: the GSI or system image is larger than the logical space inside <code>super</code>.</p>
+      <p>Fix:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot delete-logical-partition product_a</code></pre>
+      </div>
+
+      <p><strong>Error: slot switching fails in Fastbootd</strong></p>
+      <p>Cause: some slot management commands must run at the bootloader level.</p>
+      <p>Fix:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot bootloader
+fastboot set_active a</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Rule of thumb</h3>
+      <ul>
+        <li>Working with <code>boot.img</code>, Magisk root, <code>vbmeta</code>, or bootloader unlock &rarr; <strong>Standard Fastboot</strong></li>
+        <li>Working with Custom ROMs, GSI, <code>vendor.img</code>, Android 10+ firmware dumps &rarr; <strong>Fastbootd</strong></li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="flash-stock-firmware-adb-fastboot.html">Flash stock firmware</a></li>
+      <li><a href="fix-dm-verity-vbmeta.html">Fix DM-Verity &amp; VBMeta</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

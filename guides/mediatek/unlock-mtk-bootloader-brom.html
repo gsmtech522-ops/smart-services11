@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlock MediaTek Bootloader via BROM Mode (MTKClient) | Tech Learn</title>
+<meta name="description" content="Instant bootloader unlock on any MediaTek device via BROM mode using MTKClient. Bypasses OEM unlock waiting periods by patching seccfg partition.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🟢</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Unlock MediaTek Bootloader via BROM Mode</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>MediaTek Helio P/G series &amp; Dimensity chipsets</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Legal warning:</strong> only unlock the bootloader of <strong>your own device</strong>. Bypassing OEM waiting periods on someone else's phone, or using this to install malicious firmware, is illegal in most countries. Unlocking voids warranty and forces a factory reset.</p>
+  </div>
+
+  <p>Unlocking the bootloader on modern Android devices normally requires enabling the OEM Unlocking toggle, issuing fastboot commands, requesting authorization from manufacturer servers, or waiting through cooling-off periods (7–14 days). On MediaTek devices, <strong>Boot ROM (BROM) exploitation</strong> lets technicians bypass the OS entirely by patching the <code>seccfg</code> partition directly — instantly unlocking the bootloader without OEM approval tokens.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites &amp; environment setup</h3>
+      <ul>
+        <li><strong>MediaTek VCOM USB drivers</strong> &amp; <strong>UsbDk drivers</strong> installed on Windows PC.</li>
+        <li><strong>Python 3.9+</strong> with <em>"Add Python to PATH"</em> enabled.</li>
+        <li><strong>MTKClient</strong> downloaded or cloned on PC.</li>
+        <li>Target MediaTek smartphone (Helio or Dimensity) + quality USB data cable.</li>
+        <li><strong>Full backup of personal data</strong> — unlocking forces an automatic factory reset of <code>userdata</code>.</li>
+      </ul>
+
+      <p><strong>Install MTKClient:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">git clone https://github.com/bkerler/mtkclient.git
+cd mtkclient
+pip install -r requirements.txt</code></pre>
+      </div>
+
+      <p>Install UsbDk (once):</p>
+      <ul>
+        <li>Download the 64-bit <code>UsbDk.msi</code> from the official GitHub releases.</li>
+        <li>Run installer → reboot PC.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Understanding the <code>seccfg</code> partition</h3>
+      <p>MediaTek bootloader security relies on an encrypted hardware flag stored in the <code>seccfg</code> partition (Security Configuration). On power-on, the preloader verifies this block to decide whether untrusted images (custom recoveries, patched boot, modified system) can execute.</p>
+      <p>Instead of requesting an encrypted unlock key signed by the vendor, BROM exploits let MTKClient inject a custom payload into SRAM, forcing the preloader to write a valid "unlocked" signature into <code>seccfg</code> — permanently toggling bootloader security off at the hardware layer.</p>
+      <div class="note">
+        <p><strong>Why this works:</strong> BROM runs before any Android verification. Exploiting it bypasses the OEM's unlock-request flow entirely, because the check that would reject the OEM token hasn't been reached yet .</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Put the device into BROM mode</h3>
+      <ol>
+        <li>Ensure battery connections are stable, then power off the device completely.</li>
+        <li>Open Command Prompt, PowerShell, or Terminal inside your <code>mtkclient</code> directory.</li>
+        <li>Initiate the unlock sequence:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk da-xml unlock</code></pre>
+      </div>
+      <ol start="4">
+        <li>The terminal prints: <code>Waiting for device in BROM mode...</code></li>
+        <li>Press and hold the boot keys — usually <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd> or <kbd>Volume Down</kbd> only.</li>
+        <li>Plug in the USB cable while holding the keys. Once the PC detects the MTK BROM COM port, release the buttons.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Note:</strong> some devices enter Preloader mode instead of BROM. If MTKClient hangs on "waiting for device" for more than 5 seconds, unplug, hold <kbd>Power</kbd>+<kbd>Volume Down</kbd> for 10s to hard reset, then retry with both volume keys held.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Execute instant BROM unlock</h3>
+      <p>For a clean single-flow trigger that handles both the auth bypass and the lock-flag modification:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk e metadata,userdata,md_udc
+python mtk da-xml unlock</code></pre>
+      </div>
+      <ol>
+        <li>MTKClient exploits the Boot ROM, disables SLA/DAA security payloads, and modifies the <code>seccfg</code> signature block.</li>
+        <li>Terminal shows progress:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">Bypass SLA/DAA success.
+Sending payload...
+Patching seccfg partition...
+Writing unlocked header to target block... Success!</code></pre>
+      </div>
+      <ol start="3">
+        <li>Disconnect USB when complete.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Post-unlock &amp; first boot</h3>
+      <ol>
+        <li>Power on the phone by holding <kbd>Power</kbd>.</li>
+        <li>During boot, a warning screen appears — <em>"Orange State: Your device has been unlocked and cannot be trusted"</em>. This confirms the unlock succeeded.</li>
+        <li>First boot after unlock takes 2–5 minutes (new userdata encryption keys generated).</li>
+        <li>Complete the initial Android setup wizard.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Orange State warning is permanent</strong> until the bootloader is re-locked. It is purely cosmetic and does not affect functionality.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Relock the bootloader via BROM (optional)</h3>
+      <p>To restore factory lock status for warranty or stock OTA updates:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk da-xml lock</code></pre>
+      </div>
+      <p>This re-signs <code>seccfg</code> with the "locked" flag. Note that <strong>data will be wiped again</strong>.</p>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+
+      <p><strong>1. Device stuck in Preloader mode / handshake timeout</strong></p>
+      <p>Cause: phone boots straight into Preloader or Charging mode before BROM exploitation initializes.</p>
+      <p>Fix: install <strong>UsbDk drivers</strong>, reboot PC, hold both volume keys firmly before plugging USB. On some modern MTK devices, a hardware <strong>test point</strong> (shorting CLK to GND) is required if BROM is soft-disabled by the OEM preloader.</p>
+
+      <p><strong>2. Red State: "Your device has failed verification" bootloop</strong></p>
+      <p>Cause: <code>seccfg</code> was patched but <code>userdata</code> or <code>vbmeta</code> signatures are corrupted.</p>
+      <p>Fix: erase metadata and userdata via MTKClient:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk e metadata,userdata</code></pre>
+      </div>
+      <p>Or re-flash stock <code>vbmeta.img</code> with disable flags via fastboot:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash --disable-verity --disable-verification vbmeta vbmeta.img</code></pre>
+      </div>
+
+      <p><strong>3. Error: Verified Boot is enabled (AVB)</strong></p>
+      <p>Cause: Android Verified Boot (AVB 2.0) blocks modified boot images after unlocking.</p>
+      <p>Fix: flash a blank or patched <code>vbmeta</code> via MTKClient or fastboot:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash --disable-verity --disable-verification vbmeta vbmeta.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Additional troubleshooting table</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>LIBUSB_ERROR_NOT_SUPPORTED</td><td>Install UsbDk 64-bit, reboot PC.</td></tr>
+          <tr><td>Device not detected at all</td><td>MTK VCOM driver missing — install from the drivers guide.</td></tr>
+          <tr><td>BROM mode detected but disconnect at 5%</td><td>Use a USB 2.0 port directly on motherboard. Avoid front-panel hubs.</td></tr>
+          <tr><td>"seccfg partition not found"</td><td>Some devices use <code>seccfg_a</code>/<code>seccfg_b</code> for A/B slots. MTKClient handles this automatically in newer versions.</td></tr>
+          <tr><td>Bootloop after unlock</td><td>Erase userdata + metadata, then boot.</td></tr>
+          <tr><td>Play Integrity fails after unlock</td><td>Expected — see Play Integrity fix guide.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Setup (once) ----
+git clone https://github.com/bkerler/mtkclient.git
+cd mtkclient
+pip install -r requirements.txt
+
+# ---- Unlock bootloader ----
+python mtk da-xml unlock
+
+# ---- Clean erase + unlock (recommended) ----
+python mtk e metadata,userdata,md_udc
+python mtk da-xml unlock
+
+# ---- Relock bootloader (wipes data) ----
+python mtk da-xml lock
+
+# ---- Check current lock state (advanced) ----
+python mtk r seccfg seccfg.img
+xxd seccfg.img | head
+
+# ---- Alternative method — direct seccfg write ----
+# 1. Dump seccfg
+python mtk r seccfg seccfg.img
+
+# 2. Patch seccfg with a known-good unlocked image
+python mtk w seccfg unlocked_seccfg.img
+
+# ---- Fix AVB after unlock ----
+fastboot flash --disable-verity --disable-verification vbmeta vbmeta.img
+
+# ---- Erase userdata only (fix Red State) ----
+python mtk e metadata,userdata</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Only unlock <strong>your own device</strong> — unlocking someone else's phone is illegal.</li>
+        <li>✅ Full data backup first — unlock always wipes <code>userdata</code>.</li>
+        <li>✅ Install UsbDk before trying — it prevents most detection failures.</li>
+        <li>✅ Use a USB 2.0 port on the motherboard, not front-panel hubs.</li>
+        <li>✅ After unlock, immediately flash TWRP or custom recovery if that's your goal — leaving the bootloader unlocked with no custom recovery adds no value.</li>
+        <li>✅ Keep a working <code>seccfg.img</code> backup in case you need to restore the original state.</li>
+        <li>✅ If you ever RMA the device, <strong>relock the bootloader first</strong>.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> MTKClient can also dump your <code>seccfg.img</code> as a backup. If something goes wrong during a future operation, you can restore it with <code>python mtk w seccfg seccfg_backup.img</code> to reset the bootloader state.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="mtkclient-overview-setup.html">MTKClient — Overview &amp; Setup</a></li>
+      <li><a href="bypass-mediatek-sla-daa.html">Bypass MediaTek SLA/DAA Security</a></li>
+      <li><a href="backup-mtk-mtkclient.html">Backup MTK Firmware via MTKClient</a></li>
+      <li><a href="install-mtk-vcom-drivers.html">Install MTK VCOM Drivers</a></li>
+      <li><a href="../android-generic/disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB</a></li>
+      <li><a href="../../android.html#mediatek">MediaTek category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

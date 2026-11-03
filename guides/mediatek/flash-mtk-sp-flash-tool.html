@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash MediaTek Stock Firmware via SP Flash Tool | Tech Learn</title>
+<meta name="description" content="Complete step-by-step guide to flash MediaTek stock firmware, unbrick dead devices and repair bootloops using SP Flash Tool.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Flash MediaTek Stock Firmware via SP Flash Tool</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek Android devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When a MediaTek phone is hard-bricked, stuck in a bootloop, or has severe system corruption, flashing official stock firmware is the ultimate repair. SP Flash Tool is the official MTK software designed specifically for this.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MediaTek VCOM drivers installed.</li>
+        <li>Official stock firmware with <code>Android_scatter.txt</code>.</li>
+        <li>Latest SP Flash Tool (v5.x or v6.x).</li>
+        <li>MTK Auth Bypass Tool / MTKClient (if SLA/DAA protected).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Launch &amp; load scatter</h3>
+      <ol>
+        <li>Open <code>flash_tool.exe</code> as Administrator.</li>
+        <li>In <strong>Download</strong> tab, click <strong>Choose</strong> next to <em>Scatter-loading File</em>.</li>
+        <li>Select <code>MT6xxx_Android_scatter.txt</code> from the firmware folder.</li>
+        <li>Partition list appears (preloader, boot, recovery, system, userdata…).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Choose flashing mode</h3>
+      <ul>
+        <li><strong>Download Only (Recommended):</strong> flashes selected partitions without erasing IMEI. Try this first.</li>
+        <li><strong>Firmware Upgrade:</strong> for OS version upgrades. Wipes and rebuilds partition layout safely.</li>
+        <li><strong>Format All + Download (DANGER):</strong> fully formats the entire flash.</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Warning:</strong> <code>Format All + Download</code> erases NVRAM/NVDATA → loses IMEI and baseband. Only last resort.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Trigger &amp; connect</h3>
+      <ol>
+        <li>Click green <strong>Download</strong> button.</li>
+        <li>Power off the phone.</li>
+        <li>Hold <kbd>Volume Down</kbd> or both volume keys.</li>
+        <li>Connect USB.</li>
+        <li>SP Flash Tool detects the device:
+          <ul>
+            <li>Red bar: DA download</li>
+            <li>Yellow/purple bar: partition write progress</li>
+          </ul>
+        </li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Complete &amp; first boot</h3>
+      <ol>
+        <li>Wait for green checkmark <strong>Download OK</strong>.</li>
+        <li>Unplug USB.</li>
+        <li>Hold Power 10s to boot.</li>
+        <li>First boot takes 5–10 minutes.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Troubleshooting</h3>
+
+      <p><strong>S_BROM_CMD_STARTCMD_FAIL (2005)</strong></p>
+      <p>Fix: reinstall VCOM drivers, check COM port conflicts, try direct motherboard USB port/cable.</p>
+
+      <p><strong>STATUS_SEC_AUTH_FILE_NEEDED</strong></p>
+      <p>Fix: modern chips require bypass. Run MTK Auth Bypass Tool or MTKClient payload before clicking Download.</p>
+
+      <p><strong>PMT changed for the ROM; it must be downloaded</strong></p>
+      <p>Fix: scatter layout doesn't match phone storage. Switch mode from <em>Download Only</em> to <strong>Firmware Upgrade</strong>.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="sp-flash-tool-complete-guide.html">SP Flash Tool overview</a></li>
+      <li><a href="sp-flash-tool-errors.html">SP Flash Tool errors</a></li>
+      <li><a href="flash-mtk-master-guide.html">Flash MTK — master guide</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

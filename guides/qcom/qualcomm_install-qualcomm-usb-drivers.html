@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Install Qualcomm Snapdragon USB Drivers on Windows | Tech Learn</title>
+<meta name="description" content="Complete guide to install Qualcomm USB drivers (QDLoader 9008 and Diagnostics 900E) on Windows using automatic installer or manual Device Manager method.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🔵</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#qualcomm">Qualcomm</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Install Qualcomm Snapdragon USB Drivers on Windows</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Windows 7, 8, 10, 11</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When dealing with software repairs, firmware flashing, network unlocking or restoring devices powered by Qualcomm Snapdragon processors, having the correct drivers installed on your PC is critical. Qualcomm devices use two main servicing modes:</p>
+
+  <ul>
+    <li><strong>Emergency Download Mode (EDL):</strong> used for deep flashing, unbricking and system recovery via the <strong>Qualcomm HS-USB QDLoader 9008</strong> driver.</li>
+    <li><strong>Diagnostic Mode (Diag):</strong> used for advanced tasks like IMEI repair, QCN backup/restore, and network recalibration via the <strong>Qualcomm HS-USB Diagnostics 900E / 9091 / 9025</strong> driver.</li>
+  </ul>
+
+  <p>Without these drivers, servicing tools like <strong>QFIL</strong>, <strong>Miracle Box</strong>, <strong>UnlockTool</strong>, <strong>UFI Box</strong> or specialized IMEI tools will fail to detect your phone.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites (crucial step)</h3>
+      <p>Before manual installation on Windows 8, 10 or 11, you must <a href="../windows/disable-driver-signature-enforcement.html">disable Driver Signature Enforcement</a>. Windows blocks unsigned drivers by default, causing the QDLoader or Diag driver install to fail or show a yellow warning icon.</p>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Automatic installation (recommended)</h3>
+      <p>The official Qualcomm Driver setup wizard handles both QDLoader 9008 and Diagnostic port configurations automatically.</p>
+      <ol>
+        <li><strong>Download &amp; extract:</strong> download the Qualcomm USB Driver package and extract the <code>.rar</code> file with WinRAR or 7-Zip. Trusted sources include <a href="https://qdloader.com/" target="_blank" rel="noopener">qdloader.com</a> and the official Qualcomm developers site.</li>
+        <li><strong>Launch setup:</strong> open the extracted folder and double-click the setup executable (e.g. <code>Qualcomm_USB_Driver_v1.0.exe</code>) as <strong>Administrator</strong>.</li>
+        <li><strong>Select setup type:</strong> on the initial screen, choose "<strong>WWAN-DHCP is used to get IPAddress</strong>" and click <strong>Next</strong>.</li>
+        <li><strong>License agreement:</strong> click <strong>Next</strong> on the Welcome screen, accept the terms, click <strong>Next</strong>.</li>
+        <li><strong>Install:</strong> click <strong>Install</strong> to copy driver files to your system.</li>
+        <li><strong>Finish &amp; reboot:</strong> click <strong>Finish</strong> and restart your PC to apply system updates.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Manual install via Device Manager</h3>
+      <p>If the device appears in Device Manager as <strong>QHUSB_BULK</strong>, <strong>QUSB_BULK</strong>, <strong>Android</strong>, or an Unknown Device with a yellow exclamation mark (or an unrecognized Serial/COM port), the automatic installer did not bind the driver correctly. Force-install it manually.</p>
+
+      <ol>
+        <li><strong>Extract driver package:</strong> ensure the raw Qualcomm driver files (containing the <code>.inf</code> configuration files) are extracted to an accessible folder.</li>
+        <li><strong>Open Device Manager:</strong> press <kbd>Win</kbd>+<kbd>X</kbd> → <strong>Device Manager</strong>.</li>
+        <li><strong>Locate device:</strong> look for <strong>QHUSB_BULK</strong> or <strong>QUSB_BULK</strong> under <strong>Other devices</strong> (or under <strong>Ports (COM &amp; LPT)</strong>).</li>
+        <li><strong>Update driver:</strong> right-click the device → <strong>Update driver</strong> → <strong>Browse my computer for drivers</strong>.</li>
+        <li><strong>Manual pick:</strong> click <strong>Let me pick from a list of available drivers on my computer</strong>. If prompted, tick <strong>Show all devices</strong> → Next → <strong>Have Disk…</strong>.</li>
+        <li><strong>Locate driver file:</strong> click <strong>Browse</strong>, navigate to your extracted Qualcomm driver folder, open the folder for your Windows architecture (e.g. <code>Win10 > x64</code> or <code>Free</code>), and select the <code>.inf</code> file (typically <code>qcser.inf</code> or <code>qcdrivers.inf</code>) → Open → OK.</li>
+        <li><strong>Select port driver:</strong>
+          <ul>
+            <li>For EDL / Flashing Mode: choose <strong>Qualcomm HS-USB QDLoader 9008</strong>.</li>
+            <li>For IMEI Repair / Diag Mode: choose <strong>Qualcomm HS-USB Diagnostics 900E</strong> (or the Diag Port matching your chipset, e.g. <strong>9091</strong> or <strong>9025</strong>).</li>
+          </ul>
+        </li>
+        <li><strong>Confirm installation:</strong> if Windows Security warns <em>"Windows can't verify the publisher of this driver software"</em>, click <strong>"Install this driver software anyway"</strong>.</li>
+        <li><strong>Complete setup:</strong> click <strong>Close</strong> when installation succeeds.</li>
+      </ol>
+
+      <div class="note">
+        <p><strong>Code 10 / Code 31 error:</strong> if a warning icon appears after installation while the device is disconnected, you can safely ignore it. The driver requires an active EDL or Diag connection to initialize properly.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Verify EDL mode connection</h3>
+      <ol>
+        <li>Open <strong>Device Manager</strong> and expand <strong>Ports (COM &amp; LPT)</strong>.</li>
+        <li>Connect the Qualcomm device in <strong>EDL mode</strong> (via test points, hardware key combos, or an EDL cable).</li>
+        <li>Check Device Manager — you should see <strong>Qualcomm HS-USB QDLoader 9008 (COMxx)</strong> listed clearly under Ports, without any yellow warning icon.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Verify Diag (Diagnostic) mode connection</h3>
+      <ol>
+        <li>Enable Diag mode on your device via dialer code (e.g. <code>*#*#717717#*#*</code>), AT commands, root access, or a servicing tool — see <a href="enable-qualcomm-diag-mode.html">Enable Qualcomm Diag Mode</a>.</li>
+        <li>Connect the phone to PC via USB.</li>
+        <li>In Device Manager → <strong>Ports (COM &amp; LPT)</strong> you should see <strong>Qualcomm HS-USB Diagnostics (COMxx)</strong> (e.g. <strong>900E</strong>, <strong>9091</strong>, or <strong>9025</strong>), ready for IMEI repair and diagnostics.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Driver install fails on Windows 10/11</td><td>Disable Driver Signature Enforcement first, reboot, then retry.</td></tr>
+          <tr><td>QHUSB_BULK shows with yellow warning</td><td>Force-install via Device Manager → Have Disk → <code>qcser.inf</code>.</td></tr>
+          <tr><td>Code 10 / Code 31 warning</td><td>Safe to ignore if the device is disconnected. Reconnect in EDL / Diag mode.</td></tr>
+          <tr><td>Diag port shows "unrecognized"</td><td>Wrong .inf selected, or wrong architecture (x86 vs x64). Re-do method 2 with the correct folder.</td></tr>
+          <tr><td>QDLoader not appearing when entering EDL</td><td>Wrong driver bound. Uninstall current driver, replug with driver signature enforcement disabled, and reinstall.</td></tr>
+          <tr><td>Multiple Qualcomm devices conflicting</td><td>Clean out older driver entries first via <strong>pnputil /enum-drivers</strong> and delete by name.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>7. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Enter Windows Test Mode (if unsigned driver blocked) ----
+# 1. Hold Shift → click Restart → Troubleshoot → Advanced → Startup Settings → Restart
+# 2. Press 7 or F7 to "Disable driver signature enforcement"
+
+# ---- Verify driver after install ----
+# Device Manager → Ports (COM & LPT)
+# Expected entries:
+#   Qualcomm HS-USB QDLoader 9008 (COMx)      <- EDL mode
+#   Qualcomm HS-USB Diagnostics 900E (COMx)   <- Diag mode
+#   Qualcomm HS-USB Diagnostics 9091 (COMx)   <- newer chipset
+#   Qualcomm HS-USB Diagnostics 9025 (COMx)   <- older chipset
+
+# ---- Find the exact Qualcomm driver via PowerShell ----
+Get-PnpDevice -Class Ports | Where-Object { $_.FriendlyName -like "*Qualcomm*" }
+
+# ---- List installed third-party drivers (audit) ----
+pnputil /enum-drivers | Select-String "Qualcomm"
+
+# ---- Remove a driver by INF name (advanced) ----
+# pnputil /delete-driver oemXX.inf /uninstall /force</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Best practices</h3>
+      <ul>
+        <li>✅ Disable Driver Signature Enforcement before installing.</li>
+        <li>✅ Use the newest driver package compatible with your Windows build.</li>
+        <li>✅ Connect directly to rear motherboard USB ports — avoid front-panel hubs.</li>
+        <li>✅ Use a quality data cable — power-only cables cause detection failures.</li>
+        <li>✅ Install drivers once, then test both QDLoader and Diag ports with a real device.</li>
+        <li>✅ Keep a copy of the extracted driver folder — you may need it again on a fresh Windows install.</li>
+        <li>✅ If tools like QFIL don't detect the phone, first double-check that Device Manager shows the QDLoader 9008 port with no yellow warning.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> after successful installation, keep the QDLoader 9008 and Diag 900E drivers readily available. If you ever reinstall Windows or move to a new PC, you can re-bind them in a few minutes using the manual method with <code>qcser.inf</code>.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="enable-qualcomm-diag-mode.html">Enable Qualcomm Diag Mode</a></li>
+      <li><a href="backup-restore-efs-imei-twrp.html">Backup &amp; Restore EFS / IMEI via TWRP</a></li>
+      <li><a href="../windows/disable-driver-signature-enforcement.html">Disable Driver Signature Enforcement (Windows)</a></li>
+      <li><a href="../android-generic/find-usb-vid-pid.html">Find USB VID &amp; PID</a></li>
+      <li><a href="../../android.html#qualcomm">Qualcomm category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

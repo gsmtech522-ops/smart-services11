@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Get Mount Points &amp; Partition Info on Android (ADB) | Tech Learn</title>
+<meta name="description" content="Complete guide to list mount points, block devices and partition mappings on Android using adb shell, /proc/mounts, df, and by-name symlinks.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Get Mount Points &amp; Partition Info on Android</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Reference Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices with ADB access</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When you need to extract a partition, flash an image, or repair a mount issue, the first step is knowing <strong>which block device maps to which mount point</strong>. Android's storage layout is device-specific and has evolved heavily since Android 10 (dynamic partitions, device-mapper, per-process mounts). This guide shows every method to list mount points and partition mappings via ADB.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Quick method — <code>df</code> command</h3>
+      <p>The simplest way to see mounted filesystems and their block devices:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell df -h</code></pre>
+      </div>
+      <p>Output example:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">Filesystem       Size  Used Avail Use% Mounted on
+/dev/block/dm-17 1.4G  1.4G     0 100% /
+/dev/block/dm-18 4.1G  2.6G   1.4G  66% /data
+/dev/block/sda14 100M   20M    80M  20% /vendor</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Note:</strong> <code>df</code> shows <em>mounted</em> filesystems. Some partitions (like <code>boot</code>, <code>recovery</code>, <code>modem</code>) are never mounted during normal Android operation, so they won't appear here [citation:3].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Detailed method — <code>/proc/mounts</code></h3>
+      <p>Shows every mounted filesystem with full device path, mount point, filesystem type, and flags:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /proc/mounts</code></pre>
+      </div>
+      <p>Filter to see only physical partitions:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /proc/mounts | grep "/dev/block"</code></pre>
+      </div>
+      <p>Output example:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">/dev/block/dm-17 / ext4 ro,seclabel,relatime 0 0
+/dev/block/dm-18 /data ext4 rw,seclabel,nosuid,nodev,noatime 0 0
+/dev/block/mmcblk0p1 /vendor ext4 ro,seclabel,relatime 0 0</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Tip:</strong> <code>/proc/self/mountinfo</code> is newer and more complete than <code>/proc/mounts</code> — it includes mount IDs, parent IDs, and mount propagation info [citation:9].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. All partitions (mounted + unmounted) — <code>/proc/partitions</code></h3>
+      <p>Lists every block device the kernel knows about, even if not mounted:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /proc/partitions</code></pre>
+      </div>
+      <p>Output example:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">major minor  #blocks  name
+ 179        0   61071360 mmcblk0
+ 179        1       8192 mmcblk0p1
+ 179        2      16384 mmcblk0p2
+ 179       21     524288 mmcblk0p21
+ 253        0    1048576 dm-0
+ 253        1    4194304 dm-1</code></pre>
+      </div>
+      <p>This is essential when you need to find a partition that isn't currently mounted (e.g. <code>boot</code>, <code>modemst1</code>) [citation:3][citation:11].</p>
+    </li>
+
+    <li>
+      <h3>4. Find partition-by-name symlinks</h3>
+      <p>Modern Android exposes partitions through <code>by-name</code> symlinks, so you don't need to know the raw <code>mmcblk0p21</code> number:</p>
+
+      <p><strong>Step 1 — Locate the by-name directory (device-specific):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell find /dev -name "by-name" 2>/dev/null</code></pre>
+      </div>
+      <p>Typical outputs:</p>
+      <ul>
+        <li><code>/dev/block/platform/soc/1d84000.ufshc/by-name</code> (UFS devices)</li>
+        <li><code>/dev/block/platform/msm_sdcc.1/by-name</code> (older Qualcomm eMMC)</li>
+        <li><code>/dev/block/by-name</code> (symlink common on modern devices)</li>
+      </ul>
+
+      <p><strong>Step 2 — List all partitions with their block device numbers:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell ls -al /dev/block/by-name/</code></pre>
+      </div>
+      <p>Output example:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">lrwxrwxrwx root root boot -> /dev/block/sda12
+lrwxrwxrwx root root system -> /dev/block/sda13
+lrwxrwxrwx root root vendor -> /dev/block/sda14
+lrwxrwxrwx root root userdata -> /dev/block/sda15
+lrwxrwxrwx root root modem -> /dev/block/sda16</code></pre>
+      </div>
+      <p>This is the safest way to flash or backup a partition without guessing [citation:8][citation:12].</p>
+    </li>
+
+    <li>
+      <h3>5. Resolve <code>dm-*</code> (device-mapper) to real partitions</h3>
+      <p>On Android 10+ with dynamic partitions, many mounted filesystems show as <code>/dev/block/dm-X</code> — a device-mapper virtual node. To find which logical partition it represents:</p>
+
+      <p><strong>Method A — Check the dm name:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /sys/block/dm-0/dm/name
+adb shell cat /sys/block/dm-1/dm/name</code></pre>
+      </div>
+      <p>Output example:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">system
+userdata</code></pre>
+      </div>
+      <p>This requires root or a userdebug/eng build [citation:14].</p>
+
+      <p><strong>Method B — Correlate with mount points:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /proc/mounts | grep dm-</code></pre>
+      </div>
+      <p>Output shows which <code>dm-X</code> is mounted at <code>/</code>, <code>/data</code>, <code>/vendor</code>, etc. Combined with the <code>by-name</code> list (which shows the raw <code>super</code> partition), you can infer the mapping.</p>
+      <div class="note">
+        <p><strong>Why dm-X?</strong> On dynamic partitions, <code>system</code>, <code>vendor</code>, <code>product</code> are logical sub-partitions inside the physical <code>super</code> partition. The kernel maps each one through device-mapper [citation:14].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Root-only — full <code>mount</code> command output</h3>
+      <p>If you have root, the <code>mount</code> command shows everything with full flags:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su -c mount</code></pre>
+      </div>
+      <p>Filter to a specific partition:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su -c "mount | grep system"</code></pre>
+      </div>
+      <p>Output example:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">/dev/block/dm-17 on /system type ext4 (ro,seclabel,relatime)</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Note:</strong> without root, the <code>mount</code> command may still work but shows limited info. <code>/proc/mounts</code> is more reliable for non-root users [citation:5].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Common partitions you should know</h3>
+      <table>
+        <thead>
+          <tr><th>Partition name</th><th>Usually mounted at</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>system</code> / <code>dm-0</code></td><td><code>/</code> or <code>/system</code></td><td>Android framework</td></tr>
+          <tr><td><code>vendor</code></td><td><code>/vendor</code></td><td>HAL drivers</td></tr>
+          <tr><td><code>userdata</code> / <code>dm-1</code></td><td><code>/data</code></td><td>User apps and files</td></tr>
+          <tr><td><code>boot</code></td><td>Not mounted</td><td>Kernel + ramdisk</td></tr>
+          <tr><td><code>recovery</code></td><td>Not mounted</td><td>Recovery mode</td></tr>
+          <tr><td><code>modem</code></td><td>Not mounted</td><td>Baseband firmware</td></tr>
+          <tr><td><code>persist</code></td><td>Not mounted</td><td>Sensor calibration</td></tr>
+          <tr><td><code>super</code></td><td>Not mounted</td><td>Dynamic partitions container</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>8. Per-process mount isolation (Android 10+)</h3>
+      <p>Android leverages Linux per-process mount namespaces. A process launched from <code>adbd</code> may see different mounts than an app process launched by <code>zygote</code> [citation:3][citation:7].</p>
+      <p>To inspect an app's view of mounts, use:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell cat /proc/self/mounts</code></pre>
+      </div>
+      <p>This shows the mounts visible to your current ADB shell session, which is usually the "base" view.</p>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Quick overview of mounted filesystems ----
+adb shell df -h
+adb shell df -h /
+
+# ---- Full mount table ----
+adb shell cat /proc/mounts
+adb shell cat /proc/mounts | grep "/dev/block"
+
+# ---- Mount info (newer, more detailed) ----
+adb shell cat /proc/self/mountinfo
+
+# ---- All known partitions (mounted + unmounted) ----
+adb shell cat /proc/partitions
+
+# ---- Locate by-name symlinks ----
+adb shell find /dev -name "by-name" 2>/dev/null
+
+# ---- List partitions with block device mapping ----
+adb shell ls -al /dev/block/by-name/
+
+# ---- Resolve dm-X (root/userdebug only) ----
+adb shell cat /sys/block/dm-0/dm/name
+adb shell cat /sys/block/dm-1/dm/name
+
+# ---- Root-only full mount output ----
+adb shell su -c mount
+adb shell su -c "mount | grep system"
+
+# ---- Check SELinux context on a mount ----
+adb shell ls -Z /system</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>find /dev -name by-name</code> returns nothing</td><td>Try <code>ls /dev/block/by-name/</code> directly — the symlink may exist without the directory being findable [citation:8].</td></tr>
+          <tr><td><code>/proc/partitions</code> shows nothing useful</td><td>Non-root may see limited info on some builds. Try <code>ls /dev/block/</code> instead.</td></tr>
+          <tr><td>dm-X name is blank</td><td>Requires root or a userdebug build. Use <code>/proc/mounts</code> correlation instead.</td></tr>
+          <tr><td>Partition not listed anywhere</td><td>It may not be mapped in <code>by-name</code> on your device. Use <code>/proc/partitions</code> and match by size.</td></tr>
+          <tr><td><code>df</code> shows 100% on <code>/</code></td><td>Normal on dynamic partitions — the logical size is fixed. Check <code>/data</code> for real free space.</td></tr>
+          <tr><td>Cannot read <code>/proc/mounts</code></td><td>Some OEM ROMs restrict it. Root solves this.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>11. Best practices</h3>
+      <ul>
+        <li>✅ Prefer <code>by-name</code> symlinks over raw block numbers — they are stable and readable.</li>
+        <li>✅ Use <code>/proc/partitions</code> to find unmounted partitions (<code>boot</code>, <code>modem</code>).</li>
+        <li>✅ Remember that <code>dm-X</code> is a virtual layer over <code>super</code> on Android 10+.</li>
+        <li>✅ Always double-check the block device before flashing — wrong device = brick.</li>
+        <li>✅ Back up <code>nvram</code> / <code>modemst1</code> before any partition operation.</li>
+        <li>✅ Use <code>df -h</code> for a quick sanity check before deep diagnostics.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if you're writing an extraction script, start with <code>adb shell ls /dev/block/by-name/</code> — it gives you every partition name and its exact block device in one command, no root required on most devices.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="find-usb-vid-pid.html">Find USB VID &amp; PID</a></li>
+      <li><a href="check-file-system-system-img-windows.html">Check &amp; Repair system.img</a></li>
+      <li><a href="convert-sparse-to-raw-img-simg2img.html">Convert Sparse to Raw with simg2img</a></li>
+      <li><a href="../adb-fastboot/adb-fastboot-commands-cheatsheet.html">ADB &amp; Fastboot Commands Cheat Sheet</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

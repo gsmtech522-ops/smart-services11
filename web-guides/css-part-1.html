@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۱: CSS کا تعارف اور شامل کرنے کے طریقے (Introduction to CSS)</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .description {
+            background-color: #eff6ff;
+            border-right: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #1e40af;
+            margin-bottom: 25px;
+        }
+        h3 {
+            color: #1e40af;
+            margin-top: 30px;
+            border-right: 4px solid #3b82f6;
+            padding-right: 10px;
+        }
+        h4 {
+            color: #334155;
+            margin-top: 20px;
+        }
+        ul, ol {
+            padding-right: 25px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #d97706;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+        /* Editor Box Fixes */
+        .interactive-editor-box {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid #334155;
+            direction: ltr;
+        }
+        .editor-toolbar {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: sans-serif;
+            font-size: 14px;
+            direction: ltr;
+        }
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: #f8fafc;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-left: 5px;
+            transition: background 0.2s;
+        }
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+        }
+        .editor-toolbar .actions button.run-btn:hover {
+            background: #15803d;
+        }
+        .code-input-area {
+            width: 100%;
+            height: 220px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+            outline: none;
+            line-height: 1.5;
+            tab-size: 4;
+        }
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+            direction: rtl;
+        }
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 5px;
+            font-family: sans-serif;
+        }
+        .preview-iframe {
+            width: 100%;
+            height: 180px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #ffffff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+    <div class="container">
+        <h1>سبق ۱: CSS کا تعارف اور شامل کرنے کے طریقے (Introduction to CSS)</h1>
+        <div class="description">CSS (جس کا پورا نام Cascading Style Sheets ہے) کا استعمال HTML کے ذریعے بنائے گئے ڈھانچے کو خوبصورت، رنگین اور باقاعدہ ڈیزائن دینے کے لیے کیا جاتا ہے۔ اگر HTML کسی عمارت کی بنیادی اینٹیں ہیں، تو CSS اس کی پینٹنگ ہے۔</div>
+        <div class="lesson-body">
+            
+        <h3>CSS شامل کرنے کے 3 طریقے</h3>
+        <p>HTML میں CSS کو بنیادی طور پر تین طریقوں سے لکھا جا سکتا ہے:</p>
+        <ul>
+            <li><strong>Inline CSS:</strong> کسی ایک مخصوص HTML ٹیگ کے اندر <code>style</code> ایٹریبیوٹ کا استعمال کرتے ہوئے۔</li>
+            <li><strong>Internal CSS:</strong> HTML فائل کے <code>&lt;head&gt;</code> حصے میں <code>&lt;style&gt;</code> ٹیگ کے اندر۔</li>
+            <li><strong>External CSS:</strong> (بہترین طریقہ) ایک الگ <code>.css</code> فائل <code>style.css</code> کے نام سے بنا کر اسے HTML پیج کے <code>&lt;head&gt;</code> میں <code>&lt;link&gt;</code> ٹیگ کے ذریعے جوڑنا۔</li>
+        </ul>
+
+        <h3>CSS کا بنیادی طریقہ کار (Syntax)</h3>
+        <p>CSS میں کسی بھی ایلیمنٹ کو ڈیزائن کرنے کا فارمیٹ یوں ہوتا ہے:</p>
+        <p><code><strong>selector { property: value; }</strong></code></p>
+        <ul>
+            <li><strong>Selector:</strong> جس HTML ایلیمنٹ کو آپ ڈیزائن کرنا چاہتے ہیں (جیسے <code>h1</code>, <code>p</code>, <code>body</code>)۔</li>
+            <li><strong>Property:</strong> وہ خصوصیت جسے آپ بدلنا چاہتے ہیں (جیسے <code>color</code>, <code>background-color</code>, <code>font-size</code>)۔</li>
+            <li><strong>Value:</strong> وہ قیمت یا رنگ جو آپ لاگو کرنا چاہتے ہیں (جیسے <code>blue</code>, <code>20px</code>)۔</li>
+        </ul>
+
+        <h3>Inline CSS کی مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>HTML کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inline CSS کی مثال</title>
+</head>
+<body>
+    <h1 style="color: red;">لال رنگ کی سرخی Heading</h1>
+</body>
+</html>
+            </textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+        <p>اوپر کوڈ میں heading ٹیگ کے اندر <code>style</code> ایٹریبیوٹ کا استعمال کر کے ہیڈنگ کو رنگین بنایا گیا ہے۔ یہ Inline CSS کی مثال ہے۔</p>
+
+        <h3>Internal CSS کی مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>HTML کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Internal CSS کی مثال</title>
+    <style>
+        body { background-color: blue; }
+        h1 { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Internal CSS رنگین ہیڈنگ</h1>
+</body>
+</html>
+            </textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+        <p>اوپر کے کوڈ میں <code>&lt;head&gt;</code> سیکشن میں <code>&lt;style&gt;</code> ٹیگ کے اندر CSS کا کوڈ لکھا گیا ہے، جیسے <code>body { background-color: blue; }</code> اور <code>h1 { color: red; }</code>۔ باقی سارا کوڈ HTML ہے۔</p>
+
+        <h3>External CSS کی مثال</h3>
+        <p>External CSS میں CSS کی الگ فائل بنانی ہوتی ہے، <code>style.css</code>، اور اس میں الگ سے CSS کا کوڈ لکھا جاتا ہے۔ HTML کی فائل <code>index.html</code> میں اس کا سورس <code>&lt;head&gt;</code> سیکشن میں <code>&lt;link&gt;</code> ٹیگ کے ذریعے ڈالا جاتا ہے۔ پہلے ایک HTML فائل بنائیں: <code>index.html</code></p>
+
+        <h4>index.html</h4>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>HTML کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>External CSS کی مثال</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>External CSS رنگین ہیڈنگ</h1>
+</body>
+</html>
+            </textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h4>style.css</h4>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>CSS کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">
+body {
+    background-color: blue;
+}
+h1 {
+    color: red;
+}
+            </textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <p><code>index.html</code> کے <code>&lt;head&gt;</code> سیکشن میں CSS کی لوکل فائل کا لنک دیا گیا ہے۔</p>
+        <ul>
+            <li><strong><code>&lt;link&gt;</code>:</strong> ٹیگ</li>
+            <li><strong><code>rel</code>, <code>href</code>:</strong> ایٹریبیوٹس</li>
+            <li><strong><code>"style.css"</code>:</strong> CSS فائل کا راستہ</li>
+            <li><strong><code>stylesheet</code>:</strong> فائل کی قسم</li>
+        </ul>
+
+        <h3>CSS فائل کا کوڈ</h3>
+        <ul>
+            <li><strong><code>body</code>, <code>h1</code>:</strong> سلیکٹرز</li>
+            <li><strong><code>background-color</code>, <code>color</code>:</strong> پراپرٹیز</li>
+            <li><strong><code>red</code>, <code>blue</code>:</strong> ویلیوز</li>
+        </ul>
+
+        <h3>اہم باتیں اور قواعد</h3>
+        <ul>
+            <li><strong>External CSS کا فائدہ:</strong> ایک ہی فائل سے پورا پروجیکٹ ڈیزائن کرنے کا سب سے بڑا فائدہ یہ ہے کہ آپ صرف ایک <code>style.css</code> فائل میں تبدیلی کر کے اپنی ویب سائٹ کے تمام HTML پیجز کا ڈیزائن ایک ساتھ بدل سکتے ہیں۔</li>
+            <li><strong>سیمیکولن (;) کا استعمال:</strong> ہر CSS پراپرٹی اور ویلیو کے بعد سیمیکولن (<code>;</code>) لگانا ضروری ہے، ورنہ اس کے بعد والا کوڈ کام نہیں کرے گا۔</li>
+        </ul>
+
+        <h3>نوٹ</h3>
+        <p>اگر آپ کی CSS فائل کا نام مختلف ہے تو HTML فائل کے <code>&lt;head&gt;</code> سیکشن میں <code>&lt;link&gt;</code> ٹیگ کے اندر نام تبدیل کرنا ہوگا۔ اور اگر آپ کی CSS فائل کسی اور فولڈر میں ہے تو راستہ کچھ یوں ہوگا: <code>foldername/style.css</code>۔ CSS فائل میں HTML کا کوڈ نہیں ہوگا بلکہ اس کا اپنا کوڈ ہوگا۔ CSS فائل میں دیگر ٹیگز جیسے پیراگراف وغیرہ کو بھی ڈیزائن کیا جا سکتا ہے اور مزید پراپرٹیز بھی شامل کی جا سکتی ہیں۔</p>
+        
+        </div>
+    </div>
+
+    <script>
+        function runCodeFromEditor(btn) {
+            const box = btn.closest('.interactive-editor-box');
+            const code = box.querySelector('.code-input-area').value;
+            const iframe = box.querySelector('.preview-iframe');
+            iframe.srcdoc = code;
+        }
+
+        function copyCodeFromEditor(btn) {
+            const box = btn.closest('.interactive-editor-box');
+            const code = box.querySelector('.code-input-area').value;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied! ✅';
+                setTimeout(() => btn.innerText = originalText, 2000);
+            });
+        }
+
+        // Auto-run all code editors on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.interactive-editor-box').forEach(box => {
+                const code = box.querySelector('.code-input-area').value;
+                const iframe = box.querySelector('.preview-iframe');
+                if (iframe && code) {
+                    iframe.srcdoc = code;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

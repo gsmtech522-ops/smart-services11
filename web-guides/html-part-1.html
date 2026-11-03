@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۱: HTML کا تعارف، Setup اور پہلا Program</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.8;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #1e3a8a;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+        }
+        code {
+            background-color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #0f172a;
+            font-family: monospace;
+        }
+        /* ایڈیٹر اور کمانڈ باکس کا سٹائل */
+        .interactive-editor-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1e293b;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .editor-toolbar {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .editor-toolbar .actions button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .editor-toolbar .actions button.run-btn {
+            background: #10b981;
+        }
+        .code-input-area {
+            width: 100%;
+            height: 220px;
+            background: #1e293b;
+            color: #f8fafc;
+            border: none;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+        }
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #cbd5e1;
+            padding: 10px;
+        }
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #334155;
+        }
+        .preview-iframe {
+            width: 100%;
+            height: 180px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <h1>سبق ۱: HTML کا تعارف، Setup اور پہلا Program</h1>
+    <p>HTML (HyperText Markup Language) ویب کی بنیادی زبان ہے — تمام ویب صفحات کا ڈھانچہ اسی سے بنتا ہے۔ اگر ویب سائٹ ایک عمارت ہے تو HTML اس کی اینٹیں اور ستون ہیں۔ CSS ڈیزائن، JavaScript فنکشنلٹی — لیکن بنیاد HTML ہے۔</p>
+
+    <h3>1. HTML کیا ہے؟</h3>
+    <ul>
+        <li><strong>Markup Language:</strong> پروگرامنگ نہیں — tags سے content کو structure دیتا ہے۔</li>
+        <li><strong>ویب کی بنیاد:</strong> تمام براؤزرز (Chrome، Firefox، Edge، Safari) HTML سمجھتے ہیں۔</li>
+        <li><strong>HyperText:</strong> لنکس سے صفحات جڑے — یہی "ویب" ہے۔</li>
+        <li><strong>W3C Standard:</strong> بین الاقوامی معیار — سب براؤزرز پیروی کرتے ہیں۔</li>
+        <li><strong>آفلائن:</strong> کوئی انٹرنیٹ ضروری نہیں — فائل براؤزر میں کھولیں۔</li>
+    </ul>
+
+    <h3>2. HTML کیوں ضروری ہے؟</h3>
+    <ul>
+        <li><strong>Structure:</strong> کہاں heading، کہاں paragraph، کہاں image — سب HTML بتاتا ہے۔</li>
+        <li><strong>Accessibility:</strong> screen readers HTML سے سمجھتے ہیں۔</li>
+        <li><strong>SEO:</strong> سرچ انجن HTML پڑھتے ہیں۔</li>
+        <li><strong>Foundation:</strong> React، Vue، Angular — سب آخر میں HTML بناتے ہیں۔</li>
+        <li><strong>آسان:</strong> کوئی logic نہیں — صرف tags۔</li>
+    </ul>
+
+    <h3>3. Setup — پہلی فائل</h3>
+    <ol>
+        <li><strong>Editor:</strong> VS Code (free) — <a href="https://code.visualstudio.com" target="_blank">code.visualstudio.com</a>۔</li>
+        <li><strong>Folder:</strong> <code dir="ltr" style="unicode-bidi:isolate">html-learning/</code> بنائیں۔</li>
+        <li><strong>File:</strong> <code dir="ltr" style="unicode-bidi:isolate">index.html</code> بنائیں۔</li>
+        <li><strong>Open:</strong> براؤزر میں کھولیں — یا VS Code میں Live Server۔</li>
+    </ol>
+
+    <h3>4. پہلا Program</h3>
+    <div class="interactive-editor-box">
+        <div class="editor-toolbar">
+            <span>HTML — index.html</span>
+            <div class="actions">
+                <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+            </div>
+        </div>
+        <textarea class="code-input-area" dir="ltr" spellcheck="false" style="direction:ltr;text-align:left;unicode-bidi:isolate"><!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>میرا پہلا صفحہ</title>
+</head>
+<body>
+    <h1>السلام علیکم!</h1>
+    <p>یہ میرا پہلا HTML صفحہ ہے۔</p>
+    <p>آج: <strong>HTML سیکھنا</strong> شروع کیا۔</p>
+</body>
+</html></textarea>
+        <div class="preview-container">
+            <div class="preview-title">براؤزر میں رزلٹ:</div>
+            <iframe class="preview-iframe"></iframe>
+        </div>
+    </div>
+
+    <h3>5. کوڈ کی وضاحت — ہر لائن</h3>
+    <ul>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;!DOCTYPE html&gt;</code> — HTML5 document کا اعلان۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;html lang="ur" dir="rtl"&gt;</code> — root، زبان اردو، سمت RTL۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;head&gt;</code> — meta info (براؤزر کے لیے، نہ دکھے)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;meta charset="UTF-8"&gt;</code> — اردو حروف صحیح دکھیں۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;meta name="viewport" ...&gt;</code> — موبائل responsive۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;title&gt;</code> — براؤزر ٹیب کا عنوان۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;body&gt;</code> — مرکزی مواد (جو دکھے)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;h1&gt;</code> — بڑی heading۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;p&gt;</code> — paragraph۔</li>
+    </ul>
+
+    <h3>6. Tags کی اقسام</h3>
+    <ul>
+        <li><strong>Opening Tag:</strong> <code dir="ltr" style="unicode-bidi:isolate">&lt;p&gt;</code></li>
+        <li><strong>Closing Tag:</strong> <code dir="ltr" style="unicode-bidi:isolate">&lt;/p&gt;</code></li>
+        <li><strong>Self-closing:</strong> <code dir="ltr" style="unicode-bidi:isolate">&lt;br&gt;</code>، <code dir="ltr" style="unicode-bidi:isolate">&lt;img&gt;</code>، <code dir="ltr" style="unicode-bidi:isolate">&lt;hr&gt;</code></li>
+        <li><strong>Element:</strong> <code dir="ltr" style="unicode-bidi:isolate">&lt;p&gt;متن&lt;/p&gt;</code> — مکمل</li>
+        <li><strong>Attribute:</strong> <code dir="ltr" style="unicode-bidi:isolate">&lt;p class="text"&gt;</code> — اضافی info</li>
+    </ul>
+
+    <h3>7. اہم باتیں</h3>
+    <ul>
+        <li>✅ <strong>Indentation:</strong> nested tags — اندر، 2-4 spaces۔</li>
+        <li>✅ <strong>Lowercase:</strong> tags — <code dir="ltr" style="unicode-bidi:isolate">&lt;p&gt;</code> نہ <code dir="ltr" style="unicode-bidi:isolate">&lt;P&gt;</code>۔</li>
+        <li>✅ <strong>DOCTYPE:</strong> ہمیشہ پہلی لائن۔</li>
+        <li>✅ <strong>lang + dir:</strong> اردو کے لیے <code dir="ltr" style="unicode-bidi:isolate">lang="ur" dir="rtl"</code>۔</li>
+        <li>✅ <strong>charset:</strong> UTF-8 — اردو کے لیے لازمی۔</li>
+        <li>✅ <strong>Test:</strong> ہر تبدیلی پر براؤزر refresh۔</li>
+    </ul>
+
+    <h3>عمل / مشق (Task)</h3>
+    <ol>
+        <li>VS Code نصب کریں — Live Server extension۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">index.html</code> بنائیں — اپنا نام، شہر۔</li>
+        <li>3 headings (h1، h2، h3) — مختلف سائز دیکھیں۔</li>
+        <li>2 paragraphs — اردو میں۔</li>
+        <li>Browser DevTools (F12) — HTML structure دیکھیں۔</li>
+    </ol>
+
+    <script>
+        function runCodeFromEditor(btn) {
+            const container = btn.closest('.interactive-editor-box');
+            const code = container.querySelector('.code-input-area').value;
+            const iframe = container.querySelector('.preview-iframe');
+            iframe.srcdoc = code;
+        }
+
+        function copyCodeFromEditor(btn) {
+            const container = btn.closest('.interactive-editor-box');
+            const code = container.querySelector('.code-input-area').value;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('کوڈ کاپی ہو گیا ہے!');
+            });
+        }
+
+        // صفحہ لوڈ ہوتے ہی پہلے سے موجود کوڈ کو خودکار طریقے سے چلائیں
+        window.onload = function() {
+            document.querySelectorAll('.run-btn').forEach(btn => runCodeFromEditor(btn));
+        };
+    </script>
+</body>
+</html>

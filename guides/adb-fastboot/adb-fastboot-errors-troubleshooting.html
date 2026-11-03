@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADB &amp; Fastboot Errors Troubleshooting Guide | Tech Learn</title>
+<meta name="description" content="Fix common ADB and Fastboot errors: device unauthorized, command not recognized, waiting for device, protocol fault, and more.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>ADB &amp; Fastboot Errors Troubleshooting Guide</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Quick Reference</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Use</dt>
+    <dd>Bookmark — search (Ctrl+F) to find your exact error</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>The most common ADB and Fastboot errors, why they happen, and exactly how to fix them.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. <code>adb devices</code> shows "unauthorized"</h3>
+      <p><strong>Why it happens:</strong> your PC is trying to talk to the phone, but you haven't granted the security permission on the phone screen itself.</p>
+      <p><strong>Fix:</strong></p>
+      <ol>
+        <li>Disconnect the USB cable.</li>
+        <li>Go to <strong>Settings → Developer Options</strong> on the phone.</li>
+        <li>Tap <strong>Revoke USB debugging authorizations</strong> → OK.</li>
+        <li>Reconnect the USB cable.</li>
+        <li>Watch the phone screen for <strong>"Allow USB debugging?"</strong>.</li>
+        <li>Check <strong>Always allow from this computer</strong> and tap <strong>Allow</strong>.</li>
+        <li>Run <code>adb devices</code> again — status changes from <em>unauthorized</em> to <em>device</em>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>2. <code>'adb' (or 'fastboot') is not recognized</code></h3>
+      <p><strong>Why it happens:</strong> Windows doesn't know where <code>adb.exe</code> or <code>fastboot.exe</code> is located — the environment variable is missing, or the tool wasn't installed system-wide.</p>
+      <p><strong>Quick fix:</strong></p>
+      <ul>
+        <li>Always run your ADB installer as <strong>Administrator</strong> and press <strong>Y</strong> when asked to install system-wide.</li>
+      </ul>
+      <p><strong>Manual fix:</strong></p>
+      <ol>
+        <li>Locate your ADB folder (usually <code>C:\adb</code> or <code>C:\platform-tools</code>).</li>
+        <li>Copy the folder path.</li>
+        <li><strong>This PC → Properties → Advanced System Settings → Environment Variables</strong>.</li>
+        <li>Under <strong>System Variables</strong>, select <strong>Path</strong> → Edit.</li>
+        <li>Click <strong>New</strong>, paste the path, OK all windows.</li>
+        <li>Restart Command Prompt.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. <code>&lt; waiting for device &gt;</code> in Fastboot</h3>
+      <p><strong>Why it happens:</strong> Fastboot is waiting for the phone to be recognized in bootloader mode, but the bootloader USB driver is missing or incorrect.</p>
+      <p><strong>Fix:</strong></p>
+      <ol>
+        <li>Keep the phone connected in Fastboot mode and open <strong>Device Manager</strong>.</li>
+        <li>Look for <strong>Android</strong> under <em>Other Devices</em> with a yellow warning.</li>
+        <li>Right-click → <strong>Update driver → Browse → Let me pick from a list…</strong></li>
+        <li>Select <strong>Android Device</strong> → choose <strong>Android Bootloader Interface</strong> → Next.</li>
+        <li>The moment the driver installs, the command finishes in the terminal.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. <code>cannot load 'filename.img': No such file or directory</code></h3>
+      <p><strong>Why it happens:</strong> CMD cannot find the image file — it's not in the current folder.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li><strong>Method 1:</strong> Move the image file into the same folder as your CMD (usually <code>C:\adb</code> or <code>C:\platform-tools</code>).</li>
+        <li><strong>Method 2 (easiest):</strong> instead of typing the file name, type the command (e.g. <code>fastboot flash recovery</code>), then drag and drop the file from desktop into the CMD window — Windows pastes the full path.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>5. <code>Command not allowed</code> / <code>Flashing is not allowed for Lock State</code></h3>
+      <p><strong>Why it happens:</strong> you're attempting to flash critical partitions while the bootloader is still locked.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Unlock the bootloader first:</li>
+      </ul>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot oem unlock
+# or on newer devices:
+fastboot flashing unlock</code></pre>
+      </div>
+      <ul>
+        <li>For brands like Xiaomi, Huawei or Vivo, you must use the official brand-specific unlock tool first.</li>
+        <li>Ensure <strong>OEM Unlocking</strong> is enabled in Developer Options on the phone.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>6. <code>protocol fault (no status)</code></h3>
+      <p><strong>Why it happens:</strong> the data connection between phone and PC got cut mid-process — usually a physical (cable/port) issue.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Use a high-quality original USB data cable.</li>
+        <li>Use a <strong>USB 2.0 port</strong> (black) instead of USB 3.0 (blue).</li>
+        <li>If only USB 3 ports are available, insert a USB 2.0 hub in between.</li>
+        <li>Or run this as Administrator in CMD to force compatibility:</li>
+      </ul>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">reg add "HKLM\SYSTEM\CurrentControlSet\Control\usbflags\18D1D00D0100" /v "osvc" /t REG_BINARY /d "0000" /f</code></pre>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> bookmark this page and use <kbd>Ctrl</kbd>+<kbd>F</kbd> to search your exact error message.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-setup-windows.html">ADB &amp; Fastboot setup</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

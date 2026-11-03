@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Install MTK USB Drivers Using PdaNet (Universal Fix) | Tech Learn</title>
+<meta name="description" content="Install universal MediaTek USB drivers on Windows using PdaNet installer — a fast, signed alternative to manual driver installation.">
+<link rel="stylesheet" href="../styles/style.css">
+<link rel="stylesheet" href="../styles/guide.css">
+<link rel="stylesheet" href="../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Install MTK USB Drivers Using PdaNet</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Windows 7, 8, 10, 11</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Installing raw legacy MTK drivers manually often triggers "Digital Signature" errors or constant port disconnection. <strong>PdaNet+ Desktop Installer</strong> contains a universal USB driver stack that auto-configures ADB interfaces, Fastboot ports, and baseband routing for MTK devices — bypassing driver signature enforcement cleanly.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Why use PdaNet for MTK drivers?</h3>
+      <ul>
+        <li><strong>Fully automated:</strong> no manual <code>.inf</code> browsing or legacy hardware forcing.</li>
+        <li><strong>Bypasses signature enforcement:</strong> signed system profiles — no need to restart Windows in disable-signature mode.</li>
+        <li><strong>Fixes MTP &amp; ADB deadlocks:</strong> repairs "PC charges the phone but can't detect it" issues.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Download PdaNet+</h3>
+      <ul>
+        <li>Download the official <strong>PdaNet+ Windows Desktop Installer</strong> (e.g. <code>PdaNetA6x.exe</code> for 64-bit).</li>
+        <li>Save to your Desktop.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Clean up existing drivers (recommended)</h3>
+      <ul>
+        <li>Disconnect all smartphones.</li>
+        <li>Uninstall any broken/partial MTK driver setups from Control Panel or Device Manager.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Run setup wizard</h3>
+      <ul>
+        <li>Right-click the PdaNet installer → <strong>Run as Administrator</strong>.</li>
+        <li>Click <strong>Next</strong>, accept license terms.</li>
+        <li>Keep default installation path → <strong>Next</strong>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Universal driver capture</h3>
+      <ul>
+        <li>When prompted for your phone manufacturer, choose <strong>"Others"</strong> or <strong>"Universal Android"</strong>.</li>
+        <li>Click <strong>Install</strong>. When Windows prompts "Would you like to install this device software?", tick <strong>Always trust software from June Fabrics Technology</strong> and click <strong>Install</strong>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>6. Step 5 — Connect phone to finalize</h3>
+      <ul>
+        <li>On the phone: Settings → Developer Options → enable <strong>USB Debugging</strong>.</li>
+        <li>Connect via USB cable.</li>
+        <li>PdaNet setup detects the hardware, finalizes data communication mapping, and completes.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>7. Verify the connection</h3>
+      <ul>
+        <li>Open <strong>Device Manager</strong>.</li>
+        <li>Connect the phone powered ON — look for <strong>Android Device → Android ADB Interface</strong>.</li>
+        <li>For low-level flashing modes, the signed drivers handle BROM communication without disconnection loops.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="install-mtk-vcom-drivers.html">Install MTK VCOM drivers</a></li>
+      <li><a href="install-libusb-win32-filter.html">Install LibUSB filter</a></li>
+      <li><a href="../../android.html#mediatek">MediaTek category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

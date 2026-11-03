@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Extract .ofp / .ops Firmware Files (Oppo, Realme, OnePlus) | Tech Learn</title>
+<meta name="description" content="Complete guide to extract Oppo OFP, OPS and OPN firmware files using Python scripts, tools and manual methods on Windows and Linux.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📦</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#firmware-extracting">Firmware Extracting</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Extract .ofp / .ops Firmware Files</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Oppo · Realme · OnePlus · Some Qualcomm-based devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Oppo, Realme, OnePlus and some Qualcomm-based devices ship official firmware in encrypted archive formats — <strong>.ofp</strong> (Oppo Firmware Package), <strong>.ops</strong> (Oppo Package Suite), and <strong>.opn</strong> (newer format). Standard tools like 7-Zip cannot open them. You need a dedicated extractor to unpack partition images (<code>boot.img</code>, <code>super.img</code>, <code>system.img</code>, <code>vendor.img</code>) for flashing, patching, or analysis.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What are OFP / OPS / OPN files?</h3>
+      <table>
+        <thead>
+          <tr><th>Format</th><th>Used by</th><th>Structure</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>.ofp</strong></td><td>Oppo, Realme, OnePlus</td><td>Encrypted ZIP containing raw partition images</td></tr>
+          <tr><td><strong>.ops</strong></td><td>Older Oppo devices (ColorOS 3–5)</td><td>Encrypted proprietary archive</td></tr>
+          <tr><td><strong>.opn</strong></td><td>Newer Oppo (ColorOS 12+)</td><td>Updated encryption, similar to OFP</td></tr>
+        </tbody>
+      </table>
+
+      <p>Inside each is a set of partition images (like MTK scatter-firmware) and a <code>firmware.info</code> file that tells the flashing tool which image maps to which partition.</p>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li>Windows 10/11 or Linux — both supported by most tools.</li>
+        <li><strong>Python 3.8+</strong> (for python-based extractors) with "Add Python to PATH".</li>
+        <li>WinRAR / 7-Zip (for unpacking the extractor and secondary archives).</li>
+        <li>At least <strong>8–15 GB free disk space</strong> — extracted images are much larger than the OFP.</li>
+        <li>The original <code>.ofp</code> / <code>.ops</code> / <code>.opn</code> file matching your exact model and build.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Method 1 — OFP Extractor (Windows, Python-based)</h3>
+      <p>The most popular community tool for extracting <code>.ofp</code> files.</p>
+
+      <p><strong>Step 1 — Download the tool.</strong></p>
+      <p>Search GitHub for <code>OppoFirmwareExtractor</code> or <code>ofp-extractor</code>. Extract it into a folder, e.g. <code>C:\ofp_tool\</code>.</p>
+
+      <p><strong>Step 2 — Install Python dependencies.</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cd C:\ofp_tool
+pip install -r requirements.txt</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Copy the OFP file into the tool folder.</strong></p>
+      <p>For example: <code>C:\ofp_tool\firmware.ofp</code></p>
+
+      <p><strong>Step 4 — Extract the firmware.</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python ofp_extract.py firmware.ofp</code></pre>
+      </div>
+      <p>Some versions require a mode flag:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python ofp_extract.py firmware.ofp -o output_folder</code></pre>
+      </div>
+
+      <p><strong>Step 5 — Confirm the output.</strong></p>
+      <p>Inside the output folder you will see:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">output_folder/
+├── boot.img
+├── dtbo.img
+├── super.img
+├── vbmeta.img
+├── recovery.img
+├── modem.img
+├── firmware.info
+└── ... (vendor, product, system, odm...)</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Method 2 — OPS Extractor (older Oppo devices)</h3>
+      <p>The <code>.ops</code> format is older (ColorOS 3–5). Use a Windows-based extractor.</p>
+
+      <p><strong>Step 1 — Download OPS Extractor.</strong></p>
+      <p>Search for <code>OPS Extractor by MSM</code> or <code>OpsExtractor</code> from trusted sources.</p>
+
+      <p><strong>Step 2 — Launch the tool.</strong></p>
+      <ol>
+        <li>Run <code>OpsExtractor.exe</code> as Administrator.</li>
+        <li>Click <strong>Open File</strong> and select your <code>.ops</code> file.</li>
+        <li>Choose an output folder.</li>
+        <li>Click <strong>Extract</strong> and wait 3–15 minutes (depends on file size).</li>
+      </ol>
+
+      <p><strong>Step 3 — Handle extracted output.</strong></p>
+      <p>You will get a set of partition images plus a <code>firmware.info</code> mapping file. These can be flashed via the Oppo service tool or converted for use with fastboot.</p>
+    </li>
+
+    <li>
+      <h3>5. Method 3 — OPN Extractor (newer Oppo devices)</h3>
+      <p>ColorOS 12+ uses the newer <code>.opn</code> format. The python-based <code>opn_extract.py</code> (in the same OppoFirmwareExtractor repo) handles it.</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python opn_extract.py firmware.opn -o output_folder</code></pre>
+      </div>
+
+      <p>If the tool does not support your build, check for an updated script — the format evolves every major ColorOS release.</p>
+    </li>
+
+    <li>
+      <h3>6. Method 4 — Manual unzip (rare, older unencrypted builds)</h3>
+      <p>Some old <code>.ofp</code> files were just renamed ZIP archives. Try before reaching for a tool:</p>
+
+      <ol>
+        <li>Copy the OFP file and rename the extension:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">copy firmware.ofp firmware.zip</code></pre>
+      </div>
+      <ol start="2">
+        <li>Try opening with 7-Zip. If it opens:</li>
+        <li>Extract contents. If you see <code>boot.img</code>, <code>system.img</code>, etc., you're done — this is the unencrypted variant.</li>
+        <li>If 7-Zip says <em>"Cannot open file as archive"</em>, the file is encrypted — use Methods 1–3.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Note:</strong> newer firmware (ColorOS 7+) is always encrypted. Manual unzip only works on pre-2019 device packages.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Method 5 — Linux tools (for power users)</h3>
+      <p>If you're on Linux or WSL, use the same Python scripts. Additionally, some tools like <code>oppo_ozip_decrypt</code> can extract <code>.ozip</code> (a related format sometimes inside OFP).</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">git clone https://github.com/bkerler/oppo_ozip_decrypt.git
+cd oppo_ozip_decrypt
+pip install -r requirements.txt
+python ozipdecrypt.py path/to/file.ozip</code></pre>
+      </div>
+
+      <p>Extract the decrypted output further using standard tools:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img system.img system_raw.img
+e2fsck -n -f system_raw.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Verify extracted files</h3>
+      <p>After extraction, confirm each partition image is valid:</p>
+      <ol>
+        <li>Check <code>firmware.info</code> — it lists the mapping between partition name and image file.</li>
+        <li>Check <code>boot.img</code> type — sparse or raw:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file boot.img
+xxd -l 16 boot.img</code></pre>
+      </div>
+      <ol start="3">
+        <li>If sparse, convert with <code>simg2img</code> before patching or mounting.</li>
+        <li>Extract <code>super.img</code> further via <code>lpunpack</code> (see related guides).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>9. What to do with the extracted images?</h3>
+      <table>
+        <thead>
+          <tr><th>Goal</th><th>Next step</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Magisk root</td><td>Patch <code>boot.img</code> with Magisk, flash via fastboot</td></tr>
+          <tr><td>Custom ROM</td><td>Extract <code>super.img</code> with <code>lpunpack</code>, modify, repack</td></tr>
+          <tr><td>Unbrick device</td><td>Flash images back with QFIL / Oppo service tool / fastboot</td></tr>
+          <tr><td>Analysis</td><td>Mount ext4 images via WSL or Linux VM</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>10. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>7-Zip says "Cannot open file as archive"</td><td>File is encrypted — use OFP/OPS extractor, not 7-Zip.</td></tr>
+          <tr><td>Extractor throws "invalid magic"</td><td>Wrong tool version for the file format (OFP vs OPN). Download the matching script.</td></tr>
+          <tr><td>Extracted <code>boot.img</code> is 0 KB</td><td>Encryption key missing. Some tools need an additional key file from the OFP directory.</td></tr>
+          <tr><td>Python script crashes with <code>ModuleNotFoundError</code></td><td>Run <code>pip install -r requirements.txt</code> in the tool folder.</td></tr>
+          <tr><td>Firmware.info lists partition not extracted</td><td>Tool is incomplete. Try an updated script version or a different extractor.</td></tr>
+          <tr><td>Extracted images won't flash</td><td>Extracted raw images must be repacked to sparse for fastboot — use <code>img2simg</code>.</td></tr>
+          <tr><td>Disk full mid-extraction</td><td>OFP output ≈ 3× the file size. Ensure 15 GB+ free space.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>11. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Method 1 — Extract OFP (Python tool) ----
+cd C:\ofp_tool
+pip install -r requirements.txt
+python ofp_extract.py firmware.ofp -o output_folder
+
+# ---- Method 2 — Extract OPS (Windows tool) ----
+# Run OpsExtractor.exe as Administrator → Open File → Extract
+
+# ---- Method 3 — Extract OPN (Python) ----
+python opn_extract.py firmware.opn -o output_folder
+
+# ---- Method 4 — Try unzip (older builds) ----
+copy firmware.ofp firmware.zip
+# Then open with 7-Zip; if it fails, file is encrypted
+
+# ---- Method 5 — OZIP decrypt (Linux) ----
+git clone https://github.com/bkerler/oppo_ozip_decrypt.git
+cd oppo_ozip_decrypt
+pip install -r requirements.txt
+python ozipdecrypt.py path/to/file.ozip
+
+# ---- Verify extracted images ----
+file boot.img
+xxd -l 16 boot.img             # 3AFF26ED = sparse, 53EF = ext4 raw
+sudo e2fsck -n -f system.img   # ext4 integrity
+
+# ---- Convert sparse if needed ----
+simg2img system.img system_raw.img
+img2simg system_raw.img system_sparse.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>12. Best practices</h3>
+      <ul>
+        <li>✅ Use the exact matching firmware for your model — region and build number must match.</li>
+        <li>✅ Back up EFS/QCN before flashing any extracted image (see related guides).</li>
+        <li>✅ Verify each image with <code>file</code> before flashing.</li>
+        <li>✅ Keep the extracted folder on an external drive — 15 GB+ per firmware.</li>
+        <li>✅ Test patched images on a backup device or VM first.</li>
+        <li>✅ Download extractors only from trusted GitHub repositories.</li>
+        <li>✅ Never use someone else's extracted firmware for IMEI operations — illegal.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> after extraction, if you plan to modify <code>system.img</code> or install TWRP, disable dm-verity and AVB first (see related guide). Otherwise the device will refuse to boot after any modification.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="../android-generic/convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw with simg2img</a></li>
+      <li><a href="../android-generic/check-file-system-system-img-windows.html">Check &amp; Repair system.img on Windows</a></li>
+      <li><a href="../android-generic/disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="../development/extract-boot-payload-bin.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="../development/extract-recovery-img-lz4.html">Extract recovery.img from .lz4</a></li>
+      <li><a href="../../android.html#firmware-extracting">Firmware Extracting category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

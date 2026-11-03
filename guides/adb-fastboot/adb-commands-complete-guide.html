@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADB Commands Complete Guide — Hardware, Communication &amp; Software Testing | Tech Learn</title>
+<meta name="description" content="Complete ADB commands reference: setup, hardware tests (battery, display, sensors, camera), communication tests (calls, SMS, Wi-Fi, Bluetooth), and software tests (install, logs, performance).">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>ADB Commands Complete Guide — Hardware, Communication &amp; Software Testing</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Reference Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Use</dt>
+    <dd>Bookmark — search (Ctrl+F) to find any ADB command fast</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices with ADB access</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Safety note:</strong> only run these commands on phones you own or are authorized to test. Several commands change settings, and some (<code>pm clear</code>, <code>fastboot</code>, <code>uninstall</code>) delete data permanently.</p>
+  </div>
+
+  <p>ADB (Android Debug Bridge) is a command-line tool from Google's Platform-Tools that lets a computer control and inspect an Android phone over USB or Wi-Fi. This guide covers setup, the complete host-side command list, and the most useful shell tools for hardware, communication, and software testing.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Setup</h3>
+      <ol>
+        <li>Download Platform-Tools from developer.android.com for Windows, macOS, or Linux and unzip it.</li>
+        <li>On the phone: Settings → About phone → tap <strong>Build number</strong> 7 times to unlock Developer options.</li>
+        <li>Open Developer options and enable <strong>USB debugging</strong>.</li>
+        <li>Connect the phone via USB and accept the "Allow USB debugging?" prompt.</li>
+        <li>Run <code>adb devices</code> — the phone should appear with state <code>device</code>.</li>
+      </ol>
+
+      <p><strong>Wireless debugging (Android 11+):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb pair <ip>:<pairing-port>     # enter the 6-digit code shown on the phone
+adb connect <ip>:<port>          # port from the Wireless debugging screen
+adb disconnect <ip>:<port></code></pre>
+      </div>
+
+      <p><strong>Older phones (Android 10 and older):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Connect by USB once, then:
+adb tcpip 5555
+adb connect <ip>:5555</code></pre>
+      </div>
+
+      <p><strong>Command shape:</strong> <code>adb [-d | -e | -s &lt;serial&gt;] &lt;command&gt;</code></p>
+      <ul>
+        <li><code>-s &lt;serial&gt;</code> — target a specific device when multiple are attached</li>
+        <li><code>-d</code> — target the only USB device</li>
+        <li><code>-e</code> — target the only emulator</li>
+      </ul>
+      <p><code>adb shell &lt;cmd&gt;</code> runs a command on the phone itself.</p>
+    </li>
+
+    <li>
+      <h3>2. Full host-side command list (41 commands)</h3>
+      <p>Counted from <code>adb help</code> in recent Platform-Tools; exact number varies by version.</p>
+      <table>
+        <thead>
+          <tr><th>Group</th><th>Count</th><th>Commands</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Connection and server</td><td>13</td><td><code>devices</code>, <code>connect</code>, <code>disconnect</code>, <code>pair</code>, <code>mdns</code>, <code>start-server</code>, <code>kill-server</code>, <code>reconnect</code>, <code>get-state</code>, <code>get-serialno</code>, <code>get-devpath</code>, <code>wait-for-&lt;state&gt;</code>, <code>track-devices</code></td></tr>
+          <tr><td>Transport and networking</td><td>4</td><td><code>usb</code>, <code>tcpip</code>, <code>forward</code>, <code>reverse</code></td></tr>
+          <tr><td>File transfer</td><td>3</td><td><code>push</code>, <code>pull</code>, <code>sync</code></td></tr>
+          <tr><td>App install</td><td>4</td><td><code>install</code>, <code>install-multiple</code>, <code>install-multi-package</code>, <code>uninstall</code></td></tr>
+          <tr><td>Shell and debugging</td><td>5</td><td><code>shell</code>, <code>logcat</code>, <code>bugreport</code>, <code>jdwp</code>, <code>emu</code></td></tr>
+          <tr><td>System and root</td><td>7</td><td><code>root</code>, <code>unroot</code>, <code>remount</code>, <code>reboot</code>, <code>sideload</code>, <code>disable-verity</code>, <code>enable-verity</code></td></tr>
+          <tr><td>Backup (deprecated)</td><td>2</td><td><code>backup</code>, <code>restore</code></td></tr>
+          <tr><td>Utility</td><td>3</td><td><code>help</code>, <code>version</code>, <code>keygen</code></td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Common tools inside <code>adb shell</code>:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>Used for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>pm</code></td><td>Package manager: list, enable, disable, grant permissions</td></tr>
+          <tr><td><code>am</code></td><td>Activity manager: start apps, send broadcasts, force-stop</td></tr>
+          <tr><td><code>dumpsys</code></td><td>Status dump of any system service (battery, wifi, sensors)</td></tr>
+          <tr><td><code>cmd</code></td><td>Calls system services directly (e.g. <code>cmd wifi</code>, <code>cmd package</code>)</td></tr>
+          <tr><td><code>settings</code></td><td>Reads and writes system, secure and global settings</td></tr>
+          <tr><td><code>input</code></td><td>Fakes taps, swipes, key presses and text</td></tr>
+          <tr><td><code>svc</code></td><td>Toggles Wi-Fi, mobile data, power stay-on, NFC</td></tr>
+          <tr><td><code>getprop</code> / <code>setprop</code></td><td>Reads and writes system properties</td></tr>
+          <tr><td><code>wm</code></td><td>Screen size and density</td></tr>
+          <tr><td><code>screencap</code> / <code>screenrecord</code></td><td>Screenshots and video</td></tr>
+          <tr><td><code>monkey</code></td><td>Random UI stress events</td></tr>
+          <tr><td><code>content</code></td><td>Queries content providers (contacts, SMS, settings)</td></tr>
+          <tr><td><code>logcat</code></td><td>System and app logs</td></tr>
+          <tr><td><code>top</code>, <code>ps</code>, <code>df</code>, <code>free</code></td><td>CPU, processes, storage, memory</td></tr>
+          <tr><td><code>getevent</code> / <code>sendevent</code></td><td>Raw touch and button events</td></tr>
+          <tr><td><code>telecom</code>, <code>locksettings</code>, <code>bmgr</code>, <code>appops</code></td><td>Calls, lock screen, backup, app operation permissions</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>3. Connection and device information</h3>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb devices -l</code></td><td>Lists connected devices with model and transport</td></tr>
+          <tr><td><code>adb get-state</code></td><td>Prints <code>device</code>, <code>offline</code>, or <code>unauthorized</code></td></tr>
+          <tr><td><code>adb get-serialno</code></td><td>Prints the device serial number</td></tr>
+          <tr><td><code>adb wait-for-device</code></td><td>Blocks until the phone is ready (useful in scripts)</td></tr>
+          <tr><td><code>adb kill-server</code> then <code>adb start-server</code></td><td>Restarts the ADB daemon when stuck</td></tr>
+          <tr><td><code>adb reboot</code></td><td>Reboots the phone</td></tr>
+          <tr><td><code>adb reboot bootloader</code></td><td>Reboots into bootloader (fastboot)</td></tr>
+          <tr><td><code>adb reboot recovery</code></td><td>Reboots into recovery</td></tr>
+          <tr><td><code>adb shell getprop ro.product.model</code></td><td>Model name</td></tr>
+          <tr><td><code>adb shell getprop ro.product.manufacturer</code></td><td>Manufacturer</td></tr>
+          <tr><td><code>adb shell getprop ro.build.version.release</code></td><td>Android version</td></tr>
+          <tr><td><code>adb shell getprop ro.build.version.sdk</code></td><td>API level</td></tr>
+          <tr><td><code>adb shell getprop ro.build.fingerprint</code></td><td>Full build fingerprint</td></tr>
+          <tr><td><code>adb shell getprop ro.product.cpu.abi</code></td><td>CPU architecture</td></tr>
+          <tr><td><code>adb shell getprop</code></td><td>Every system property</td></tr>
+          <tr><td><code>adb shell wm size</code> / <code>wm density</code></td><td>Screen resolution and DPI</td></tr>
+          <tr><td><code>adb shell cat /proc/cpuinfo</code></td><td>CPU details</td></tr>
+          <tr><td><code>adb shell cat /proc/meminfo</code></td><td>RAM details</td></tr>
+          <tr><td><code>adb shell settings get secure android_id</code></td><td>Android ID</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>Android 10+:</strong> serial, IMEI and similar identifiers may be blocked for non-system apps. The old <code>adb shell service call iphonesubinfo</code> trick often returns nothing now.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Phone hardware tests</h3>
+      <p>All commands run through <code>adb shell</code> unless shown with the <code>adb</code> prefix. Some depend on Android version or manufacturer; a few need root.</p>
+
+      <p><strong>Battery and power:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>dumpsys battery</code></td><td>Level, status, temperature (tenths of °C), voltage, charger type</td></tr>
+          <tr><td><code>dumpsys battery set level 15</code></td><td>Fake a battery level to test low-battery behaviour</td></tr>
+          <tr><td><code>dumpsys battery set ac 0</code> / <code>set usb 0</code></td><td>Fake an unplugged charger</td></tr>
+          <tr><td><code>dumpsys battery reset</code></td><td>Undo all fake values (always run after testing)</td></tr>
+          <tr><td><code>dumpsys batterystats</code></td><td>Detailed drain by app since last charged</td></tr>
+          <tr><td><code>dumpsys power</code></td><td>Wake locks, screen state, sleep reasons</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Display and touch:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>wm size</code> / <code>wm size 720x1280</code> / <code>wm size reset</code></td><td>Read, change, restore resolution</td></tr>
+          <tr><td><code>wm density 320</code> / <code>wm density reset</code></td><td>Change or restore DPI</td></tr>
+          <tr><td><code>settings put system screen_brightness 200</code></td><td>Set brightness (0 to 255)</td></tr>
+          <tr><td><code>settings put system screen_off_timeout 600000</code></td><td>Screen timeout in milliseconds</td></tr>
+          <tr><td><code>settings put system show_touches 1</code></td><td>Show a dot at each touch</td></tr>
+          <tr><td><code>settings put system pointer_location 1</code></td><td>Overlay with live touch coordinates and trails</td></tr>
+          <tr><td><code>getevent -lt</code></td><td>Raw touchscreen and button events with timestamps</td></tr>
+          <tr><td><code>input tap 540 1200</code></td><td>Tap a point</td></tr>
+          <tr><td><code>input swipe 300 1000 300 400 300</code></td><td>Swipe over 300 ms</td></tr>
+          <tr><td><code>dumpsys display</code></td><td>Panel size, refresh rate, HDR, brightness state</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Buttons:</strong> test via <code>getevent -l</code> — each physical button press should print a key event.</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Keyevent codes for testing:
+input keyevent 3    # Home
+input keyevent 4    # Back
+input keyevent 24   # Volume up
+input keyevent 25   # Volume down
+input keyevent 26   # Power
+input keyevent 187  # Recents
+input keyevent 82   # Menu</code></pre>
+      </div>
+
+      <p><strong>Sensors:</strong> ADB cannot trigger a sensor on its own. Rotate or cover the phone and re-run the dump to confirm readings change. Dialer codes like <code>*#0*#</code> (Samsung) or <code>*#*#4636#*#*</code> open built-in hardware test menus on many phones.</p>
+
+      <p><strong>Camera, audio, vibration:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>am start -a android.media.action.IMAGE_CAPTURE</code></td><td>Open the camera in photo mode</td></tr>
+          <tr><td><code>am start -a android.media.action.VIDEO_CAPTURE</code></td><td>Open video mode</td></tr>
+          <tr><td><code>dumpsys media.camera</code></td><td>Camera devices, supported modes, active clients</td></tr>
+          <tr><td><code>dumpsys audio</code></td><td>Audio routing, volumes, mute state, active players</td></tr>
+          <tr><td><code>cmd media_session volume --stream 3 --set 10</code></td><td>Set media volume (Android 11+)</td></tr>
+          <tr><td><code>am start -a android.intent.action.VIEW -d file:///sdcard/test.mp3 -t audio/mpeg</code></td><td>Play a file to test the speaker</td></tr>
+          <tr><td><code>cmd vibrator_manager help</code></td><td>Shows vibration test syntax (Android 12+)</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Location (GPS):</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>cmd location set-location-enabled true</code></td><td>Turn location on</td></tr>
+          <tr><td><code>dumpsys location</code></td><td>Providers, last known fix, satellites, active requests</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Storage, memory, CPU, heat:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>df -h</code></td><td>Partition usage</td></tr>
+          <tr><td><code>du -sh /sdcard/*</code></td><td>Size of folders in shared storage</td></tr>
+          <tr><td><code>dumpsys diskstats</code></td><td>App, data and cache totals</td></tr>
+          <tr><td><code>dumpsys meminfo</code></td><td>Memory by process; add a package name for one app</td></tr>
+          <tr><td><code>top -n 1</code></td><td>One snapshot of CPU use</td></tr>
+          <tr><td><code>dumpsys cpuinfo</code></td><td>CPU use over recent minutes</td></tr>
+          <tr><td><code>dumpsys thermalservice</code></td><td>Temperatures and throttling status</td></tr>
+          <tr><td><code>cat /sys/class/thermal/thermal_zone0/temp</code></td><td>Raw temperature reading (may be blocked)</td></tr>
+          <tr><td><code>dumpsys usb</code></td><td>USB port mode and connection state</td></tr>
+          <tr><td><code>dumpsys fingerprint</code></td><td>Fingerprint sensor state and enrolled count</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>5. Phone communication tests</h3>
+      <p>Commands below run inside <code>adb shell</code> unless they start with <code>adb</code>. Replace phone numbers with a number you control.</p>
+
+      <p><strong>Calls and SMS:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>am start -a android.intent.action.DIAL -d tel:5551234567</code></td><td>Opens the dialer with the number filled in</td></tr>
+          <tr><td><code>am start -a android.intent.action.CALL -d tel:5551234567</code></td><td>Places the call directly</td></tr>
+          <tr><td><code>input keyevent 5</code></td><td>Answers a ringing call</td></tr>
+          <tr><td><code>input keyevent 6</code></td><td>Ends a call</td></tr>
+          <tr><td><code>dumpsys telephony.registry</code></td><td>Call state, signal strength, network type, cell info</td></tr>
+          <tr><td><code>dumpsys telecom</code></td><td>Active and recent calls, audio route</td></tr>
+          <tr><td><code>am start -a android.intent.action.SENDTO -d sms:5551234567 -es sms_body "Test message"</code></td><td>Opens messaging app with a draft</td></tr>
+          <tr><td><code>content query -uri content://sms/inbox</code></td><td>Reads received SMS (often blocked on newer Android)</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>SIM and mobile network:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>getprop gsm.sim.state</code></td><td><code>READY</code> when SIM works, <code>ABSENT</code> if none</td></tr>
+          <tr><td><code>getprop gsm.operator.alpha</code></td><td>Carrier name</td></tr>
+          <tr><td><code>getprop gsm.network.type</code></td><td>Network type such as LTE or NR</td></tr>
+          <tr><td><code>svc data disable</code> / <code>svc data enable</code></td><td>Mobile data off or on</td></tr>
+          <tr><td><code>cmd connectivity airplane-mode enable</code> / <code>disable</code></td><td>Airplane mode (Android 11+)</td></tr>
+          <tr><td><code>dumpsys connectivity</code></td><td>Active networks, validation state, DNS</td></tr>
+          <tr><td><code>dumpsys netstats</code></td><td>Data usage by network and app</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Wi-Fi:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>svc wifi enable</code> / <code>svc wifi disable</code></td><td>Wi-Fi on or off</td></tr>
+          <tr><td><code>cmd wifi status</code></td><td>Connection state, SSID, signal, link speed</td></tr>
+          <tr><td><code>cmd wifi list-scan-results</code></td><td>Nearby networks and signal levels</td></tr>
+          <tr><td><code>cmd wifi connect-network &lt;SSID&gt; wpa2 &lt;password&gt;</code></td><td>Joins a network (Android 11+)</td></tr>
+          <tr><td><code>dumpsys wifi</code></td><td>Full Wi-Fi state, scan history, connection log</td></tr>
+          <tr><td><code>ip addr show wlan0</code></td><td>The phone's Wi-Fi IP address</td></tr>
+          <tr><td><code>ping -c 4 8.8.8.8</code></td><td>Tests internet reachability</td></tr>
+          <tr><td><code>ping -c 4 google.com</code></td><td>Tests DNS as well</td></tr>
+          <tr><td><code>ip route</code></td><td>Routing table and gateway</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Bluetooth and NFC:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>svc bluetooth enable</code> / <code>disable</code></td><td>Bluetooth on or off</td></tr>
+          <tr><td><code>dumpsys bluetooth_manager</code></td><td>Adapter state, bonded devices, active profiles</td></tr>
+          <tr><td><code>svc nfc enable</code> / <code>disable</code></td><td>NFC on or off</td></tr>
+          <tr><td><code>dumpsys nfc</code></td><td>NFC state and last tag events</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Network behaviour testing:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>settings put global http_proxy 192.168.1.10:8888</code></td><td>Route traffic through a proxy</td></tr>
+          <tr><td><code>settings put global http_proxy :0</code></td><td>Remove the proxy</td></tr>
+          <tr><td><code>adb forward tcp:8000 tcp:9000</code></td><td>Computer port 8000 reaches phone port 9000</td></tr>
+          <tr><td><code>adb reverse tcp:8081 tcp:8081</code></td><td>Phone reaches a server on the computer</td></tr>
+          <tr><td><code>adb forward --list</code> / <code>adb reverse --list</code></td><td>Show active tunnels</td></tr>
+          <tr><td><code>adb forward --remove-all</code></td><td>Clear forwards</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>6. Software tests</h3>
+
+      <p><strong>Install and remove apps:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb install app.apk</code></td><td>Installs an APK</td></tr>
+          <tr><td><code>adb install -r app.apk</code></td><td>Reinstalls and keeps data</td></tr>
+          <tr><td><code>adb install -d app.apk</code></td><td>Allows a version downgrade</td></tr>
+          <tr><td><code>adb install -g app.apk</code></td><td>Grants all runtime permissions on install</td></tr>
+          <tr><td><code>adb install-multiple base.apk split1.apk</code></td><td>Installs split APKs</td></tr>
+          <tr><td><code>adb uninstall com.example.app</code></td><td>Removes the app</td></tr>
+          <tr><td><code>adb uninstall -k com.example.app</code></td><td>Removes the app but keeps data</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Package manager (<code>pm</code>):</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>pm list packages</code></td><td>All packages; add <code>-3</code> user, <code>-s</code> system, <code>-d</code> disabled</td></tr>
+          <tr><td><code>pm list packages | grep camera</code></td><td>Find a package by name</td></tr>
+          <tr><td><code>pm path com.example.app</code></td><td>Location of the APK on the phone</td></tr>
+          <tr><td><code>pm clear com.example.app</code></td><td>Wipes the app's data and cache</td></tr>
+          <tr><td><code>pm disable-user --user 0 com.example.app</code></td><td>Disables an app without root</td></tr>
+          <tr><td><code>pm enable com.example.app</code></td><td>Re-enables it</td></tr>
+          <tr><td><code>pm grant com.example.app android.permission.CAMERA</code></td><td>Grants a permission</td></tr>
+          <tr><td><code>pm revoke com.example.app android.permission.CAMERA</code></td><td>Revokes it</td></tr>
+          <tr><td><code>dumpsys package com.example.app</code></td><td>Version, permissions, install time, components</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Activity manager (<code>am</code>):</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>am start -n com.example.app/.MainActivity</code></td><td>Opens a specific screen</td></tr>
+          <tr><td><code>am start -W -n com.example.app/.MainActivity</code></td><td>Opens it and prints launch time in ms</td></tr>
+          <tr><td><code>am start -a android.intent.action.VIEW -d https://example.com</code></td><td>Tests a deep link or URL</td></tr>
+          <tr><td><code>am force-stop com.example.app</code></td><td>Kills the app</td></tr>
+          <tr><td><code>am kill com.example.app</code></td><td>Kills background processes only</td></tr>
+          <tr><td><code>am broadcast -a android.intent.action.BOOT_COMPLETED</code></td><td>Sends a broadcast</td></tr>
+          <tr><td><code>am instrument -w com.example.app.test/androidx.test.runner.AndroidJUnitRunner</code></td><td>Runs instrumented tests</td></tr>
+          <tr><td><code>monkey -p com.example.app 500</code></td><td>Sends 500 random taps and gestures</td></tr>
+          <tr><td><code>monkey -p com.example.app -s 42 --throttle 200 -v 1000</code></td><td>Repeatable run (seed 42), 200ms between events</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Logs and crash analysis:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb logcat</code></td><td>Live system log</td></tr>
+          <tr><td><code>adb logcat -c</code></td><td>Clears the log buffer</td></tr>
+          <tr><td><code>adb logcat -d &gt; log.txt</code></td><td>Saves the current log and exits</td></tr>
+          <tr><td><code>adb logcat *:E</code></td><td>Errors only (levels: V, D, I, W, E, F)</td></tr>
+          <tr><td><code>adb logcat -s MyTag</code></td><td>Only one tag</td></tr>
+          <tr><td><code>adb logcat --pid=$(adb shell pidof -s com.example.app)</code></td><td>One app's logs</td></tr>
+          <tr><td><code>adb logcat -b crash</code></td><td>Crash buffer</td></tr>
+          <tr><td><code>adb bugreport report.zip</code></td><td>Full diagnostic bundle: logs, dumpsys, ANRs, battery stats</td></tr>
+          <tr><td><code>dumpsys activity processes</code></td><td>Running processes and their state</td></tr>
+          <tr><td><code>dumpsys activity activities</code></td><td>Activity stack and what is on screen now</td></tr>
+          <tr><td><code>dumpsys window | grep mCurrentFocus</code></td><td>The app currently in the foreground</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Performance and system behaviour:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>dumpsys gfxinfo com.example.app</code></td><td>Frame times and jank percentage</td></tr>
+          <tr><td><code>dumpsys gfxinfo com.example.app reset</code></td><td>Resets the frame counters before a test</td></tr>
+          <tr><td><code>dumpsys meminfo com.example.app</code></td><td>App memory use and leak hints</td></tr>
+          <tr><td><code>dumpsys deviceidle force-idle</code></td><td>Forces Doze to test background work</td></tr>
+          <tr><td><code>dumpsys deviceidle unforce</code></td><td>Leaves Doze</td></tr>
+          <tr><td><code>am set-standby-bucket com.example.app rare</code></td><td>Tests app under restricted background limits</td></tr>
+          <tr><td><code>cmd appops set com.example.app RUN_IN_BACKGROUND deny</code></td><td>Blocks background running</td></tr>
+          <tr><td><code>settings put global window_animation_scale 0</code></td><td>Turns off animations for UI tests</td></tr>
+          <tr><td><code>cmd uimode night yes</code> / <code>no</code></td><td>Dark mode on or off</td></tr>
+          <tr><td><code>cmd locale set-app-locales com.example.app --locales fr</code></td><td>Changes app language (Android 13+)</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>OS and update checks:</strong> <code>getprop ro.build.version.security_patch</code> (security patch date), <code>getprop ro.build.version.incremental</code> (build number), <code>adb sideload update.zip</code> (in recovery mode).</p>
+    </li>
+
+    <li>
+      <h3>7. Files, screen, input, and other tools</h3>
+
+      <p><strong>Files:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb push local.txt /sdcard/Download/</code></td><td>Computer to phone</td></tr>
+          <tr><td><code>adb pull /sdcard/DCIM/Camera/ ./photos</code></td><td>Phone to computer</td></tr>
+          <tr><td><code>adb shell ls -l /sdcard/</code></td><td>Lists files</td></tr>
+          <tr><td><code>adb shell rm /sdcard/Download/old.txt</code></td><td>Deletes a file</td></tr>
+          <tr><td><code>adb shell mkdir /sdcard/test</code></td><td>Creates a folder</td></tr>
+          <tr><td><code>adb shell cat /sdcard/file.txt</code></td><td>Prints a file</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Screenshots and screen recording:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb exec-out screencap -p &gt; shot.png</code></td><td>Screenshot straight to the computer</td></tr>
+          <tr><td><code>adb shell screencap -p /sdcard/shot.png</code></td><td>Screenshot saved on the phone</td></tr>
+          <tr><td><code>adb shell screenrecord /sdcard/demo.mp4</code></td><td>Records video; stops after 180s or Ctrl+C</td></tr>
+          <tr><td><code>adb shell screenrecord --time-limit 30 --size 1280x720 /sdcard/demo.mp4</code></td><td>Shorter, smaller recording</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Input and automation:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>input text "hello"</code></td><td>Types text (use <code>%s</code> for spaces)</td></tr>
+          <tr><td><code>input keyevent KEYCODE_HOME</code></td><td>Presses a key by name</td></tr>
+          <tr><td><code>input tap x y</code></td><td>Tap</td></tr>
+          <tr><td><code>input swipe x1 y1 x2 y2 [ms]</code></td><td>Swipe; same start+end with long duration = long press</td></tr>
+          <tr><td><code>input roll dx dy</code></td><td>Trackball movement</td></tr>
+          <tr><td><code>uiautomator dump /sdcard/ui.xml</code></td><td>Saves the screen's UI tree, useful for finding tap coordinates</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Settings</strong> — namespaces are <code>system</code>, <code>secure</code>, <code>global</code>:</p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>settings list global</code></td><td>Every global setting</td></tr>
+          <tr><td><code>settings put global stay_on_while_plugged_in 3</code></td><td>Keeps the screen on while charging</td></tr>
+          <tr><td><code>settings put system accelerometer_rotation 0</code></td><td>Locks auto-rotate off</td></tr>
+          <tr><td><code>settings put global development_settings_enabled 1</code></td><td>Developer options on</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Power, lock screen, and device state:</strong></p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>input keyevent 26</code></td><td>Toggles screen on and off</td></tr>
+          <tr><td><code>input keyevent 82</code></td><td>Wakes or unlocks on phones without a PIN</td></tr>
+          <tr><td><code>locksettings clear --old 1234</code></td><td>Removes the lock PIN (Android 8+; needs old PIN)</td></tr>
+          <tr><td><code>dumpsys window | grep -i keyguard</code></td><td>Checks whether the lock screen is showing</td></tr>
+          <tr><td><code>adb reboot</code></td><td>Restart</td></tr>
+          <tr><td><code>adb shell reboot -p</code></td><td>Power off (may need root)</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Fastboot and recovery</strong> (separate from adb; bootloader mode):</p>
+      <table>
+        <thead>
+          <tr><th>Command</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot devices</code></td><td>Lists phones in fastboot mode</td></tr>
+          <tr><td><code>fastboot getvar all</code></td><td>Prints bootloader variables, including lock state</td></tr>
+          <tr><td><code>fastboot flash boot boot.img</code></td><td>Flashes a partition</td></tr>
+          <tr><td><code>fastboot oem unlock</code> / <code>fastboot flashing unlock</code></td><td>Unlocks the bootloader; erases all data</td></tr>
+          <tr><td><code>fastboot reboot</code></td><td>Reboots to Android</td></tr>
+          <tr><td><code>adb reboot recovery</code></td><td>Boots recovery (for sideloading updates or factory reset)</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Backup and root:</strong> <code>adb backup</code> and <code>adb restore</code> are deprecated and fail for most modern apps. <code>adb root</code>, <code>adb remount</code>, and <code>adb disable-verity</code> only work on userdebug or engineering builds — not on normal retail phones.</p>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting and quick checklist</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb devices</code> shows nothing</td><td>Try another cable (some are charge-only) and USB port; set USB mode to File transfer; install the phone maker's USB driver on Windows</td></tr>
+          <tr><td>State is <code>unauthorized</code></td><td>Unlock the phone and accept the prompt; or revoke USB debugging authorizations in Developer options and reconnect</td></tr>
+          <tr><td>State is <code>offline</code></td><td>Run <code>adb kill-server</code>, then <code>adb start-server</code>; replug the cable</td></tr>
+          <tr><td>More than one device/emulator</td><td>Add <code>-s &lt;serial&gt;</code> from <code>adb devices</code></td></tr>
+          <tr><td>Command not found on a shell tool</td><td>The tool is missing on that Android version; check <code>adb shell cmd -l</code></td></tr>
+          <tr><td>Permission denied or SecurityException</td><td>The command needs root, a system app, or a newer Android shell; check the version</td></tr>
+          <tr><td>Wireless connection drops</td><td>Keep the phone and computer on the same network and re-run <code>adb connect</code></td></tr>
+          <tr><td>Fake battery values stuck</td><td>Run <code>adb shell dumpsys battery reset</code></td></tr>
+          <tr><td>Changed screen size looks wrong</td><td>Run <code>adb shell wm size reset</code> and <code>adb shell wm density reset</code></td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Ten-minute phone health check:</strong></p>
+      <ol>
+        <li><code>adb devices -l</code> to confirm the connection.</li>
+        <li><code>getprop ro.build.version.release</code> and <code>dumpsys battery</code> for OS version and battery health.</li>
+        <li><code>df -h</code> and <code>dumpsys meminfo</code> for storage and memory.</li>
+        <li><code>settings put system pointer_location 1</code> then swipe over the screen to find dead touch zones; turn it off with <code>0</code>.</li>
+        <li><code>dumpsys sensorservice</code> to confirm every expected sensor is listed.</li>
+        <li><code>getprop gsm.sim.state</code> and <code>dumpsys telephony.registry</code> for SIM and signal.</li>
+        <li><code>cmd wifi status</code> and <code>ping -c 4 8.8.8.8</code> for Wi-Fi and internet.</li>
+        <li>Open the camera with the <code>IMAGE_CAPTURE</code> intent and take a test photo.</li>
+        <li>Play a sound, then record and play back a clip to check speaker and mic.</li>
+        <li><code>adb bugreport report.zip</code> to save a full report of the results.</li>
+      </ol>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> bookmark this page and use <kbd>Ctrl</kbd>+<kbd>F</kbd> to search any command. Run <code>adb help</code> on your machine to see the exact list for your Platform-Tools version — the command count shifts slightly between releases.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">ADB &amp; Fastboot Commands Cheat Sheet</a></li>
+      <li><a href="adb-fastboot-setup-windows.html">Setup ADB &amp; Fastboot on Windows</a></li>
+      <li><a href="adb-fastboot-errors-troubleshooting.html">ADB &amp; Fastboot Errors Troubleshooting</a></li>
+      <li><a href="capture-logcat-kernel-logs-adb.html">Capture Logcat &amp; Kernel Logs</a></li>
+      <li><a href="screenshot-screen-record-adb.html">Screenshots &amp; Screen Recording via ADB</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

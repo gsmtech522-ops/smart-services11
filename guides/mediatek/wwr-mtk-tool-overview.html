@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WWR MTK Tool — Overview, Features &amp; How It Works | Tech Learn</title>
+<meta name="description" content="WWR MTK Tool overview: scatter file generation, readback address calculation, preloader detection and firmware splitting for MediaTek.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>WWR MTK Tool — Complete Overview</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Software Overview</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Developer</dt>
+    <dd>wzener</dd>
+    <dt>OS</dt>
+    <dd>Windows 7, 8, 10, 11</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When servicing MediaTek devices without stock firmware, creating a proper scatter file or finding exact readback addresses is a major challenge. <strong>WWR MTK Tool</strong> solves this: it analyzes raw firmware dumps (<code>ROM_0</code>), detects partition structures, generates accurate <code>Android_scatter.txt</code> files, and calculates exact hex memory addresses.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Software profile</h3>
+      <table>
+        <thead>
+          <tr><th>Attribute</th><th>Details</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Software Name</td><td>WWR MTK Tool</td></tr>
+          <tr><td>Developer</td><td>wzener</td></tr>
+          <tr><td>Supported OS</td><td>Windows 7 / 8 / 10 / 11</td></tr>
+          <tr><td>Target Hardware</td><td>MediaTek chipsets (eMMC &amp; UFS)</td></tr>
+          <tr><td>Companion Tools</td><td>SP Flash Tool, HxD Hex Editor</td></tr>
+          <tr><td>License</td><td>Freeware</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>2. Key features &amp; capabilities</h3>
+
+      <p><strong>1. Automatic scatter file generation</strong></p>
+      <p>Without original firmware, dump a small raw file (<code>ROM_0</code>) via SP Flash Tool Readback. WWR parses the GPT/PMT structure inside that dump and generates a 100% compatible <code>Android_scatter.txt</code>.</p>
+
+      <p><strong>2. Preloader &amp; platform detection</strong></p>
+      <p>WWR auto-scans binary structure to identify the exact MediaTek chipset platform (MT6580, MT6739, MT6765, MT6785…) and extracts the original <code>preloader.bin</code>.</p>
+
+      <p><strong>3. Readback address calculation</strong></p>
+      <p>To dump or back up specific partitions (nvram, boot, system), you need exact start and length hex addresses. WWR calculates these so you can paste them into SP Flash Tool's Readback tab.</p>
+
+      <p><strong>4. Firmware partition splitting</strong></p>
+      <p>Given a single raw <code>ROM_0</code> dump, WWR splits it into individual flashable images (<code>boot.img</code>, <code>system.img</code>, <code>vendor.img</code>, <code>recovery.img</code>) that can be flashed via SP Flash Tool or Fastboot.</p>
+
+      <p><strong>5. NVRAM &amp; IMEI region identification</strong></p>
+      <p>WWR pinpoints the exact memory regions of NVRAM, NVDATA, PROTECT1 and PROTECT2 — critical for extracting clean backups before formatting.</p>
+    </li>
+
+    <li>
+      <h3>3. Workflow with SP Flash Tool</h3>
+      <ol>
+        <li><strong>Phase 1 — Initial dump:</strong> use SP Flash Tool Readback to extract the first 32 MB (<code>0x2000000</code>) of storage into a <code>ROM_0</code> file.</li>
+        <li><strong>Phase 2 — WWR analysis:</strong> load <code>ROM_0</code> into WWR MTK Tool; it scans for partition headers and generates a scatter file.</li>
+        <li><strong>Phase 3 — Address calculation:</strong> WWR reports full storage size and hex addresses for individual partitions.</li>
+        <li><strong>Phase 4 — Full backup:</strong> load the generated scatter into SP Flash Tool, paste WWR's readback length, and pull the complete firmware dump.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Common errors</h3>
+
+      <p><strong>GPT Header / PMT Table Not Found</strong></p>
+      <p>Cause: initial dump too small or encrypted storage.</p>
+      <p>Fix: increase readback length from 32 MB (<code>0x2000000</code>) to 64 MB (<code>0x4000000</code>) and retry.</p>
+
+      <p><strong>Preloader Missing or Corrupted</strong></p>
+      <p>Cause: preloader wasn't in the dump range or was corrupted.</p>
+      <p>Fix: manually select a known matching preloader file for your chipset.</p>
+
+      <p><strong>Unknown Platform / Chipset</strong></p>
+      <p>Cause: outdated WWR version on a modern 64-bit MTK processor.</p>
+      <p>Fix: upgrade to <strong>WWR MTK Tool v2.51</strong> or newer for modern Helio and Dimensity definitions.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="create-scatter-file-wwr-mtk-tool.html">Create a scatter file using WWR</a></li>
+      <li><a href="backup-mtk-sp-flash-tool.html">Backup MTK via SP Flash Tool</a></li>
+      <li><a href="mediatek-partition-map-explained.html">Partition map</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

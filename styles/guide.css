@@ -1,0 +1,428 @@
+/* ==========================================================
+   guide.css - load AFTER style.css on every guide page
+   <link rel="stylesheet" href="../../styles/style.css">
+   <link rel="stylesheet" href="../../styles/guide.css">
+   ========================================================== */
+
+:root {
+  --note: #1f5fd6;
+  --note-bg: #e6eefc;
+  --warn: #b45309;
+  --warn-bg: #fdf0dc;
+  --code-bg: #101820;
+  --code-ink: #e6edf3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --note: #6b9cff;
+    --note-bg: #1b2a47;
+    --warn: #f5b25b;
+    --warn-bg: #3a2a12;
+  }
+}
+
+/* One narrow reading column */
+body.guide-page {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 50rem;
+}
+
+/* ---------- Breadcrumb ---------- */
+.breadcrumb {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  margin-right: 0.4rem;
+}
+
+.breadcrumb a {
+  color: var(--computer);
+}
+
+/* ---------- Article ---------- */
+article h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+article h2 {
+  margin: 2.25rem 0 0.75rem;
+  font-size: 1.45rem;
+  line-height: 1.25;
+}
+
+article p,
+article li {
+  max-width: 68ch;
+}
+
+/* Guide info box: OS, level, prerequisites, last tested */
+.guide-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--computer);
+  border-radius: var(--radius);
+}
+
+.guide-meta dt {
+  font-weight: 700;
+}
+
+.guide-meta dd {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ---------- Steps (a real sequence, so numbered) ---------- */
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps > li {
+  position: relative;
+  margin-bottom: 1.5rem;
+  padding-left: 3rem;
+  counter-increment: step;
+}
+
+.steps > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--computer);
+  border-radius: 50%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .steps > li::before {
+    color: #0b1117;
+  }
+}
+
+.steps h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.steps p {
+  margin: 0 0 0.5rem;
+}
+
+/* ---------- Code ---------- */
+pre {
+  margin: 0.75rem 0;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--code-ink);
+  background: var(--code-bg);
+  border-radius: 10px;
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace;
+}
+
+p code,
+li code {
+  padding: 0.1rem 0.4rem;
+  font-size: 0.92em;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+
+kbd {
+  padding: 0.1rem 0.45rem;
+  font-family: inherit;
+  font-size: 0.9em;
+  font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-bottom-width: 3px;
+  border-radius: 5px;
+}
+
+/* ---------- Note and warning boxes ---------- */
+.note,
+.warning {
+  margin: 1rem 0;
+  padding: 0.9rem 1.1rem;
+  border-left: 5px solid var(--note);
+  background: var(--note-bg);
+  border-radius: 8px;
+}
+
+.warning {
+  border-left-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.note > :first-child,
+.warning > :first-child {
+  margin-top: 0;
+}
+
+.note > :last-child,
+.warning > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Related / next links ---------- */
+.related {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.related h2 {
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+
+.related a {
+  color: var(--computer);
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .guide-meta {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .guide-meta dd {
+    margin-bottom: 0.6rem;
+  }
+}
+
+/* ==========================================================
+   Category pages: guide lists grouped with <details>
+   ========================================================== */
+.level-group {
+  margin: 0 0 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.level-group summary {
+  padding: 0.85rem 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.level-group[open] > summary {
+  border-bottom: 1px solid var(--line);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.level-group summary:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.guide-index,
+.plain-list {
+  margin: 0;
+  padding: 0.5rem 1.1rem 0.75rem;
+  list-style: none;
+}
+
+.guide-index li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.guide-index li:last-child {
+  border-bottom: 0;
+}
+
+.guide-index a {
+  color: var(--computer);
+  font-weight: 600;
+}
+
+.plain-list li {
+  padding: 0.35rem 0;
+  color: var(--ink-soft);
+}
+
+.empty {
+  padding: 1rem 1.1rem;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+/* OS pages: one page, all categories as collapsible groups */
+.guide-index li.planned {
+  color: var(--ink-soft);
+}
+
+.level-group > summary {
+  font-size: 1.1rem;
+}
+
+.level-group {
+  scroll-margin-top: 1rem;
+}
+
+/* ==========================================================
+   Command box with Copy button
+   ========================================================== */
+.command-box {
+  position: relative;
+  margin: 0.6rem 0;
+}
+
+.command-box pre {
+  margin: 0;
+  padding-right: 5.5rem;   /* room for the Copy button */
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.3rem 0.8rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: #374151;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  background: #4b5563;
+}
+
+.copy-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.copy-btn.copied {
+  background: #16a34a;
+}
+
+/* Nested step lists keep normal numbering */
+.steps ol,
+.steps ul {
+  margin: 0.5rem 0;
+  padding-left: 1.4rem;
+  list-style: revert;
+}
+
+.steps ol li,
+.steps ul li {
+  padding-left: 0;
+  margin-bottom: 0.5rem;
+  counter-increment: none;
+}
+
+.steps ol li::before,
+.steps ul li::before {
+  content: none;
+}
+
+/* Fix: code inside a code block must not get the inline-code box style
+   (it made light text sit on a light background inside list steps) */
+pre code,
+.command-box pre code {
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+/* ==========================================================
+   Right-to-left pages (Urdu, Arabic): <article lang="ur" dir="rtl">
+   ========================================================== */
+
+/* Code is always left-to-right, even on RTL pages */
+pre,
+.command-box {
+  direction: ltr;
+  text-align: left;
+}
+
+article[lang="ur"] {
+  font-family: "Noto Naskh Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+  line-height: 1.95;
+}
+
+article[dir="rtl"] .guide-meta {
+  border-left: 1px solid var(--line);
+  border-right: 6px solid var(--computer);
+}
+
+article[dir="rtl"] .steps > li {
+  padding-left: 0;
+  padding-right: 3rem;
+}
+
+article[dir="rtl"] .steps > li::before {
+  left: auto;
+  right: 0;
+}
+
+article[dir="rtl"] .steps ol,
+article[dir="rtl"] .steps ul {
+  padding-left: 0;
+  padding-right: 1.4rem;
+}
+
+article[dir="rtl"] .note,
+article[dir="rtl"] .warning {
+  border-left: 0;
+  border-right: 5px solid var(--note);
+}
+
+article[dir="rtl"] .warning {
+  border-right-color: var(--warn);
+}

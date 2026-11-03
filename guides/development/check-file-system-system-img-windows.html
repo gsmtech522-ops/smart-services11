@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Check &amp; Repair system.img File System on Windows | Tech Learn</title>
+<meta name="description" content="Complete guide to inspect, mount, and repair Android system.img filesystem (ext4, erofs, sparse) on Windows using e2fsck, simg2img, 7-Zip and Linux tools.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Check &amp; Repair system.img File System on Windows</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Technical Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Ext4 / EROFS / sparse Android system.img files</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When you extract <code>system.img</code> from a stock firmware or readback dump, you often need to verify its integrity, mount it to inspect contents, or repair it if it's corrupted. Windows does not natively support ext4 or EROFS filesystems, so you need dedicated tools. This guide covers the complete workflow — from identifying the filesystem type to running <code>e2fsck</code> for repair.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Identify the filesystem type first</h3>
+      <p>Android uses several filesystem formats. Before anything else, figure out what you're dealing with:</p>
+      <table>
+        <thead>
+          <tr><th>Type</th><th>Detection method</th><th>Tool needed</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>ext4</strong></td><td>File starts with magic bytes at offset 0x438 = <code>53 EF</code></td><td>e2fsck, 7-Zip, LinuxReader</td></tr>
+          <tr><td><strong>EROFS</strong></td><td>File starts with <code>E2 E1 F5 E0</code> at offset 0x400 (1024)</td><td>erofs-utils, 7-Zip ZS</td></tr>
+          <tr><td><strong>Sparse ext4</strong></td><td>Starts with magic <code>3A FF 26 ED</code></td><td>simg2img first, then ext4 tools</td></tr>
+          <tr><td><strong>F2FS</strong></td><td>Magic <code>F2 F5 20</code> at offset 0x400</td><td>fsck.f2fs (Linux)</td></tr>
+          <tr><td><strong>Raw / unknown</strong></td><td>No recognizable magic</td><td>hex editor to inspect</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Quick detection via PowerShell:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">$bytes = [System.IO.File]::ReadAllBytes("C:\firmware\system.img")[1024..1027]
+[System.BitConverter]::ToString($bytes)</code></pre>
+      </div>
+      <p>Output examples:</p>
+      <ul>
+        <li><code>53-EF</code> at offset 1080 → ext4</li>
+        <li><code>E2-E1-F5-E0</code> → EROFS</li>
+        <li><code>3A-FF-26-ED</code> → sparse ext4</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Verify ext4 with e2fsck (Linux/WSL)</h3>
+      <p><code>e2fsck</code> is the standard ext2/3/4 filesystem check and repair tool. Windows has no native version, so use <strong>WSL (Windows Subsystem for Linux)</strong> or a Linux VM.</p>
+
+      <p><strong>Step 1 — Install WSL (once):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">wsl --install -d Ubuntu</code></pre>
+      </div>
+      <p>Reboot and complete Ubuntu setup.</p>
+
+      <p><strong>Step 2 — Install e2fsprogs:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo apt update
+sudo apt install e2fsprogs android-sdk-libsparse-utils -y</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Copy system.img into WSL and check:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Copy file into WSL home
+cp /mnt/c/firmware/system.img ~/system.img
+
+# Check-only mode (no changes)
+sudo e2fsck -n -f ~/system.img</code></pre>
+      </div>
+
+      <p><strong>Step 4 — Repair if errors are found:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo e2fsck -f -y ~/system.img</code></pre>
+      </div>
+      <p>Flags explained:</p>
+      <ul>
+        <li><code>-n</code> → check only (no writes) — safe</li>
+        <li><code>-f</code> → force check even if clean</li>
+        <li><code>-y</code> → answer "yes" to all repairs</li>
+        <li><code>-p</code> → automatic safe repair</li>
+        <li><code>-v</code> → verbose output</li>
+      </ul>
+
+      <div class="warning">
+        <p><strong>WSL limitation:</strong> WSL mounts the Windows drive under <code>/mnt/c</code> with special permissions. Always <strong>copy</strong> the image into the WSL home folder first — do not run <code>e2fsck</code> directly on <code>/mnt/c/...</code> paths.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Convert sparse ext4 before checking</h3>
+      <p>If your <code>system.img</code> starts with sparse magic (3A FF 26 ED), it's a "sparse image" — a compressed format used by OTA packages. e2fsck cannot read it directly.</p>
+
+      <p><strong>Step 1 — Convert to raw ext4:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img system.img system_raw.img</code></pre>
+      </div>
+
+      <p><strong>Step 2 — Then run e2fsck:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo e2fsck -f -y ~/system_raw.img</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Convert back to sparse (optional):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">img2simg system_raw.img system_fixed.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — Inspect contents with 7-Zip / LinuxReader (ext4)</h3>
+      <p>You don't always need to repair — sometimes you just want to verify the file isn't corrupted and see what's inside.</p>
+
+      <p><strong>Option A — 7-Zip:</strong></p>
+      <ol>
+        <li>Right-click <code>system.img</code> in Windows Explorer.</li>
+        <li>Choose <strong>7-Zip → Open archive</strong>.</li>
+        <li>If it opens and shows <code>/system/...</code> folders, the file is intact.</li>
+        <li>Extract individual files by right-clicking → Extract.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Note:</strong> 7-Zip supports ext4 read-only. It cannot repair. If the image opens but you see random garbage, the file is corrupt.</p>
+      </div>
+
+      <p><strong>Option B — LinuxReader (DiskInternals):</strong></p>
+      <ol>
+        <li>Download and install <strong>LinuxReader</strong> (free).</li>
+        <li>Open the tool → <strong>Open Image</strong> → select <code>system.img</code>.</li>
+        <li>Browse the filesystem. Extract files if needed.</li>
+        <li>LinuxReader can also show <strong>partition table</strong> info — useful to know if the image is raw or sparse.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Method 4 — EROFS check (Android 11+)</h3>
+      <p>Modern Android (11+) often ships <code>system.img</code> as <strong>EROFS</strong> instead of ext4. EROFS is read-only; you cannot run e2fsck on it, but you can still inspect it.</p>
+
+      <p><strong>Install erofs-utils in WSL:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo apt install erofs-utils -y</code></pre>
+      </div>
+
+      <p><strong>List contents without mounting:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fsck.erofs --extract=/tmp/system_extracted ~/system.img
+
+# Or just inspect superblock:
+dump.erofs ~/system.img</code></pre>
+      </div>
+
+      <p><strong>Extract a single folder:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fsck.erofs --extract=/tmp/out --path=/system/app ~/system.img</code></pre>
+      </div>
+
+      <div class="note">
+        <p><strong>If EROFS extraction succeeds</strong>, the filesystem is structurally valid — no repair needed. If it throws "invalid magic" or "corrupted superblock", the image is bad.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Method 5 — Check partition table &amp; size</h3>
+      <p>A "corrupt" system.img is often just <strong>truncated</strong> — its size doesn't match the partition it's supposed to fit. Verify this before running repair tools:</p>
+
+      <p><strong>Check file size in Windows:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">(Get-Item "C:\firmware\system.img").Length / 1MB</code></pre>
+      </div>
+
+      <p><strong>Check scatter file expected size (MTK):</strong></p>
+      <p>Open the <code>Android_scatter.txt</code> file in Notepad → find <code>partition_name: system</code> → note the <code>partition_size</code> value. Convert hex to decimal to compare.</p>
+
+      <p><strong>Check ext4 superblock info in WSL:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo tune2fs -l ~/system.img</code></pre>
+      </div>
+      <p>Look at <code>Block count</code> × <code>Block size</code> — this should match the file size. If not, the file is corrupted or truncated.</p>
+    </li>
+
+    <li>
+      <h3>7. Method 6 — Mount &amp; write to system.img (advanced)</h3>
+      <p>To actually <em>modify</em> a system.img (add/remove system apps), you need to mount it in Linux:</p>
+
+      <p><strong>Create a mount point and loop-mount:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir /mnt/sysimg
+sudo mount -o loop,rw ~/system.img /mnt/sysimg</code></pre>
+      </div>
+
+      <p><strong>If mount fails with "already mounted" or "read-only":</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo mount -o loop,rw,remount ~/system.img /mnt/sysimg</code></pre>
+      </div>
+
+      <p><strong>Make modifications, then unmount:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cp ~/my_app.apk /mnt/sysimg/system/app/MyApp/MyApp.apk
+sudo umount /mnt/sysimg</code></pre>
+      </div>
+
+      <div class="warning">
+        <p><strong>WSL limitation:</strong> loop-mounting requires kernel modules that standard WSL2 does not include. Use a full Ubuntu VM (VirtualBox / VMware) or a live Linux USB for this method.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Method 7 — Quick integrity check with md5 / sha256</h3>
+      <p>The fastest way to verify a system.img is intact is to compare its hash against the original firmware manifest (many stock ROMs ship a <code>checksum.md5</code> or <code>checksums.txt</code>):</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell"># Windows PowerShell
+Get-FileHash "C:\firmware\system.img" -Algorithm SHA256</code></pre>
+      </div>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># WSL / Linux
+sha256sum system.img
+md5sum system.img</code></pre>
+      </div>
+
+      <p>If the hash matches the manifest, the image is byte-for-byte correct — no repair needed. If not, re-download or extract again.</p>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Detect filesystem type ----
+file system.img
+xxd -l 64 -s 1024 system.img
+
+# ---- Convert sparse to raw ----
+simg2img system.img system_raw.img
+img2simg system_raw.img system_sparse.img
+
+# ---- ext4 check & repair ----
+sudo e2fsck -n -f system.img       # check only
+sudo e2fsck -f -y system.img       # repair
+sudo tune2fs -l system.img         # superblock info
+
+# ---- EROFS inspect ----
+dump.erofs system.img
+fsck.erofs --extract=/tmp/out system.img
+
+# ---- Mount and modify ----
+sudo mkdir /mnt/sysimg
+sudo mount -o loop,rw system.img /mnt/sysimg
+# ... modify files ...
+sudo umount /mnt/sysimg
+
+# ---- Hash verification ----
+sha256sum system.img
+md5sum system.img
+
+# ---- Windows-only alternatives ----
+# 7-Zip: right-click image → Open archive
+# LinuxReader: Open Image → select system.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>7-Zip says "Cannot open file as archive"</td><td>Image is sparse or EROFS, not ext4. Convert with <code>simg2img</code> first, or use <code>dump.erofs</code>.</td></tr>
+          <tr><td>e2fsck: "Bad magic number in super-block"</td><td>Image is not ext4, or is corrupted. Check first 1024 bytes with hex editor.</td></tr>
+          <tr><td>e2fsck: "Filesystem still has errors"</td><td>Run <code>e2fsck -f -y -c</code> to re-scan for bad blocks, or <code>e2fsck -p</code> for auto-safe.</td></tr>
+          <tr><td>e2fsck: "Superblock last mount time is in the future"</td><td>Clock skew — safe to answer "yes" to fix.</td></tr>
+          <tr><td>WSL cannot find /mnt/c</td><td>Windows drive mounting is disabled. Enable in <code>/etc/wsl.conf</code> → <code>[automount] enabled=true</code>.</td></tr>
+          <tr><td>Loop mount fails in WSL</td><td>Use Ubuntu VM (VirtualBox/VMware) or live Linux USB.</td></tr>
+          <tr><td>Extracted app doesn't run after reinject</td><td>Missing SELinux contexts. Use <code>set_metadata_recursive</code> in updater-script or fix permissions in mounted fs.</td></tr>
+          <tr><td>EROFS fsck.erofs throws error</td><td>Image is truncated or corrupted. Re-download from official source.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>11. Best practices</h3>
+      <ul>
+        <li>✅ Always <strong>verify hash</strong> against firmware manifest before repairing.</li>
+        <li>✅ Work on a <strong>copy</strong> — never repair the original in place.</li>
+        <li>✅ Use <code>e2fsck -n</code> (check-only) first before running any repair.</li>
+        <li>✅ Copy the image into WSL home directory before running e2fsck.</li>
+        <li>✅ Keep a copy of the original <code>system.img</code> before modifications.</li>
+        <li>✅ Test modifications in a VM before flashing back to a physical device.</li>
+        <li>✅ After modifying, re-hash and compare to ensure no unintended changes.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> most "corrupt system.img" reports are actually the wrong file format (sparse vs raw) or a truncated download. Verify file type and hash before running repair tools — they can actually cause more damage if the image was fine.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="../development/extract-boot-payload-bin.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="../development/extract-recovery-img-lz4.html">Extract recovery.img from .lz4</a></li>
+      <li><a href="../development/create-flashable-zip.html">Create a custom flashable ZIP</a></li>
+      <li><a href="find-usb-vid-pid.html">Find USB VID &amp; PID</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

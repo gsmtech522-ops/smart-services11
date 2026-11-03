@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Voice Generator</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #0a0a0f;
+    color: #e5e5e5;
+    margin: 0;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 6px;
+    background: linear-gradient(90deg, #4ade80, #60a5fa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .sub { color: #888; font-size: 13px; margin-bottom: 20px; }
+
+  .container {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    max-width: 1100px;
+  }
+  @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+
+  .card {
+    background: #15151c;
+    border: 1px solid #23232e;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .card h3 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 200px;
+    background: #0a0a0f;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  textarea:focus { outline: 2px solid #4ade80; border-color: transparent; }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    align-items: center;
+  }
+  button {
+    padding: 10px 16px;
+    font-size: 14px;
+    background: #22222c;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .15s;
+    font-weight: 500;
+  }
+  button:hover { background: #2c2c38; }
+  button.primary { background: #4ade80; color: #000; border-color: #4ade80; font-weight: 600; }
+  button.primary:hover { background: #3ecb6d; }
+  button.danger { background: #7f1d1d; border-color: #991b1b; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .field {
+    margin-bottom: 16px;
+  }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .field label span { color: #4ade80; font-weight: 600; }
+
+  select, input[type=text] {
+    width: 100%;
+    padding: 9px 10px;
+    background: #0a0a0f;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 7px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  select:focus, input:focus { outline: 2px solid #4ade80; border-color: transparent; }
+
+  input[type=range] {
+    width: 100%;
+    accent-color: #4ade80;
+  }
+
+  .status {
+    font-size: 12px;
+    color: #888;
+    margin-top: 12px;
+    min-height: 16px;
+  }
+  .status.playing { color: #4ade80; }
+  .status.error { color: #ef4444; }
+
+  .quick-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .tag {
+    padding: 5px 10px;
+    font-size: 11px;
+    background: #1d1d26;
+    border: 1px solid #333;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #aaa;
+    transition: .15s;
+  }
+  .tag:hover { background: #2c2c38; color: #eee; border-color: #4ade80; }
+
+  .highlight {
+    display: inline-block;
+    background: #4ade80;
+    color: #000;
+    padding: 1px 3px;
+    border-radius: 3px;
+    transition: .05s;
+  }
+
+  #preview {
+    background: #0a0a0f;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100px;
+    color: #ddd;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .charcount {
+    font-size: 11px;
+    color: #666;
+    text-align: right;
+    margin-top: 4px;
+  }
+</style>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+<h1>🎙 Voice Generator</h1>
+<div class="sub">Type text, tune the voice, click Speak. Works offline — uses your OS voices.</div>
+
+<div class="container">
+
+  <!-- LEFT: Text input + preview -->
+  <div>
+    <div class="card">
+      <h3>📝 Your Text</h3>
+      <textarea id="text" placeholder="Type or paste your text here...">Hello! Welcome to this tech tutorial. Today we're going to build something amazing together.</textarea>
+      <div class="charcount"><span id="charCount">0</span> characters</div>
+
+      <div class="quick-tags">
+        <span class="tag" data-text="Hello world! This is a text to speech demo.">👋 Demo</span>
+        <span class="tag" data-text="Welcome back to the channel! In today's video, we'll cover everything you need to know.">🎬 Intro</span>
+        <span class="tag" data-text="Thanks for watching! Don't forget to like and subscribe.">🔔 Outro</span>
+        <span class="tag" data-text="This is a critical error. Please check your configuration and try again.">⚠️ Alert</span>
+        <span class="tag" data-text="Congratulations! You have successfully completed the tutorial.">🎉 Success</span>
+      </div>
+
+      <div class="controls">
+        <button id="speakBtn" class="primary">▶ Speak</button>
+        <button id="pauseBtn">⏸ Pause</button>
+        <button id="resumeBtn">⏵ Resume</button>
+        <button id="stopBtn" class="danger">⏹ Stop</button>
+        <button id="downloadBtn">⬇ Download Audio</button>
+      </div>
+
+      <div class="status" id="status">Ready.</div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>👁 Live Preview (word highlighting)</h3>
+      <div id="preview"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Voice settings -->
+  <div>
+    <div class="card">
+      <h3>🎛 Voice Settings</h3>
+
+      <div class="field">
+        <label>Voice</label>
+        <select id="voiceSelect"></select>
+      </div>
+
+      <div class="field">
+        <label>Language / Region</label>
+        <select id="langFilter">
+          <option value="all">All languages</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Rate (speed) <span id="rateVal">1.0</span></label>
+        <input type="range" id="rate" min="0.5" max="2" step="0.05" value="1">
+      </div>
+
+      <div class="field">
+        <label>Pitch <span id="pitchVal">1.0</span></label>
+        <input type="range" id="pitch" min="0" max="2" step="0.05" value="1">
+      </div>
+
+      <div class="field">
+        <label>Volume <span id="volumeVal">1.0</span></label>
+        <input type="range" id="volume" min="0" max="1" step="0.05" value="1">
+      </div>
+
+      <div class="controls">
+        <button id="resetBtn">↺ Reset</button>
+        <button id="testBtn">🔊 Test Voice</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>⚡ Presets</h3>
+      <div class="controls" style="flex-direction:column;align-items:stretch;">
+        <button data-preset="narrator">📖 Narrator (slow, low)</button>
+        <button data-preset="tutorial">🎓 Tutorial (clear, mid)</button>
+        <button data-preset="excited">🚀 Excited (fast, high)</button>
+        <button data-preset="robot">🤖 Robot (monotone)</button>
+        <button data-preset="whisper">🤫 Whisper (quiet, slow)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  voices: [],
+  speaking: false,
+  paused: false,
+  currentUtterance: null,
+};
+
+const els = {
+  text: document.getElementById('text'),
+  charCount: document.getElementById('charCount'),
+  voiceSelect: document.getElementById('voiceSelect'),
+  langFilter: document.getElementById('langFilter'),
+  rate: document.getElementById('rate'),
+  pitch: document.getElementById('pitch'),
+  volume: document.getElementById('volume'),
+  rateVal: document.getElementById('rateVal'),
+  pitchVal: document.getElementById('pitchVal'),
+  volumeVal: document.getElementById('volumeVal'),
+  speakBtn: document.getElementById('speakBtn'),
+  pauseBtn: document.getElementById('pauseBtn'),
+  resumeBtn: document.getElementById('resumeBtn'),
+  stopBtn: document.getElementById('stopBtn'),
+  downloadBtn: document.getElementById('downloadBtn'),
+  status: document.getElementById('status'),
+  preview: document.getElementById('preview'),
+};
+
+// ============================================================
+// VOICE LOADING
+// ============================================================
+function loadVoices() {
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+
+  state.voices = voices;
+
+  // Build language filter list
+  const langs = [...new Set(voices.map(v => v.lang))].sort();
+  const filter = els.langFilter;
+  const current = filter.value;
+  filter.innerHTML = '<option value="all">All languages</option>';
+  langs.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l;
+    opt.textContent = l + ' — ' + (voices.find(v => v.lang === l)?.name.split(' ')[0] || '');
+    filter.appendChild(opt);
+  });
+  filter.value = current;
+
+  populateVoiceList();
+}
+
+function populateVoiceList() {
+  const filter = els.langFilter.value;
+  const selected = els.voiceSelect.value;
+  els.voiceSelect.innerHTML = '';
+
+  const filtered = filter === 'all'
+    ? state.voices
+    : state.voices.filter(v => v.lang === filter);
+
+  if (filtered.length === 0) {
+    const opt = document.createElement('option');
+    opt.textContent = 'No voices for this language';
+    opt.disabled = true;
+    els.voiceSelect.appendChild(opt);
+    return;
+  }
+
+  filtered.forEach((voice, i) => {
+    const opt = document.createElement('option');
+    opt.value = state.voices.indexOf(voice);
+    // Mark default, local, and name
+    const flags = [];
+    if (voice.default) flags.push('default');
+    if (voice.localService) flags.push('local');
+    opt.textContent = `${voice.name} (${voice.lang})${flags.length ? ' · ' + flags.join(', ') : ''}`;
+    els.voiceSelect.appendChild(opt);
+  });
+
+  // Try to restore selection
+  if (selected && [...els.voiceSelect.options].some(o => o.value === selected)) {
+    els.voiceSelect.value = selected;
+  }
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+// Some browsers need a delay
+setTimeout(loadVoices, 200);
+setTimeout(loadVoices, 1000);
+
+// ============================================================
+// SPEAK
+// ============================================================
+function speak() {
+  const text = els.text.value.trim();
+  if (!text) { setStatus('⚠️ Enter some text first.', 'error'); return; }
+
+  // Cancel existing
+  speechSynthesis.cancel();
+
+  const utter = new SpeechSynthesisUtterance(text);
+  const voiceIdx = +els.voiceSelect.value;
+  if (state.voices[voiceIdx]) utter.voice = state.voices[voiceIdx];
+
+  utter.rate = +els.rate.value;
+  utter.pitch = +els.pitch.value;
+  utter.volume = +els.volume.value;
+
+  // Word boundary — highlight in preview
+  utter.onboundary = (e) => {
+    if (e.name === 'word' || e.name === undefined) {
+      highlightWord(e.charIndex, e.charLength || findWordLength(text, e.charIndex));
+    }
+  };
+
+  utter.onstart = () => {
+    state.speaking = true;
+    state.paused = false;
+    setStatus('🔊 Speaking...', 'playing');
+    renderPreview(text);
+    updateButtons();
+  };
+
+  utter.onend = () => {
+    state.speaking = false;
+    state.paused = false;
+    setStatus('✅ Done.');
+    clearHighlight();
+    updateButtons();
+  };
+
+  utter.onerror = (e) => {
+    state.speaking = false;
+    setStatus('❌ Error: ' + (e.error || 'unknown'), 'error');
+    clearHighlight();
+    updateButtons();
+  };
+
+  utter.onpause = () => { setStatus('⏸ Paused.'); };
+  utter.onresume = () => { setStatus('🔊 Speaking...', 'playing'); };
+
+  state.currentUtterance = utter;
+  speechSynthesis.speak(utter);
+}
+
+function findWordLength(text, start) {
+  let i = start;
+  while (i < text.length && /\S/.test(text[i])) i++;
+  return i - start;
+}
+
+// ============================================================
+// PREVIEW / HIGHLIGHTING
+// ============================================================
+function renderPreview(text) {
+  // Wrap each word in a span so we can highlight
+  let html = '';
+  let i = 0;
+  while (i < text.length) {
+    if (/\s/.test(text[i])) {
+      html += escapeHtml(text[i]);
+      i++;
+    } else {
+      const start = i;
+      while (i < text.length && /\S/.test(text[i])) i++;
+      html += `<span class="word" data-start="${start}" data-end="${i}">${escapeHtml(text.slice(start, i))}</span>`;
+    }
+  }
+  els.preview.innerHTML = html;
+}
+
+function highlightWord(start, length) {
+  clearHighlight();
+  const end = start + length;
+  els.preview.querySelectorAll('.word').forEach(span => {
+    const s = +span.dataset.start;
+    const e = +span.dataset.end;
+    // Highlight any word that overlaps the range
+    if (s < end && e > start) {
+      span.classList.add('highlight');
+    }
+  });
+}
+
+function clearHighlight() {
+  els.preview.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// ============================================================
+// BUTTON STATE
+// ============================================================
+function updateButtons() {
+  els.speakBtn.disabled = state.speaking;
+  els.pauseBtn.disabled = !state.speaking || state.paused;
+  els.resumeBtn.disabled = !state.speaking || !state.paused;
+  els.stopBtn.disabled = !state.speaking;
+}
+
+function setStatus(msg, cls = '') {
+  els.status.textContent = msg;
+  els.status.className = 'status ' + cls;
+}
+
+// ============================================================
+// DOWNLOAD — record speech via MediaRecorder + AudioContext
+// ============================================================
+let mediaRecorder = null;
+let recordedChunks = [];
+
+async function downloadAudio() {
+  const text = els.text.value.trim();
+  if (!text) { setStatus('⚠️ Enter some text first.', 'error'); return; }
+
+  setStatus('🎙 Recording... (plays in real-time, then downloads)');
+  els.downloadBtn.disabled = true;
+
+  // Problem: SpeechSynthesis output can't be captured directly.
+  // Workaround: use MediaRecorder on a MediaStreamDestination — BUT SpeechSynthesis
+  // doesn't route through Web Audio, so we can't capture it directly in most browsers.
+
+  // Fallback: notify the user with instructions
+  setStatus('⚠️ Browser limitation: speech output cannot be recorded directly. Use a screen recorder or the "Save as WebM" workaround below.', 'error');
+  els.downloadBtn.disabled = false;
+
+  // If you really need downloadable audio, you'd need a server-side TTS API
+  // (Google Cloud TTS, ElevenLabs, etc.) that returns an audio file.
+  // Web Speech API is playback-only by design.
+}
+
+// ============================================================
+// PRESETS
+// ============================================================
+const PRESETS = {
+  narrator:  { rate: 0.85, pitch: 0.8,  volume: 1.0 },
+  tutorial:  { rate: 1.0,  pitch: 1.0,  volume: 1.0 },
+  excited:   { rate: 1.35, pitch: 1.3,  volume: 1.0 },
+  robot:     { rate: 1.0,  pitch: 0.3,  volume: 0.9 },
+  whisper:   { rate: 0.75, pitch: 1.1,  volume: 0.4 },
+};
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  els.rate.value = p.rate;
+  els.pitch.value = p.pitch;
+  els.volume.value = p.volume;
+  updateSliderLabels();
+  setStatus(`Preset applied: ${name}`);
+}
+
+function updateSliderLabels() {
+  els.rateVal.textContent = (+els.rate.value).toFixed(2);
+  els.pitchVal.textContent = (+els.pitch.value).toFixed(2);
+  els.volumeVal.textContent = (+els.volume.value).toFixed(2);
+}
+
+// ============================================================
+// EVENT WIRING
+// ============================================================
+els.speakBtn.onclick = speak;
+els.pauseBtn.onclick = () => { speechSynthesis.pause(); state.paused = true; updateButtons(); };
+els.resumeBtn.onclick = () => { speechSynthesis.resume(); state.paused = false; updateButtons(); };
+els.stopBtn.onclick = () => {
+  speechSynthesis.cancel();
+  state.speaking = false;
+  state.paused = false;
+  clearHighlight();
+  setStatus('⏹ Stopped.');
+  updateButtons();
+};
+els.downloadBtn.onclick = downloadAudio;
+
+els.rate.oninput = () => { updateSliderLabels(); };
+els.pitch.oninput = () => { updateSliderLabels(); };
+els.volume.oninput = () => { updateSliderLabels(); };
+
+els.voiceSelect.onchange = () => {
+  // Preview on change
+  const idx = +els.voiceSelect.value;
+  const v = state.voices[idx];
+  if (v) setStatus(`Selected: ${v.name} (${v.lang})`);
+};
+
+els.langFilter.onchange = populateVoiceList;
+
+els.text.oninput = () => {
+  els.charCount.textContent = els.text.value.length;
+};
+
+document.getElementById('testBtn').onclick = () => {
+  const original = els.text.value;
+  els.text.value = 'This is a preview of the selected voice.';
+  speak();
+  setTimeout(() => { els.text.value = original; }, 100);
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  els.rate.value = 1;
+  els.pitch.value = 1;
+  els.volume.value = 1;
+  updateSliderLabels();
+};
+
+document.querySelectorAll('[data-preset]').forEach(btn => {
+  btn.onclick = () => applyPreset(btn.dataset.preset);
+});
+
+document.querySelectorAll('.tag').forEach(tag => {
+  tag.onclick = () => {
+    els.text.value = tag.dataset.text;
+    els.charCount.textContent = els.text.value.length;
+    speak();
+  };
+});
+
+// ============================================================
+// BOOT
+// ============================================================
+els.charCount.textContent = els.text.value.length;
+updateSliderLabels();
+updateButtons();
+renderPreview(els.text.value);
+
+setStatus('Ready — pick a voice and click Speak.');
+</script>
+</body>
+</html>

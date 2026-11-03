@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate checksum.ini for MTK Scatter ROM (Fix Checksum Error) | Tech Learn</title>
+<meta name="description" content="Create or bypass checksum.ini in MediaTek scatter firmware to fix SP Flash Tool S_CHKSUM_ERROR (1041).">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Generate checksum.ini for MTK Scatter ROM</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~3 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek SP Flash Tool firmware</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>If you flash customized firmware or read-back dumps, SP Flash Tool often throws <strong>BROM ERROR: S_CHKSUM_ERROR (1041)</strong> or "checksum file is missing". The tool requires a <strong>checksum.ini</strong> verification map inside the firmware folder before writing to hardware.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Why SP Flash Tool needs checksum.ini</h3>
+      <p>Before writing critical partitions, SP Flash Tool hashes each file and compares against values stored in <code>checksum.ini</code>. If you modify even one byte (e.g. patched <code>boot.img</code>), the hash changes and the tool aborts to prevent bricking. Regenerating the checksum map fixes the mismatch.</p>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Automated one-click generation</h3>
+      <ol>
+        <li>Open your MTK firmware folder containing the scatter file.</li>
+        <li>Check if <code>CheckSum_Gen.exe</code> exists there. If not, copy it from any other SP Flash Tool directory into your firmware folder.</li>
+        <li>Right-click <code>CheckSum_Gen.exe</code> → <strong>Run as Administrator</strong>.</li>
+        <li>A CMD window opens and scans the scatter map.</li>
+        <li>It computes hash values for every partition image (<code>system.img</code>, <code>boot.img</code>, etc.).</li>
+        <li>Wait 1–3 minutes.</li>
+        <li>CMD closes when finished.</li>
+        <li><code>checksum.ini</code> appears in the folder — flash will now work.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Manual checksum bypass</h3>
+      <p>If you don't have the utility:</p>
+      <ol>
+        <li>Open the SP Flash Tool folder.</li>
+        <li>Open <code>option.ini</code> in Notepad.</li>
+        <li><kbd>Ctrl</kbd>+<kbd>F</kbd> → search <code>CheckSum</code> or <code>chksum</code>.</li>
+        <li>Find <code>CheckSum=1</code> and change to <code>CheckSum=0</code>.</li>
+        <li>Save and relaunch SP Flash Tool — checksum verification is skipped.</li>
+      </ol>
+      <div class="warning">
+        <p><strong>Warning:</strong> disabling checksum means corrupted downloads won't be caught. Only use for quick local testing, not for distribution.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Pro tip</h3>
+      <p>When sharing customized firmware or dumps online, always use <strong>Method 1</strong>. A valid <code>checksum.ini</code> ensures SP Flash Tool rejects corrupt downloads before writing to hardware.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="sp-flash-tool-errors.html">SP Flash Tool errors</a></li>
+      <li><a href="flash-mtk-sp-flash-tool.html">Flash via SP Flash Tool</a></li>
+      <li><a href="sp-flash-tool-complete-guide.html">SP Flash Tool overview</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Common SP Flash Tool Errors &amp; How to Fix Them | Tech Learn</title>
+<meta name="description" content="Complete diagnostic guide for SP Flash Tool BROM error codes with causes and fixes.">
+<link rel="stylesheet" href="../../../styles/style.css">
+<link rel="stylesheet" href="../../../styles/guide.css">
+<link rel="stylesheet" href="../../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Common SP Flash Tool Errors &amp; Fixes</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Reference</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Use</dt>
+    <dd>Bookmark — search (Ctrl+F) to find your exact BROM error</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>A comprehensive diagnostic reference for the most common SP Flash Tool BROM and DA error codes, with causes and fixes.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. BROM ERROR: S_FT_ENABLE_DRAM_FAIL (4032)</h3>
+      <p><strong>Cause:</strong> scatter file or <code>preloader.bin</code> does not match the exact hardware, or driver failed to initialize DRAM.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Download the exact stock firmware for your model/build number.</li>
+        <li>Try flashing without the preloader partition.</li>
+        <li>Hold Volume Down (or both) while plugging USB.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. BROM ERROR: S_BROM_CMD_STARTCMD_FAIL (2001)</h3>
+      <p><strong>Cause:</strong> physical USB handshake loss between PC and phone.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Try a different USB port (prefer USB 2.0 motherboard ports).</li>
+        <li>Replace USB cable.</li>
+        <li>Charge the battery to at least 30–50%.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. BROM ERROR: S_INVALID_BBCHIP_TYPE (1003)</h3>
+      <p><strong>Cause:</strong> scatter file was compiled for a different MTK processor family.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Verify device specs (MT6737 vs MT6750) and get the correct scatter.</li>
+        <li>Use the right SP Flash Tool version (v5 vs v6).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>4. BROM ERROR: S_DL_GET_DRAM_SETTINGS_FAIL (5054)</h3>
+      <p><strong>Cause:</strong> preloader missing, corrupted, or incompatible with eMMC/UFS.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Double-check <code>preloader.bin</code> is checked in SP Flash Tool.</li>
+        <li>Use a fresh firmware pack or extract a clean scatter via WWR MTK Tool.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>5. BROM ERROR: S_SECURITY_SECURE_USB_DL_IMAGE_SIGN_VERIFY_FAIL (6047)</h3>
+      <p><strong>Cause:</strong> locked bootloader or Secure Boot preventing unsigned binaries.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Load a valid DA file (<code>.bin</code> / <code>.auth</code>) for your device.</li>
+        <li>Run MTKClient or auth bypass tool before SP Flash Tool.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>6. BROM ERROR: S_DA_EMMC_FLASH_NOT_FOUND (3144)</h3>
+      <p><strong>Cause:</strong> cannot detect the memory chip — hardware failure or wrong scatter address.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Run Memory Test to verify RAM and eMMC health.</li>
+        <li>If eMMC is dead, the chip requires hardware repair/replacement.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>7. BROM ERROR: S_DL_PMT_ERR_NO_SPACE (8038) / PMT changed</h3>
+      <p><strong>Cause:</strong> firmware's partition layout doesn't match the phone's current table.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Switch from <em>Download Only</em> to <strong>Firmware Upgrade</strong>.</li>
+        <li>Or use <strong>Format All + Download</strong> — but back up NVRAM/IMEI first.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>8. STATUS_SEC_AUTH_FILE_NEEDED (0xC0020002)</h3>
+      <p><strong>Cause:</strong> modern MTK SoCs require SLA/DAA authorization.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Load the official <code>.auth</code> file in the Authentication File field.</li>
+        <li>Or run MTKClient / MTK Auth Bypass tool first.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>9. BROM ERROR: S_FT_NEED_DOWNLOAD_ALL_FAIL (4004)</h3>
+      <p><strong>Cause:</strong> only a few partitions are selected when SP Flash Tool requires all critical ones.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Select all partition checkboxes.</li>
+        <li>Ensure no required image file is missing from the firmware folder.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>10. BROM ERROR: S_CHKSUM_ERROR (1041 / 2008)</h3>
+      <p><strong>Cause:</strong> checksum verification failed — files corrupted during extraction, or <code>checksum.ini</code> has mismatched values.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Delete or rename <code>checksum.ini</code> in the firmware folder.</li>
+        <li>Re-extract firmware with latest WinRAR / 7-Zip.</li>
+        <li>Or regenerate via <a href="generate-checksum-ini.html">Generate checksum.ini</a>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>11. BROM ERROR: STATUS_EXT_RAM_EXCEPTION (0xC0050005)</h3>
+      <p><strong>Cause:</strong> DRAM communication failed — test-point connection issue, low battery, or wrong Preloader.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Ensure battery is charged and connected.</li>
+        <li>Try a different Preloader binary matching your exact variant.</li>
+        <li>Clean USB port with contact cleaner.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>12. BROM ERROR: S_DA_SDMMC_WRITE_FAILED (3149)</h3>
+      <p><strong>Cause:</strong> write protection or physical eMMC/UFS degradation.</p>
+      <p><strong>Fix:</strong></p>
+      <ul>
+        <li>Change flashing speed from High to Full Speed under Options → Connection.</li>
+        <li>If it persists across firmware packages, the eMMC/UFS is end-of-life (hardware fault).</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> bookmark this page and <kbd>Ctrl</kbd>+<kbd>F</kbd> to search your exact error code.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="sp-flash-tool-complete-guide.html">SP Flash Tool overview</a></li>
+      <li><a href="generate-checksum-ini.html">Generate checksum.ini</a></li>
+      <li><a href="bypass-mediatek-sla-daa.html">Bypass SLA/DAA</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

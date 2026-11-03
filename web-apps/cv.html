@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Maker — Print Suite</title>
+<style>
+:root {
+  --accent: #2563eb;
+  --accent-dark: #1e40af;
+  --accent-light: #dbeafe;
+  --accent-soft: #eff6ff;
+  --success: #16a34a;
+  --danger: #ef4444;
+  --warning: #ca8a04;
+  --cyan: #0891b2;
+  --purple: #7c3aed;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.10);
+}
+body.dark {
+  --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9;
+  --text-light: #94a3b8; --border: #334155;
+}
+body.dark .form-panel,
+body.dark .preview-panel { background: var(--surface); }
+body.dark input, body.dark textarea, body.dark select {
+  background: #0f172a; color: var(--text); border-color: #475569;
+}
+body.dark fieldset { background: #0f172a; }
+body.dark .row-item { background: #0f172a; }
+body.dark #cv-preview { background: white; color: black; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+.topbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 8px;
+  position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow);
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar h1 { font-size: 17px; font-weight: 700; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 7px 12px; border-radius: var(--radius);
+  background: var(--bg); color: var(--text); text-decoration: none;
+  font-size: 13px; font-weight: 500; border: 1px solid var(--border);
+}
+.back-btn:hover { background: var(--accent-light); color: var(--accent-dark); }
+.topbar-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+button {
+  padding: 8px 14px; border: none; border-radius: var(--radius);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  font-family: inherit; display: inline-flex; align-items: center;
+  gap: 5px; white-space: nowrap; transition: all 0.2s;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #15803d; }
+.btn-cyan { background: var(--cyan); color: white; }
+.btn-cyan:hover { background: #0e7490; }
+.btn-purple { background: var(--purple); color: white; }
+.btn-purple:hover { background: #6d28d9; }
+.btn-warning { background: var(--warning); color: white; }
+.btn-warning:hover { background: #a16207; }
+.btn-gray { background: var(--text-light); color: white; }
+.btn-gray:hover { background: #475569; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #dc2626; }
+.btn-dark { background: #1e293b; color: white; border: 1px solid #334155; }
+.btn-dark:hover { background: #0f172a; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+.layout {
+  display: grid; grid-template-columns: 1fr; gap: 16px;
+  padding: 16px; max-width: 1600px; margin: 0 auto;
+}
+@media (min-width: 1100px) {
+  .layout { grid-template-columns: 460px 1fr; }
+}
+
+.form-panel {
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 16px;
+  max-height: calc(100vh - 100px); overflow-y: auto;
+}
+fieldset {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px; margin-bottom: 14px; background: var(--surface);
+}
+legend {
+  font-weight: 600; font-size: 12px; padding: 0 8px;
+  color: var(--accent-dark); text-transform: uppercase; letter-spacing: 0.5px;
+}
+body.dark legend { color: var(--accent-light); }
+label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+input[type="text"], input[type="email"], input[type="tel"],
+textarea, select {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: 13px; font-family: inherit;
+  margin-top: 4px; background: var(--surface); color: var(--text);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+textarea { resize: vertical; min-height: 55px; }
+
+.color-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.color-row input[type="color"] {
+  width: 50px; height: 38px; padding: 2px;
+  border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;
+}
+.color-row input[type="text"] { flex: 1; margin: 0; }
+
+.preset-colors { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.preset-color {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 3px solid transparent; cursor: pointer; transition: transform 0.2s;
+}
+.preset-color:hover { transform: scale(1.15); }
+.preset-color.active { border-color: var(--text); }
+
+.row-item {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px; margin-bottom: 10px; background: var(--bg);
+}
+.row-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 8px;
+}
+.row-header strong {
+  font-size: 11px; color: var(--accent-dark);
+  background: var(--accent-light); padding: 2px 8px; border-radius: 10px;
+}
+body.dark .row-header strong { background: #1e3a8a; color: #dbeafe; }
+.row-remove {
+  background: var(--danger); color: white; padding: 3px 8px;
+  font-size: 11px; border-radius: 4px; cursor: pointer; border: none;
+}
+
+.preview-panel {
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden;
+  display: flex; justify-content: center; padding: 20px;
+}
+
+#cv-preview {
+  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 12mm 15mm;
+  font-family: "Times New Roman", serif;
+  font-size: 10.5pt;
+  color: #000;
+  line-height: 1.4;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  position: relative;
+}
+
+.cv-header {
+  display: flex; gap: 15px; align-items: flex-start;
+  padding-bottom: 12px; margin-bottom: 14px;
+}
+.cv-photo-box {
+  width: 35mm; height: 45mm; border: 1px solid #333;
+  overflow: hidden; flex-shrink: 0; background: #f0f0f0;
+  display: flex; align-items: center; justify-content: center;
+  color: #999; font-size: 10px; font-family: Arial, sans-serif;
+}
+.cv-photo-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cv-title { flex: 1; }
+.cv-title h1 {
+  font-size: 24pt; font-weight: 700; margin: 0 0 4px;
+  font-family: Arial, sans-serif; line-height: 1.1;
+}
+.cv-title .cv-job {
+  font-size: 13pt; font-style: italic;
+  margin-bottom: 10px; color: #333;
+}
+.cv-contact {
+  font-size: 10.5pt; font-family: Arial, sans-serif; line-height: 1.5;
+}
+.cv-contact div { margin-bottom: 2px; }
+
+#cv-preview h2 {
+  font-size: 12pt; padding: 5px 10px; margin: 14px 0 8px;
+  font-family: Arial, sans-serif; text-transform: uppercase;
+  letter-spacing: 0.5px; font-weight: 700;
+}
+
+#cv-preview table {
+  width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 10pt;
+}
+#cv-preview table th {
+  padding: 6px 8px; text-align: left; font-size: 9.5pt;
+  font-family: Arial, sans-serif; font-weight: 600;
+}
+#cv-preview table td {
+  padding: 5px 8px; border: 1px solid #999; vertical-align: top;
+}
+#cv-preview table.info-table td:nth-child(1) {
+  font-weight: 600; width: 30%; font-family: Arial, sans-serif; font-size: 10pt;
+}
+#cv-preview table.info-table td:nth-child(2) { width: 70%; }
+
+.cv-text-block {
+  font-size: 10.5pt; margin-bottom: 8px;
+  text-align: justify; line-height: 1.5;
+}
+
+/* Structural variations only */
+.tpl-elegant .cv-header {
+  flex-direction: column; align-items: center; text-align: center;
+}
+.tpl-elegant .cv-photo-box { margin: 0 auto; }
+.tpl-elegant .cv-title h1 { font-size: 26pt; }
+
+.tpl-compact { font-size: 9.5pt; }
+.tpl-compact .cv-header { padding-bottom: 8px; margin-bottom: 10px; }
+.tpl-compact h2 { font-size: 10.5pt; padding: 3px 8px; margin: 8px 0 5px; }
+.tpl-compact table { font-size: 9pt; }
+.tpl-compact table td, .tpl-compact table th { padding: 3px 6px; }
+
+.tpl-photo-right .cv-header { flex-direction: row-reverse; }
+.tpl-photo-right .cv-title { text-align: right; }
+
+/* ============================================
+   SIDEBAR TEMPLATES — FULL HEIGHT + COLOR
+   ============================================ */
+.tpl-sidebar-left,
+.tpl-sidebar-right {
+  padding: 0 !important;
+  display: flex !important;
+  min-height: 297mm !important;
+  width: 210mm !important;
+}
+
+/* Main content wrapper */
+.tpl-sidebar-left .cv-main,
+.tpl-sidebar-right .cv-main {
+  flex: 1;
+  padding: 15mm 10mm;
+  min-width: 0;
+}
+
+/* Sidebar column — full height */
+.tpl-sidebar-left .cv-sidebar,
+.tpl-sidebar-right .cv-sidebar {
+  width: 62mm;
+  flex-shrink: 0;
+  padding: 15mm 8mm;
+  display: flex;
+  flex-direction: column;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  color-adjust: exact;
+}
+
+.tpl-sidebar-left .cv-photo-box,
+.tpl-sidebar-right .cv-photo-box {
+  width: 42mm;
+  height: 52mm;
+  margin: 0 auto 12px;
+  border: 2px solid white;
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.tpl-sidebar-left .sidebar-name,
+.tpl-sidebar-right .sidebar-name {
+  font-size: 15pt;
+  font-weight: 700;
+  margin-bottom: 3px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #ffffff;
+}
+
+.tpl-sidebar-left .sidebar-job,
+.tpl-sidebar-right .sidebar-job {
+  font-size: 9.5pt;
+  text-align: center;
+  margin-bottom: 14px;
+  font-style: italic;
+  color: rgba(255,255,255,0.95);
+}
+
+.tpl-sidebar-left .sidebar-section,
+.tpl-sidebar-right .sidebar-section {
+  margin-bottom: 12px;
+}
+
+.tpl-sidebar-left .sidebar-section h3,
+.tpl-sidebar-right .sidebar-section h3 {
+  font-size: 10pt;
+  text-transform: uppercase;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  font-family: Arial, sans-serif;
+  letter-spacing: 0.8px;
+  border-bottom: 1.5px solid rgba(255,255,255,0.8);
+  color: #ffffff;
+}
+
+.tpl-sidebar-left .sidebar-section div,
+.tpl-sidebar-left .sidebar-section p,
+.tpl-sidebar-right .sidebar-section div,
+.tpl-sidebar-right .sidebar-section p {
+  font-size: 9pt;
+  margin-bottom: 3px;
+  line-height: 1.35;
+  word-break: break-word;
+  color: #ffffff;
+}
+
+.tpl-sidebar-left .sidebar-section strong,
+.tpl-sidebar-right .sidebar-section strong {
+  display: block;
+  font-size: 8pt;
+  font-weight: 400;
+  margin-bottom: 1px;
+  opacity: 0.85;
+  color: #ffffff;
+}
+
+.tpl-sidebar-right { flex-direction: row-reverse; }
+
+/* ============ TWO COLUMN ============ */
+.tpl-twocolumn { padding: 12mm 15mm !important; }
+.tpl-twocolumn .cv-body {
+  display: grid; grid-template-columns: 1fr 2fr; gap: 15px;
+}
+.tpl-twocolumn .cv-col-left { padding-right: 15px; }
+.tpl-twocolumn h2 { font-size: 11pt; padding: 4px 8px; }
+.tpl-twocolumn table th { font-size: 9pt; }
+.tpl-twocolumn table td { font-size: 9pt; padding: 4px 6px; }
+
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: #1e293b; color: white; padding: 12px 20px;
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  font-size: 14px; z-index: 9999; opacity: 0;
+  transform: translateY(20px); transition: all 0.3s;
+  pointer-events: none; max-width: 300px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+
+@media (max-width: 1099px) {
+  .form-panel { max-height: none; }
+  .preview-panel { padding: 10px; overflow-x: auto; }
+}
+@media (max-width: 640px) {
+  .topbar { padding: 8px 10px; }
+  .topbar h1 { font-size: 14px; }
+  .back-btn { padding: 5px 8px; font-size: 12px; }
+  .topbar-actions { width: 100%; }
+  .topbar-actions button { flex: 1; padding: 7px 4px; font-size: 11px; justify-content: center; }
+  .layout { padding: 8px; gap: 10px; }
+  .form-panel { padding: 10px; }
+}
+
+/* ============ PRINT ============ */
+@media print {
+  @page { size: A4; margin: 0; }
+
+  body { background: white !important; color: black !important; }
+  .topbar, .form-panel, .no-print { display: none !important; }
+  .layout { display: block; padding: 0; gap: 0; }
+  .preview-panel {
+    padding: 0; box-shadow: none; border-radius: 0;
+    display: block; overflow: visible; background: white !important;
+  }
+  #cv-preview {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    height: 297mm !important;
+    box-shadow: none;
+    background: white !important;
+    color: black !important;
+    padding: 12mm 15mm;
+    page-break-after: avoid;
+  }
+
+  /* Force print colors */
+  #cv-preview * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Sidebar full height in print */
+  .tpl-sidebar-left,
+  .tpl-sidebar-right {
+    padding: 0 !important;
+    display: flex !important;
+    min-height: 297mm !important;
+    height: 297mm !important;
+    width: 210mm !important;
+    page-break-inside: avoid;
+  }
+
+  .tpl-sidebar-left .cv-sidebar,
+  .tpl-sidebar-right .cv-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 62mm !important;
+    min-height: 297mm !important;
+    height: auto !important;
+    padding: 15mm 8mm !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  .tpl-sidebar-left .cv-main,
+  .tpl-sidebar-right .cv-main {
+    flex: 1 !important;
+    padding: 15mm 10mm !important;
+  }
+
+  /* Ensure colored boxes print */
+  #cv-preview .cv-sidebar,
+  #cv-preview .cv-sidebar *,
+  #cv-preview table th,
+  #cv-preview h2,
+  #cv-preview .info-table td:nth-child(1),
+  #cv-preview .cv-header,
+  #cv-preview .cv-col-left {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+</style>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+<div class="topbar no-print">
+  <div class="topbar-left">
+    <a href="./index.html" class="back-btn">← Back</a>
+    <h1>📄 CV Maker</h1>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-dark" id="btn-theme">🌙 Dark</button>
+    <button class="btn-success" id="btn-save">💾 Save</button>
+    <button class="btn-cyan" id="btn-load">📂 Load</button>
+    <button class="btn-purple" id="btn-export">⬇ Export</button>
+    <button class="btn-warning" id="btn-import">⬆ Import</button>
+    <button class="btn-gray" id="btn-reset">↺ Reset</button>
+    <button class="btn-primary" id="btn-print">🖨️ Print</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="form-panel no-print">
+
+    <fieldset>
+      <legend>🎨 Template</legend>
+      <label>Choose Template
+        <select id="template-select">
+          <option value="classic">📄 Classic</option>
+          <option value="modern">🎨 Modern</option>
+          <option value="elegant">👑 Elegant</option>
+          <option value="compact">📦 Compact</option>
+          <option value="minimal">⬜ Minimal</option>
+          <option value="photo-right">↔️ Photo Right</option>
+          <option value="sidebar-left">📋 Sidebar Left</option>
+          <option value="sidebar-right">📋 Sidebar Right</option>
+          <option value="twocolumn">📊 Two Column</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>🎨 Accent Color</legend>
+      <div class="color-row">
+        <input type="color" id="accent-color" value="#2563eb">
+        <input type="text" id="accent-text" value="#2563eb">
+      </div>
+      <div class="preset-colors" id="preset-colors">
+        <div class="preset-color" data-color="#2563eb" style="background:#2563eb"></div>
+        <div class="preset-color" data-color="#7c3aed" style="background:#7c3aed"></div>
+        <div class="preset-color" data-color="#dc2626" style="background:#dc2626"></div>
+        <div class="preset-color" data-color="#16a34a" style="background:#16a34a"></div>
+        <div class="preset-color" data-color="#ea580c" style="background:#ea580c"></div>
+        <div class="preset-color" data-color="#0891b2" style="background:#0891b2"></div>
+        <div class="preset-color" data-color="#db2777" style="background:#db2777"></div>
+        <div class="preset-color" data-color="#1e293b" style="background:#1e293b"></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>📷 Photo</legend>
+      <label>Upload Photo
+        <input type="file" id="photo-input" accept="image/*">
+      </label>
+      <button type="button" class="btn-danger btn-sm" id="photo-remove" style="display:none">Remove Photo</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>👤 Personal Information</legend>
+      <label>Full Name<input type="text" id="p-fullName" placeholder="Muhammad Ahmad"></label>
+      <label>Job Title<input type="text" id="p-jobTitle" placeholder="Software Engineer"></label>
+      <label>Email<input type="text" id="p-email" placeholder="ahmad@example.com"></label>
+      <label>Phone<input type="text" id="p-phone" placeholder="+92 300 1234567"></label>
+      <label>Address<input type="text" id="p-address" placeholder="Lahore, Pakistan"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>📋 Personal Details</legend>
+      <label>Father's Name<input type="text" id="i-fatherName" placeholder="Abdul Karim"></label>
+      <label>CNIC / ID<input type="text" id="i-cnic" placeholder="35202-1234567-1"></label>
+      <label>Date of Birth<input type="text" id="i-dob" placeholder="01-Jan-1995"></label>
+      <label>Nationality<input type="text" id="i-nationality" placeholder="Pakistani"></label>
+      <label>Religion<input type="text" id="i-religion" placeholder="Islam"></label>
+      <label>Marital Status<input type="text" id="i-marital" placeholder="Single"></label>
+      <label>Domicile<input type="text" id="i-domicile" placeholder="Punjab"></label>
+      <label>Gender<input type="text" id="i-gender" placeholder="Male"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>🎯 Objective</legend>
+      <textarea id="t-objective" rows="3" placeholder="Seeking a challenging position..."></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>📋 Summary</legend>
+      <textarea id="t-summary" rows="3" placeholder="5+ years of experience..."></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>🎓 Education</legend>
+      <div id="edu-rows"></div>
+      <button type="button" class="btn-success btn-sm" id="edu-add">+ Add Education</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>💼 Experience</legend>
+      <div id="exp-rows"></div>
+      <button type="button" class="btn-success btn-sm" id="exp-add">+ Add Experience</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>🛠️ Skills</legend>
+      <textarea id="t-skills" rows="3" placeholder="JavaScript, HTML, CSS..."></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>🎨 Hobbies</legend>
+      <textarea id="t-hobbies" rows="2"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>👥 References</legend>
+      <div id="ref-rows"></div>
+      <button type="button" class="btn-success btn-sm" id="ref-add">+ Add Reference</button>
+    </fieldset>
+
+  </div>
+
+  <div class="preview-panel">
+    <div id="cv-preview" class="tpl-classic"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="import-input" accept=".json,application/json" style="display:none">
+
+<script>
+(function() {
+  "use strict";
+
+  var App = {
+    state: {
+      template: 'classic',
+      accent: '#2563eb',
+      theme: 'light',
+      personal: {},
+      info: {},
+      text: {},
+      photo: null,
+      education: [],
+      experience: [],
+      references: []
+    },
+
+    personalFields: ['fullName','jobTitle','email','phone','address'],
+    infoFields: ['fatherName','cnic','dob','nationality','religion','marital','domicile','gender'],
+    textFields: ['objective','summary','skills','hobbies'],
+
+    infoLabels: {
+      fatherName: "Father's Name", cnic: "CNIC / ID",
+      dob: "Date of Birth", nationality: "Nationality",
+      religion: "Religion", marital: "Marital Status",
+      domicile: "Domicile", gender: "Gender"
+    },
+
+    eduCols: [
+      { key:'degree', label:'Degree',      ph:'BSc Computer Science' },
+      { key:'inst',   label:'Institute',   ph:'Punjab University' },
+      { key:'year',   label:'Year',        ph:'2018 - 2020' },
+      { key:'marks',  label:'Marks/Grade', ph:'A Grade' }
+    ],
+    expCols: [
+      { key:'post',   label:'Position',     ph:'Software Engineer' },
+      { key:'org',    label:'Organization', ph:'ABC Company' },
+      { key:'from',   label:'From',         ph:'Jan 2020' },
+      { key:'to',     label:'To',           ph:'Present' },
+      { key:'duties', label:'Duties',       ph:'Developed web applications...' }
+    ],
+    refCols: [
+      { key:'name',    label:'Name',         ph:'Dr. Ahmad Khan' },
+      { key:'post',    label:'Position',     ph:'Professor' },
+      { key:'org',     label:'Organization', ph:'Punjab University' },
+      { key:'contact', label:'Contact',      ph:'+92 300 1111111' }
+    ],
+
+    init: function() {
+      console.log("CV Maker starting...");
+      if (!this.state.education.length)  this.state.education.push({});
+      if (!this.state.experience.length) this.state.experience.push({});
+      if (!this.state.references.length) this.state.references.push({});
+
+      this.bindSimpleFields();
+      this.bindTextFields();
+      this.bindPhoto();
+      this.bindTemplate();
+      this.bindAccent();
+      this.bindPresets();
+      this.bindRows();
+      this.bindTheme();
+      this.bindActions();
+
+      this.renderTable('edu');
+      this.renderTable('exp');
+      this.renderTable('ref');
+      this.updatePreview();
+      console.log("CV Maker ready");
+    },
+
+    bindSimpleFields: function() {
+      var self = this;
+      this.personalFields.forEach(function(key) {
+        var el = document.getElementById('p-' + key);
+        if (!el) return;
+        el.addEventListener('input', function() {
+          self.state.personal[key] = el.value;
+          self.updatePreview();
+        });
+      });
+      this.infoFields.forEach(function(key) {
+        var el = document.getElementById('i-' + key);
+        if (!el) return;
+        el.addEventListener('input', function() {
+          self.state.info[key] = el.value;
+          self.updatePreview();
+        });
+      });
+    },
+
+    bindTextFields: function() {
+      var self = this;
+      this.textFields.forEach(function(key) {
+        var el = document.getElementById('t-' + key);
+        if (!el) return;
+        el.addEventListener('input', function() {
+          self.state.text[key] = el.value;
+          self.updatePreview();
+        });
+      });
+    },
+
+    bindPhoto: function() {
+      var self = this;
+      var input = document.getElementById('photo-input');
+      var removeBtn = document.getElementById('photo-remove');
+      input.addEventListener('change', function(e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function(ev) {
+          self.state.photo = ev.target.result;
+          removeBtn.style.display = 'inline-flex';
+          self.updatePreview();
+        };
+        r.readAsDataURL(f);
+      });
+      removeBtn.addEventListener('click', function() {
+        self.state.photo = null;
+        input.value = '';
+        removeBtn.style.display = 'none';
+        self.updatePreview();
+      });
+    },
+
+    bindTemplate: function() {
+      var self = this;
+      var sel = document.getElementById('template-select');
+      sel.addEventListener('change', function() {
+        self.state.template = sel.value;
+        var p = document.getElementById('cv-preview');
+        if (p) p.className = 'tpl-' + sel.value;
+        self.updatePreview();
+      });
+    },
+
+    shade: function(hex, percent) {
+      var h = hex.replace('#', '');
+      var r = parseInt(h.substr(0, 2), 16);
+      var g = parseInt(h.substr(2, 2), 16);
+      var b = parseInt(h.substr(4, 2), 16);
+      r = Math.min(255, Math.max(0, r + Math.round(255 * percent / 100)));
+      g = Math.min(255, Math.max(0, g + Math.round(255 * percent / 100)));
+      b = Math.min(255, Math.max(0, b + Math.round(255 * percent / 100)));
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    },
+
+    bindAccent: function() {
+      var self = this;
+      var picker = document.getElementById('accent-color');
+      var text = document.getElementById('accent-text');
+      picker.addEventListener('input', function() {
+        text.value = picker.value;
+        self.state.accent = picker.value;
+        self.updatePreview();
+        self.markActivePreset(picker.value);
+      });
+      text.addEventListener('input', function() {
+        var v = text.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+          picker.value = v;
+          self.state.accent = v;
+          self.updatePreview();
+          self.markActivePreset(v);
+        }
+      });
+    },
+
+    bindPresets: function() {
+      var self = this;
+      var presets = document.querySelectorAll('.preset-color');
+      for (var i = 0; i < presets.length; i++) {
+        (function(el) {
+          el.addEventListener('click', function() {
+            var color = el.getAttribute('data-color');
+            self.state.accent = color;
+            document.getElementById('accent-color').value = color;
+            document.getElementById('accent-text').value = color;
+            self.updatePreview();
+            self.markActivePreset(color);
+          });
+        })(presets[i]);
+      }
+      this.markActivePreset(this.state.accent);
+    },
+
+    markActivePreset: function(color) {
+      var presets = document.querySelectorAll('.preset-color');
+      for (var i = 0; i < presets.length; i++) {
+        if (presets[i].getAttribute('data-color').toLowerCase() === color.toLowerCase()) {
+          presets[i].classList.add('active');
+        } else {
+          presets[i].classList.remove('active');
+        }
+      }
+    },
+
+    bindTheme: function() {
+      var self = this;
+      var btn = document.getElementById('btn-theme');
+      btn.addEventListener('click', function() {
+        if (self.state.theme === 'light') {
+          self.state.theme = 'dark';
+          document.body.classList.add('dark');
+          btn.innerHTML = '☀️ Light';
+        } else {
+          self.state.theme = 'light';
+          document.body.classList.remove('dark');
+          btn.innerHTML = '🌙 Dark';
+        }
+      });
+    },
+
+    bindRows: function() {
+      var self = this;
+      document.getElementById('edu-add').addEventListener('click', function() {
+        self.state.education.push({});
+        self.renderTable('edu');
+        self.updatePreview();
+      });
+      document.getElementById('exp-add').addEventListener('click', function() {
+        self.state.experience.push({});
+        self.renderTable('exp');
+        self.updatePreview();
+      });
+      document.getElementById('ref-add').addEventListener('click', function() {
+        self.state.references.push({});
+        self.renderTable('ref');
+        self.updatePreview();
+      });
+    },
+
+    renderTable: function(type) {
+      var self = this;
+      var cfg = {
+        edu: { cols: this.eduCols, data: 'education',  wrap: 'edu-rows' },
+        exp: { cols: this.expCols, data: 'experience', wrap: 'exp-rows' },
+        ref: { cols: this.refCols, data: 'references', wrap: 'ref-rows' }
+      }[type];
+
+      var wrap = document.getElementById(cfg.wrap);
+      if (!wrap) return;
+
+      var html = '';
+      this.state[cfg.data].forEach(function(row, idx) {
+        html += '<div class="row-item">';
+        html += '<div class="row-header">';
+        html += '<strong>#' + (idx + 1) + '</strong>';
+        html += '<button type="button" class="row-remove" data-remove="' + type + ':' + idx + '">Remove</button>';
+        html += '</div>';
+        cfg.cols.forEach(function(c) {
+          var val = (row[c.key] || '').replace(/"/g, '&quot;');
+          html += '<label>' + c.label;
+          html += '<input type="text" data-tbl="' + type + ':' + idx + ':' + c.key + '" value="' + val + '" placeholder="' + (c.ph || '') + '">';
+          html += '</label>';
+        });
+        html += '</div>';
+      });
+      wrap.innerHTML = html;
+
+      var tblInputs = wrap.querySelectorAll('[data-tbl]');
+      for (var i = 0; i < tblInputs.length; i++) {
+        (function(inp) {
+          inp.addEventListener('input', function() {
+            var p = inp.getAttribute('data-tbl').split(':');
+            var t = p[0], idx = parseInt(p[1]), k = p[2];
+            var dataKey = { edu: 'education', exp: 'experience', ref: 'references' }[t];
+            self.state[dataKey][idx][k] = inp.value;
+            self.updatePreview();
+          });
+        })(tblInputs[i]);
+      }
+
+      var removes = wrap.querySelectorAll('[data-remove]');
+      for (var j = 0; j < removes.length; j++) {
+        (function(btn) {
+          btn.addEventListener('click', function() {
+            var p = btn.getAttribute('data-remove').split(':');
+            var t = p[0], idx = parseInt(p[1]);
+            var dataKey = { edu: 'education', exp: 'experience', ref: 'references' }[t];
+            self.state[dataKey].splice(idx, 1);
+            if (self.state[dataKey].length === 0) self.state[dataKey].push({});
+            self.renderTable(t);
+            self.updatePreview();
+          });
+        })(removes[j]);
+      }
+    },
+
+    esc: function(s) {
+      return (s || '').replace(/[<>&]/g, function(m) {
+        return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' })[m];
+      });
+    },
+    nl2br: function(s) {
+      return this.esc(s).replace(/\n/g, '<br>');
+    },
+
+    pca: function() {
+      return '-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;';
+    },
+    h2Style: function(accent) {
+      var light = this.shade(accent, 85);
+      var dark = this.shade(accent, -25);
+      return 'style="background:' + light + ' !important;color:' + dark + ' !important;border-left:4px solid ' + accent + ' !important;padding:5px 10px;margin:14px 0 8px;font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;font-size:12pt;' + this.pca() + '"';
+    },
+    h2MinimalStyle: function(accent) {
+      return 'style="background:transparent !important;color:' + accent + ' !important;border:none !important;border-bottom:1px solid ' + accent + ' !important;padding:3px 0;margin:14px 0 8px;font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;font-size:12pt;' + this.pca() + '"';
+    },
+    h2ElegantStyle: function(accent) {
+      return 'style="background:transparent !important;color:' + accent + ' !important;border:none !important;border-bottom:2px solid ' + accent + ' !important;text-align:center;padding:5px 0;margin:14px 0 8px;font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;font-size:12pt;' + this.pca() + '"';
+    },
+    thStyle: function(accent) {
+      return 'style="background:' + accent + ' !important;color:#ffffff !important;border:1px solid ' + accent + ' !important;padding:6px 8px;text-align:left;font-size:9.5pt;font-family:Arial,sans-serif;font-weight:600;' + this.pca() + '"';
+    },
+    thMinimalStyle: function() {
+      return 'style="background:#f0f0f0 !important;color:#000 !important;border:1px solid #666 !important;padding:6px 8px;text-align:left;font-size:9.5pt;font-family:Arial,sans-serif;font-weight:600;' + this.pca() + '"';
+    },
+    getH2Style: function() {
+      var tpl = this.state.template;
+      var accent = this.state.accent;
+      if (tpl === 'elegant') return this.h2ElegantStyle(accent);
+      if (tpl === 'minimal') return this.h2MinimalStyle(accent);
+      return this.h2Style(accent);
+    },
+    getThStyle: function() {
+      if (this.state.template === 'minimal') return this.thMinimalStyle();
+      return this.thStyle(this.state.accent);
+    },
+
+    updatePreview: function() {
+      var p = document.getElementById('cv-preview');
+      if (!p) return;
+      p.className = 'tpl-' + this.state.template;
+
+      var tpl = this.state.template;
+      var html;
+      if (tpl === 'sidebar-left' || tpl === 'sidebar-right') {
+        html = this.buildSidebar();
+      } else if (tpl === 'twocolumn') {
+        html = this.buildTwoColumn();
+      } else {
+        html = this.buildStandard();
+      }
+      p.innerHTML = html;
+    },
+
+    buildStandard: function() {
+      var st = this.state;
+      var self = this;
+      var accent = st.accent;
+      var dark = self.shade(accent, -25);
+      var tpl = st.template;
+
+      var photoHTML = st.photo
+        ? '<div class="cv-photo-box"><img src="' + st.photo + '"></div>'
+        : '<div class="cv-photo-box">PHOTO</div>';
+
+      var contact = '';
+      if (st.personal.phone)   contact += '<div>☎ ' + self.esc(st.personal.phone) + '</div>';
+      if (st.personal.email)   contact += '<div>✉ ' + self.esc(st.personal.email) + '</div>';
+      if (st.personal.address) contact += '<div>📍 ' + self.esc(st.personal.address) + '</div>';
+
+      var headerStyle = '';
+      if (tpl === 'modern') {
+        var softBg = self.shade(accent, 94);
+        headerStyle = 'style="background:' + softBg + ' !important;border-bottom:3px solid ' + accent + ' !important;padding:12px;border-radius:6px;' + self.pca() + '"';
+      } else if (tpl === 'elegant') {
+        headerStyle = 'style="border-bottom:3px solid ' + accent + ' !important;' + self.pca() + '"';
+      } else if (tpl === 'minimal') {
+        headerStyle = 'style="border-bottom:1px solid #000 !important;"';
+      } else {
+        headerStyle = 'style="border-bottom:3px double #000 !important;"';
+      }
+
+      var nameColor = (tpl === 'modern' || tpl === 'elegant') ? dark : '#000000';
+      var h2Style = self.getH2Style();
+
+      var html = '';
+      html += '<div class="cv-header" ' + headerStyle + '>' + photoHTML;
+      html += '<div class="cv-title">';
+      html += '<h1 style="color:' + nameColor + ' !important;' + self.pca() + '">' + (self.esc(st.personal.fullName) || 'Your Name') + '</h1>';
+      if (st.personal.jobTitle) html += '<div class="cv-job" style="color:' + (tpl === 'modern' ? accent : '#333') + ' !important;">' + self.esc(st.personal.jobTitle) + '</div>';
+      html += '<div class="cv-contact">' + contact + '</div>';
+      html += '</div></div>';
+
+      html += this.buildInfoTable();
+      if (st.text.objective) html += '<h2 ' + h2Style + '>Objective</h2><div class="cv-text-block">' + self.nl2br(st.text.objective) + '</div>';
+      if (st.text.summary)   html += '<h2 ' + h2Style + '>Professional Summary</h2><div class="cv-text-block">' + self.nl2br(st.text.summary) + '</div>';
+      html += this.buildEduTable();
+      html += this.buildExpTable();
+      if (st.text.skills)  html += '<h2 ' + h2Style + '>Skills</h2><div class="cv-text-block">' + self.nl2br(st.text.skills) + '</div>';
+      if (st.text.hobbies) html += '<h2 ' + h2Style + '>Hobbies</h2><div class="cv-text-block">' + self.nl2br(st.text.hobbies) + '</div>';
+      html += this.buildRefTable();
+      return html;
+    },
+
+    /* ============= SIDEBAR — full-height colored column ============= */
+    buildSidebar: function() {
+      var st = this.state;
+      var self = this;
+      var accent = st.accent;
+
+      var photoHTML = st.photo
+        ? '<div class="cv-photo-box"><img src="' + st.photo + '"></div>'
+        : '<div class="cv-photo-box">PHOTO</div>';
+
+      var sidebarStyle = 'style="background:' + accent + ' !important;color:#ffffff !important;' + self.pca() + '"';
+
+      // Sidebar: Photo + Name + Contact + Skills + Experience
+      var sidebar = '<div class="cv-sidebar" ' + sidebarStyle + '>';
+      sidebar += photoHTML;
+      sidebar += '<div class="sidebar-name">' + (self.esc(st.personal.fullName) || 'Your Name') + '</div>';
+      if (st.personal.jobTitle) sidebar += '<div class="sidebar-job">' + self.esc(st.personal.jobTitle) + '</div>';
+
+      // Contact
+      sidebar += '<div class="sidebar-section"><h3>Contact</h3>';
+      if (st.personal.phone)   sidebar += '<div>☎ ' + self.esc(st.personal.phone) + '</div>';
+      if (st.personal.email)   sidebar += '<div>✉ ' + self.esc(st.personal.email) + '</div>';
+      if (st.personal.address) sidebar += '<div>📍 ' + self.esc(st.personal.address) + '</div>';
+      sidebar += '</div>';
+
+      // Skills
+      if (st.text.skills) {
+        sidebar += '<div class="sidebar-section"><h3>Skills</h3>';
+        sidebar += '<div>' + self.nl2br(st.text.skills) + '</div></div>';
+      }
+
+      // Experience (brief)
+      var expRows = st.experience.filter(function(r) {
+        return Object.keys(r).some(function(k) { return r[k] && r[k].trim(); });
+      });
+      if (expRows.length) {
+        sidebar += '<div class="sidebar-section"><h3>Experience</h3>';
+        expRows.forEach(function(r) {
+          sidebar += '<div style="margin-bottom:6px;color:#ffffff;">';
+          if (r.post) sidebar += '<strong>' + self.esc(r.post) + '</strong>';
+          if (r.org)  sidebar += '<div style="font-style:italic;opacity:0.9;">' + self.esc(r.org) + '</div>';
+          if (r.from || r.to) sidebar += '<div style="font-size:8pt;opacity:0.85;">' + self.esc(r.from||'') + (r.to ? ' – ' + self.esc(r.to) : '') + '</div>';
+          sidebar += '</div>';
+        });
+        sidebar += '</div>';
+      }
+
+      // Hobbies
+      if (st.text.hobbies) {
+        sidebar += '<div class="sidebar-section"><h3>Hobbies</h3>';
+        sidebar += '<div>' + self.nl2br(st.text.hobbies) + '</div></div>';
+      }
+
+      sidebar += '</div>';
+
+      // Main: Personal Details + Objective + Summary + Education + References
+      var h2Style = self.h2Style(accent);
+      var main = '<div class="cv-main">';
+      main += this.buildInfoTable();
+      if (st.text.objective) main += '<h2 ' + h2Style + '>Objective</h2><div class="cv-text-block">' + self.nl2br(st.text.objective) + '</div>';
+      if (st.text.summary)   main += '<h2 ' + h2Style + '>About Me</h2><div class="cv-text-block">' + self.nl2br(st.text.summary) + '</div>';
+      main += this.buildEduTable();
+      main += this.buildRefTable();
+      main += '</div>';
+
+      return sidebar + main;
+    },
+
+    buildTwoColumn: function() {
+      var st = this.state;
+      var self = this;
+      var accent = st.accent;
+      var photoHTML = st.photo
+        ? '<div class="cv-photo-box"><img src="' + st.photo + '"></div>'
+        : '<div class="cv-photo-box">PHOTO</div>';
+      var contact = '';
+      if (st.personal.phone)   contact += '<div>☎ ' + self.esc(st.personal.phone) + '</div>';
+      if (st.personal.email)   contact += '<div>✉ ' + self.esc(st.personal.email) + '</div>';
+      if (st.personal.address) contact += '<div>📍 ' + self.esc(st.personal.address) + '</div>';
+
+      var h2Style = self.h2Style(accent);
+      var header = '<div class="cv-header" style="border-bottom:3px solid ' + accent + ' !important;' + self.pca() + '">' + photoHTML;
+      header += '<div class="cv-title">';
+      header += '<h1 style="color:' + self.shade(accent, -25) + ' !important;">' + (self.esc(st.personal.fullName) || 'Your Name') + '</h1>';
+      if (st.personal.jobTitle) header += '<div class="cv-job">' + self.esc(st.personal.jobTitle) + '</div>';
+      header += '<div class="cv-contact">' + contact + '</div>';
+      header += '</div></div>';
+
+      var left = '<div class="cv-col-left" style="border-right:2px solid ' + accent + ' !important;' + self.pca() + '">';
+      left += this.buildInfoTable();
+      if (st.text.skills)  left += '<h2 ' + h2Style + '>Skills</h2><div class="cv-text-block">' + self.nl2br(st.text.skills) + '</div>';
+      if (st.text.hobbies) left += '<h2 ' + h2Style + '>Hobbies</h2><div class="cv-text-block">' + self.nl2br(st.text.hobbies) + '</div>';
+      left += '</div>';
+
+      var right = '<div class="cv-col-right">';
+      if (st.text.objective) right += '<h2 ' + h2Style + '>Objective</h2><div class="cv-text-block">' + self.nl2br(st.text.objective) + '</div>';
+      if (st.text.summary)   right += '<h2 ' + h2Style + '>Summary</h2><div class="cv-text-block">' + self.nl2br(st.text.summary) + '</div>';
+      right += this.buildEduTable();
+      right += this.buildExpTable();
+      right += this.buildRefTable();
+      right += '</div>';
+
+      return header + '<div class="cv-body">' + left + right + '</div>';
+    },
+
+    buildInfoTable: function() {
+      var st = this.state;
+      var self = this;
+      var soft = self.shade(st.accent, 94);
+      var h2Style = self.getH2Style();
+      var rows = '';
+      this.infoFields.forEach(function(k) {
+        if (st.info[k] && st.info[k].trim()) {
+          rows += '<tr>';
+          rows += '<td style="background:' + soft + ' !important;font-weight:600;width:30%;font-family:Arial,sans-serif;font-size:10pt;' + self.pca() + '">' + self.esc(self.infoLabels[k] || k) + '</td>';
+          rows += '<td>' + self.esc(st.info[k]) + '</td>';
+          rows += '</tr>';
+        }
+      });
+      if (!rows) return '';
+      return '<h2 ' + h2Style + '>Personal Details</h2><table class="info-table">' + rows + '</table>';
+    },
+
+    buildEduTable: function() {
+      var st = this.state;
+      var self = this;
+      var rows = st.education.filter(function(r) {
+        return Object.keys(r).some(function(k) { return r[k] && r[k].trim(); });
+      });
+      if (!rows.length) return '';
+      var h2Style = self.getH2Style();
+      var thStyle = self.getThStyle();
+      var html = '<h2 ' + h2Style + '>Education</h2><table><thead><tr>';
+      this.eduCols.forEach(function(c) { html += '<th ' + thStyle + '>' + self.esc(c.label) + '</th>'; });
+      html += '</tr></thead><tbody>';
+      rows.forEach(function(r) {
+        html += '<tr>';
+        self.eduCols.forEach(function(c) { html += '<td>' + self.esc(r[c.key]) + '</td>'; });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      return html;
+    },
+
+    buildExpTable: function() {
+      var st = this.state;
+      var self = this;
+      var rows = st.experience.filter(function(r) {
+        return Object.keys(r).some(function(k) { return r[k] && r[k].trim(); });
+      });
+      if (!rows.length) return '';
+      var h2Style = self.getH2Style();
+      var thStyle = self.getThStyle();
+      var html = '<h2 ' + h2Style + '>Work Experience</h2><table><thead><tr>';
+      this.expCols.forEach(function(c) { html += '<th ' + thStyle + '>' + self.esc(c.label) + '</th>'; });
+      html += '</tr></thead><tbody>';
+      rows.forEach(function(r) {
+        html += '<tr>';
+        self.expCols.forEach(function(c) { html += '<td>' + self.nl2br(r[c.key]) + '</td>'; });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      return html;
+    },
+
+    buildRefTable: function() {
+      var st = this.state;
+      var self = this;
+      var rows = st.references.filter(function(r) {
+        return Object.keys(r).some(function(k) { return r[k] && r[k].trim(); });
+      });
+      if (!rows.length) return '';
+      var h2Style = self.getH2Style();
+      var thStyle = self.getThStyle();
+      var html = '<h2 ' + h2Style + '>References</h2><table><thead><tr>';
+      this.refCols.forEach(function(c) { html += '<th ' + thStyle + '>' + self.esc(c.label) + '</th>'; });
+      html += '</tr></thead><tbody>';
+      rows.forEach(function(r) {
+        html += '<tr>';
+        self.refCols.forEach(function(c) { html += '<td>' + self.esc(r[c.key]) + '</td>'; });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      return html;
+    },
+
+    bindActions: function() {
+      var self = this;
+
+      document.getElementById('btn-print').addEventListener('click', function() {
+        self.updatePreview();
+        setTimeout(function() { window.print(); }, 200);
+      });
+
+      document.getElementById('btn-save').addEventListener('click', function() {
+        try {
+          localStorage.setItem('cvData', JSON.stringify(self.state));
+          self.toast('Saved', 'success');
+        } catch (e) { self.toast('Save failed', 'error'); }
+      });
+
+      document.getElementById('btn-load').addEventListener('click', function() {
+        try {
+          var s = localStorage.getItem('cvData');
+          if (!s) { self.toast('No saved data', 'error'); return; }
+          var obj = JSON.parse(s);
+          self.state = Object.assign({
+            template: 'classic', accent: '#2563eb', theme: 'light',
+            personal: {}, info: {}, text: {}, photo: null,
+            education: [{}], experience: [{}], references: [{}]
+          }, obj);
+          if (!self.state.education.length)  self.state.education.push({});
+          if (!self.state.experience.length) self.state.experience.push({});
+          if (!self.state.references.length) self.state.references.push({});
+          self.reloadForm();
+          self.toast('Loaded', 'success');
+        } catch (e) { self.toast('Load failed', 'error'); }
+      });
+
+      document.getElementById('btn-export').addEventListener('click', function() {
+        var blob = new Blob([JSON.stringify(self.state, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'cv-' + Date.now() + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        self.toast('Exported', 'success');
+      });
+
+      document.getElementById('btn-import').addEventListener('click', function() {
+        document.getElementById('import-input').click();
+      });
+
+      document.getElementById('import-input').addEventListener('change', function(e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function(ev) {
+          try {
+            var obj = JSON.parse(ev.target.result);
+            self.state = Object.assign({
+              template: 'classic', accent: '#2563eb', theme: 'light',
+              personal: {}, info: {}, text: {}, photo: null,
+              education: [{}], experience: [{}], references: [{}]
+            }, obj);
+            if (!self.state.education.length)  self.state.education.push({});
+            if (!self.state.experience.length) self.state.experience.push({});
+            if (!self.state.references.length) self.state.references.push({});
+            self.reloadForm();
+            self.toast('Imported', 'success');
+          } catch (err) { self.toast('Invalid file', 'error'); }
+        };
+        r.readAsText(f);
+        e.target.value = '';
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', function() {
+        if (!confirm('Reset all?')) return;
+        self.state = {
+          template: 'classic', accent: '#2563eb', theme: self.state.theme,
+          personal: {}, info: {}, text: {}, photo: null,
+          education: [{}], experience: [{}], references: [{}]
+        };
+        self.reloadForm();
+        self.toast('Reset done', 'success');
+      });
+    },
+
+    reloadForm: function() {
+      var self = this;
+      this.personalFields.forEach(function(k) {
+        var el = document.getElementById('p-' + k);
+        if (el) el.value = self.state.personal[k] || '';
+      });
+      this.infoFields.forEach(function(k) {
+        var el = document.getElementById('i-' + k);
+        if (el) el.value = self.state.info[k] || '';
+      });
+      this.textFields.forEach(function(k) {
+        var el = document.getElementById('t-' + k);
+        if (el) el.value = self.state.text[k] || '';
+      });
+      document.getElementById('template-select').value = self.state.template;
+      document.getElementById('accent-color').value = self.state.accent;
+      document.getElementById('accent-text').value = self.state.accent;
+      document.getElementById('photo-remove').style.display =
+        self.state.photo ? 'inline-flex' : 'none';
+
+      if (self.state.theme === 'dark') {
+        document.body.classList.add('dark');
+        document.getElementById('btn-theme').innerHTML = '☀️ Light';
+      } else {
+        document.body.classList.remove('dark');
+        document.getElementById('btn-theme').innerHTML = '🌙 Dark';
+      }
+      this.markActivePreset(self.state.accent);
+      this.renderTable('edu');
+      this.renderTable('exp');
+      this.renderTable('ref');
+      this.updatePreview();
+    },
+
+    toast: function(msg, type) {
+      var t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.className = 'toast show ' + (type || '');
+      clearTimeout(this._tt);
+      this._tt = setTimeout(function() { t.classList.remove('show'); }, 2500);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { App.init(); });
+  } else {
+    App.init();
+  }
+})();
+</script>
+</body>
+</html>

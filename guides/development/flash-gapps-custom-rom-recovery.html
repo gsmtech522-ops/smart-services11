@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Flash GApps on Custom ROM via Recovery | Tech Learn</title>
+<meta name="description" content="Complete guide to flash GApps (MindTheGapps, NikGApps) on custom ROMs using TWRP/OrangeFox recovery. Covers package selection, clean flash workflow and troubleshooting.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Flash GApps on a Custom ROM</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>AOSP-based custom ROMs (LineageOS, Pixel Experience, crDroid, etc.)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Critical rule:</strong> GApps must be flashed <strong>immediately after the ROM, before first boot</strong>. If you reboot into Android first and then try to install GApps, you will get crashes and must factory reset [citation:2][citation:4].</p>
+  </div>
+
+  <p>Most custom ROMs ship without Google apps due to licensing restrictions. If you flash a "vanilla" (no-GApps) ROM, you must install GApps separately to get Play Store, Play Services and other Google apps. This guide covers the correct workflow, package selection, and recovery steps.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Which GApps package should you use?</h3>
+      <table>
+        <thead>
+          <tr><th>Package</th><th>Best for</th><th>Size</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>MindTheGapps</strong></td><td>LineageOS and AOSP ROMs</td><td>~200 MB</td><td>Officially recommended by LineageOS [citation:2]</td></tr>
+          <tr><td><strong>NikGApps</strong></td><td>Advanced users who want control</td><td>Variable</td><td>Core package is ~80 MB, addons optional [citation:4]</td></tr>
+          <tr><td><strong>OpenGApps</strong></td><td>Legacy ROMs (Android 10 and older)</td><td>150 MB – 1 GB</td><td>No longer maintained; use only if ROM specifically requires it [citation:13]</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>Recommendation:</strong> for LineageOS use <strong>MindTheGapps</strong> matching your Android version. For other AOSP ROMs, <strong>NikGApps Core</strong> is the safest minimal choice [citation:4].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Custom recovery</strong> installed (TWRP or OrangeFox).</li>
+        <li><strong>Vanilla custom ROM zip</strong> (no GApps pre-installed) matching your device.</li>
+        <li><strong>GApps zip</strong> matching your Android version and architecture (ARM64 most common).</li>
+        <li><strong>Data backup</strong> — the process wipes your device.</li>
+        <li>Charged battery (50%+).</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Match the Android version:</strong> GApps for Android 14 will not work on Android 15, and vice versa. Check your ROM's Android version in <strong>Settings → About phone</strong> after the ROM boots, or on the ROM download page.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Boot into custom recovery</h3>
+      <ol>
+        <li>Power off the device completely.</li>
+        <li>Hold the recovery key combo:
+          <ul>
+            <li><strong>Most devices:</strong> Volume Up + Power</li>
+            <li><strong>Samsung:</strong> Volume Up + Bixby + Power</li>
+            <li><strong>Xiaomi/POCO:</strong> Volume Up + Power</li>
+          </ul>
+        </li>
+        <li>Release when the TWRP/OrangeFox logo appears.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Clean flash workflow (ROM + GApps together)</h3>
+      <p>This is the safe method. Flash the ROM and GApps in <strong>one recovery session</strong>, without rebooting in between.</p>
+
+      <p><strong>Step A — Wipe (if coming from another ROM):</strong></p>
+      <ol>
+        <li>Go to <strong>Wipe</strong> → <strong>Advanced Wipe</strong>.</li>
+        <li>Select <strong>Dalvik/ART Cache</strong>, <strong>System</strong>, <strong>Data</strong>, <strong>Cache</strong>.</li>
+        <li>Swipe to wipe.</li>
+        <li>Go back → <strong>Format Data</strong> → type <code>yes</code> (this removes encryption).</li>
+        <li>Reboot to recovery again (needed after Format Data).</li>
+      </ol>
+
+      <p><strong>Step B — Flash ROM:</strong></p>
+      <ol>
+        <li>Go to <strong>Install</strong> → select the ROM zip.</li>
+        <li>Swipe to flash.</li>
+        <li><strong>Do NOT reboot yet.</strong></li>
+      </ol>
+
+      <p><strong>Step C — Flash GApps:</strong></p>
+      <ol>
+        <li>Go back to <strong>Install</strong> (do not reboot).</li>
+        <li>Select the GApps zip.</li>
+        <li>Swipe to flash.</li>
+        <li>If you see a message that GApps size is too large, you must use a smaller package (e.g. NikGApps Core instead of Stock).</li>
+      </ol>
+
+      <p><strong>Step D — Wipe cache and reboot:</strong></p>
+      <ol>
+        <li>Go to <strong>Wipe</strong> → wipe <strong>Cache</strong> and <strong>Dalvik/ART Cache</strong>.</li>
+        <li>Reboot to <strong>System</strong>.</li>
+      </ol>
+
+      <div class="note">
+        <p><strong>ADB Sideload alternative:</strong> if your recovery supports it (LineageOS Recovery, some TWRP builds), you can flash via PC: <code>adb sideload rom.zip</code> then <code>adb sideload gapps.zip</code> without rebooting [citation:1].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — First boot and setup</h3>
+      <ol>
+        <li>Wait 5–10 minutes for the first boot.</li>
+        <li>Sign in with your Google account during setup.</li>
+        <li>Open Play Store and verify it works.</li>
+        <li>Check <strong>Settings → Apps → Google Play Services</strong> — it should show as installed and active.</li>
+      </ol>
+      <div class="note">
+        <p><strong>If Play Store crashes:</strong> clear cache/data of <code>com.android.vending</code> and <code>com.google.android.gms</code> in Settings → Apps. If that fails, you flashed GApps after first boot — you must factory reset and redo the process [citation:2].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Alternative — Flash GApps only (ROM already flashed)</h3>
+      <p>If you already flashed the ROM but <strong>did not</strong> reboot into Android yet, you can still flash GApps:</p>
+      <ol>
+        <li>In recovery, go to <strong>Install</strong>.</li>
+        <li>Select the GApps zip.</li>
+        <li>Swipe to flash.</li>
+        <li>Wipe cache/Dalvik and reboot.</li>
+      </ol>
+      <div class="warning">
+        <p><strong>If the ROM already booted into Android once:</strong> you must go back to recovery → <strong>Format Data</strong> → re-flash ROM + GApps together. There is no way around this — Google Play Services must be present on the first boot [citation:2].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Cause</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>"Not enough space" during GApps flash</td><td>GApps package too large for system partition</td><td>Use a smaller package: NikGApps Core (~80 MB) or MindTheGapps [citation:4]</td></tr>
+          <tr><td>Play Store crashes on open</td><td>GApps flashed after first boot</td><td>Format Data → re-flash ROM + GApps together</td></tr>
+          <tr><td>Bootloop after GApps</td><td>Wrong GApps version or architecture</td><td>Download GApps matching your Android version and ARM64</td></tr>
+          <tr><td>Setup Wizard keeps crashing</td><td>Missing dependencies</td><td>Use MindTheGapps (LineageOS) or NikGApps Core — they include required framework files</td></tr>
+          <tr><td>No Play Store after boot</td><td>GApps flash failed silently</td><td>Re-flash in recovery; check TWRP log for errors</td></tr>
+          <tr><td>Play Integrity fails after GApps</td><td>Custom ROM signing</td><td>See Play Integrity fix guide (separate guide)</td></tr>
+          <tr><td>OTA update breaks GApps</td><td>OTA overwrote system partition</td><td>Re-flash GApps after each OTA, or use ROM with built-in GApps</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>8. GApps package comparison (2026)</h3>
+      <table>
+        <thead>
+          <tr><th>Package</th><th>Size</th><th>Includes</th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>MindTheGapps</td><td>~200 MB</td><td>Play Store, Play Services, Digital Wellbeing, Location Services</td><td>LineageOS users [citation:2][citation:4]</td></tr>
+          <tr><td>NikGApps Core</td><td>~80 MB</td><td>Play Store + Play Services framework only</td><td>Minimal install, privacy-conscious [citation:4]</td></tr>
+          <tr><td>NikGApps Basic</td><td>~150 MB</td><td>Core + YouTube, Digital Wellbeing</td><td>Light users who want a few extras [citation:4]</td></tr>
+          <tr><td>OpenGApps Pico</td><td>~150 MB</td><td>Play Store + Services</td><td>Legacy ROMs only (Android 10 or older) [citation:4]</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference (ADB sideload method)</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- From recovery, enter ADB Sideload mode ----
+# LineageOS Recovery: Apply update → Apply from ADB
+# TWRP: Advanced → ADB Sideload → Swipe to start
+
+# ---- Verify PC sees the device ----
+adb devices
+# Should show: xxxxxx    sideload
+
+# ---- Flash ROM first ----
+adb sideload rom.zip
+
+# ---- Without rebooting, flash GApps ----
+adb sideload gapps.zip
+
+# ---- Reboot to system ----
+adb reboot
+
+# ---- If bootloop: back to recovery ----
+adb reboot recovery
+# Then Format Data and redo</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Flash ROM and GApps in <strong>one recovery session</strong> — no reboot between them.</li>
+        <li>✅ Use <strong>MindTheGapps</strong> for LineageOS, <strong>NikGApps Core</strong> for others [citation:4][citation:13].</li>
+        <li>✅ Match the Android version and architecture (ARM64) exactly.</li>
+        <li>✅ If space runs out, use a smaller GApps package.</li>
+        <li>✅ Back up data before Format Data — it erases everything.</li>
+        <li>✅ After each OTA update, re-flash GApps if the ROM does not preserve them.</li>
+        <li>✅ Do not use OpenGApps unless the ROM explicitly requires it (deprecated).</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if you use a GApps build of the ROM (not vanilla), do <strong>not</strong> flash GApps separately — they are already included. Flashing again will cause conflicts. Check the ROM filename: "vanilla" = no GApps, "gapps" = GApps included.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="fix-play-integrity-safetynet-rooted-android.html">Fix Play Integrity &amp; SafetyNet on Rooted Android</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="../firmware-extracting/extract-payload-bin-android-ota-firmware.html">Extract payload.bin from OTA</a></li>
+      <li><a href="../development/create-flashable-zip.html">Create a Custom Flashable ZIP</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

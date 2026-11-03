@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۳: Operators اور Input</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #2563eb;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .category {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #475569;
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent-color);
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        ul, ol {
+            margin-right: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 14px;
+            border-radius: 8px;
+            direction: ltr;
+            text-align: left;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        .interactive-editor-box {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .editor-toolbar {
+            background: #1e293b;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: #ffffff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 6px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .code-input-area {
+            width: 100%;
+            height: 250px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .code-input-area:focus {
+            outline: none;
+        }
+
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 120px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <div class="container">
+        <span class="category">Python گائیڈ</span>
+        <h1>سبق ۳: Operators اور Input</h1>
+        
+        <div class="description">
+            Operators — حساب، comparison، logical، assignment۔ Arithmetic (+, -, *, /, //, %, **)، Comparison (==, !=, &lt;, &gt;)، Logical (and, or, not)، Assignment (=, +=, -=)۔ Input() — user سے data۔ String formatting — values show کرنا۔ یہ interactive programs کی بنیاد ہے۔
+        </div>
+
+        <h3>1. Arithmetic Operators</h3>
+        <ul>
+            <li><code>+</code> جمع</li>
+            <li><code>-</code> تفریق</li>
+            <li><code>*</code> ضرب</li>
+            <li><code>/</code> تقسیم (float)</li>
+            <li><code>//</code> integer division (floor)</li>
+            <li><code>%</code> modulus (باقی)</li>
+            <li><code>**</code> power</li>
+        </ul>
+
+        <h3>2. Comparison Operators</h3>
+        <ul>
+            <li><code>==</code> برابر</li>
+            <li><code>!=</code> نا برابر</li>
+            <li><code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></li>
+            <li>نتیجہ: <code>True</code> یا <code>False</code>۔</li>
+        </ul>
+
+        <h3>3. Logical Operators</h3>
+        <ul>
+            <li><code>and</code> — دونوں سچ</li>
+            <li><code>or</code> — کوئی ایک سچ</li>
+            <li><code>not</code> — الٹ</li>
+        </ul>
+
+        <h3>4. Assignment Operators</h3>
+        <ul>
+            <li><code>=</code> — assign</li>
+            <li><code>+=</code> — add + assign: <code>x += 5</code> = <code>x = x + 5</code></li>
+            <li><code>-=</code>، <code>*=</code>، <code>/=</code></li>
+        </ul>
+
+        <h3>5. Input() — User سے</h3>
+        <pre>
+name = input("اپنا نام: ")
+age = int(input("عمر: "))  # ← int میں convert
+
+print(f"سلام {name}!")
+print(f"اگلے سال آپ {age + 1} سال کے")
+        </pre>
+
+        <h3>6. کوڈ کی مکمل مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>Python — operators.py</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area"># ============================
+# Arithmetic Operators
+# ============================
+print("=== Arithmetic ===")
+a = 15
+b = 4
+
+print(f"a = {a}, b = {b}")
+print(f"a + b = {a + b}")
+print(f"a - b = {a - b}")
+print(f"a * b = {a * b}")
+print(f"a / b = {a / b}")     # 3.75
+print(f"a // b = {a // b}")   # 3 (integer)
+print(f"a % b = {a % b}")     # 3 (remainder)
+print(f"a ** b = {a ** b}")   # 50625
+
+# ============================
+# Comparison
+# ============================
+print("
+=== Comparison ===")
+x = 10
+y = 20
+
+print(f"x == y: {x == y}")
+print(f"x != y: {x != y}")
+print(f"x < y: {x < y}")
+print(f"x > y: {x > y}")
+print(f"x <= 10: {x <= 10}")
+print(f"y >= 30: {y >= 30}")
+
+# ============================
+# Logical
+# ============================
+print("
+=== Logical ===")
+age = 25
+has_id = True
+
+print(f"age >= 18 and has_id: {age >= 18 and has_id}")
+print(f"age < 18 or has_id: {age < 18 or has_id}")
+print(f"not has_id: {not has_id}")
+
+# ============================
+# Assignment
+# ============================
+print("
+=== Assignment ===")
+count = 10
+print(f"count: {count}")
+
+count += 5
+print(f"count += 5: {count}")
+
+count -= 3
+print(f"count -= 3: {count}")
+
+count *= 2
+print(f"count *= 2: {count}")
+
+count //= 4
+print(f"count //= 4: {count}")
+
+# ============================
+# Practical Examples
+# ============================
+print("
+=== Practical ===")
+
+# 1. Even/Odd
+num = 7
+if num % 2 == 0:
+    print(f"{num} is even (جفت)")
+else:
+    print(f"{num} is odd (طاق)")
+
+# 2. Area of circle
+radius = 5
+area = 3.14159 * radius ** 2
+print(f"Area of circle (r={radius}): {area:.2f}")
+
+# 3. Average
+marks = [85, 90, 78, 92, 88]
+average = sum(marks) / len(marks)
+print(f"Marks: {marks}")
+print(f"Average: {average:.1f}")</textarea>
+            <div class="preview-container">
+                <div class="preview-title">Terminal میں چلائیں: <code>python operators.py</code></div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>7. Interactive Calculator — مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>Python — calculator.py</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area"># سادہ calculator
+def calculator():
+    print("=== Calculator ===")
+    print("Operations: +, -, *, /, %, **")
+
+    num1 = 10.5
+    operator = "+"
+    num2 = 3.2
+
+    print(f"
+Input: {num1} {operator} {num2}")
+
+    if operator == "+":
+        result = num1 + num2
+    elif operator == "-":
+        result = num1 - num2
+    elif operator == "*":
+        result = num1 * num2
+    elif operator == "/":
+        if num2 == 0:
+            print("❌ Division by zero!")
+            return
+        result = num1 / num2
+    elif operator == "%":
+        result = num1 % num2
+    elif operator == "**":
+        result = num1 ** num2
+    else:
+        print("❌ Unknown operator")
+        return
+
+    print(f"Result: {result}")
+    print(f"Result (2 decimals): {result:.2f}")
+
+calculator()
+
+# BMI Calculator
+print("
+=== BMI Calculator ===")
+weight = 70  # kg
+height = 1.75  # meters
+
+bmi = weight / (height ** 2)
+print(f"Weight: {weight} kg")
+print(f"Height: {height} m")
+print(f"BMI: {bmi:.1f}")
+
+if bmi < 18.5:
+    category = "کم وزن"
+elif bmi < 25:
+    category = "نارمل"
+elif bmi < 30:
+    category = "زیادہ وزن"
+else:
+    category = "موٹاپا"
+
+print(f"Category: {category}")</textarea>
+            <div class="preview-container">
+                <div class="preview-title">Terminal میں چلائیں: <code>python calculator.py</code></div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>اہم باتیں</h3>
+        <ul>
+            <li>✅ <strong>/ بمقابلہ //:</strong> <code>15/4=3.75</code>، <code>15//4=3</code>۔</li>
+            <li>✅ <strong>% modulus:</strong> باقی — even/odd کے لیے۔</li>
+            <li>✅ <strong>input() string:</strong> number کے لیے <code>int()</code>۔</li>
+            <li>✅ <strong>and/or/not:</strong> keywords — JavaScript کے <code>&amp;&amp;/||/!</code> نہیں۔</li>
+            <li>✅ <strong>+= shorthand:</strong> <code>x = x + 5</code> کا مختصر۔</li>
+            <li>✅ <strong>Division by zero:</strong> چیک کریں — error سے بچیں۔</li>
+        </ul>
+
+        <h3>عمل / مشق (Task)</h3>
+        <ol>
+            <li>ایک calculator — user input سے۔</li>
+            <li>BMI calculator — weight، height سے۔</li>
+            <li>Grade calculator — marks سے grade۔</li>
+            <li>Even/Odd — % سے چیک۔</li>
+            <li>Temperature converter — C → F۔</li>
+        </ol>
+    </div>
+
+    <script>
+        async function copyCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const codeText = textArea.value;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(codeText);
+                } else {
+                    textArea.select();
+                    document.execCommand('copy');
+                }
+
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = "Copied! ✅";
+                buttonElement.style.backgroundColor = "#16a34a";
+
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    buttonElement.style.backgroundColor = "";
+                }, 2000);
+            } catch (err) {
+                console.error('کاپی کرنے میں ناکامی:', err);
+                alert('کپی کرنے میں مسئلہ پیش آیا!');
+            }
+        }
+
+        function runCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const iframe = editorBox.querySelector('.preview-iframe');
+            
+            const code = textArea.value;
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 10px; background: #0f172a; color: #38bdf8; font-size: 13px; margin: 0; }
+                        .log { color: #38bdf8; margin-bottom: 4px; border-bottom: 1px solid #1e293b; padding-bottom: 2px; }
+                        .info { color: #94a3b8; font-style: italic; margin-bottom: 6px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="info">> Terminal Output Simulation:</div>
+                    <div id="console-output"></div>
+                    <script>
+                        const output = document.getElementById('console-output');
+                        function appendLog(msg) {
+                            const div = document.createElement('div');
+                            div.className = 'log';
+                            div.textContent = '> ' + msg;
+                            output.appendChild(div);
+                        }
+                        const codeStr = ${JSON.stringify(code)};
+                        const lines = codeStr.split('\n');
+                        lines.forEach(l => {
+                            let trimmed = l.trim();
+                            if(trimmed.startsWith('print(')) {
+                                let content = trimmed.substring(6, trimmed.length - 1);
+                                appendLog(content);
+                            }
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+        }
+    </script>
+</body>
+</html>

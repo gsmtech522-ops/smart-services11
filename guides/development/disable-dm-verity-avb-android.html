@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Disable DM-Verity &amp; AVB on Android (Fastboot Guide) | Tech Learn</title>
+<meta name="description" content="Complete guide to disable Android Verified Boot (AVB) and dm-verity via fastboot vbmeta flags. Required before installing TWRP, custom ROMs or modifying system partitions.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Disable DM-Verity &amp; AVB on Android</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Android 8+ devices with unlocked bootloader</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Critical warning:</strong> disabling AVB/dm-verity requires an <strong>unlocked bootloader</strong>. On a locked device, this will brick the phone (red boot state). Also:</p>
+    <ul>
+      <li>This weakens device security — only do it on your own device.</li>
+      <li>Unlocking the bootloader usually <strong>wipes all data</strong>.</li>
+      <li>Banking apps, Google Pay, and DRM content may stop working.</li>
+    </ul>
+  </div>
+
+  <p>Modern Android uses <strong>Verified Boot (AVB)</strong> and <strong>dm-verity</strong> to cryptographically verify every partition before booting [citation:3][citation:5]. If you modify <code>system.img</code>, flash TWRP, or patch <code>boot.img</code> with Magisk, the hash no longer matches and the device refuses to boot — often showing a red warning or a boot loop. Disabling these checks via fastboot <code>vbmeta</code> flags solves this.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What are DM-Verity and AVB?</h3>
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>What it verifies</th><th>What it blocks</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>dm-verity</strong></td><td>Block-by-block hashes of system, vendor, product partitions [citation:3]</td><td>Modifying any file in /system</td></tr>
+          <tr><td><strong>AVB (Android Verified Boot)</strong></td><td>Whole-partition hashes + chained vbmeta signatures [citation:5]</td><td>Flashing patched boot/recovery/TWRP</td></tr>
+        </tbody>
+      </table>
+      <p>Two fastboot flags control this inside the <code>vbmeta</code> partition:</p>
+      <ul>
+        <li><code>--disable-verity</code> → disables dm-verity hashtree (allows /system modifications)</li>
+        <li><code>--disable-verification</code> → disables the entire AVB verification chain (allows any boot image)</li>
+      </ul>
+      <div class="note">
+        <p><strong>Which flag do you need?</strong> If you only want to run a patched boot image (Magisk root), you may not need either flag — the unlocked bootloader is enough. If you want to <strong>modify /system</strong>, you need <code>--disable-verity</code>. If you want to <strong>flash TWRP/custom recovery</strong>, you need <code>--disable-verification</code> [citation:16].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Unlocked bootloader</strong> — check in Developer Options → OEM unlocking, then unlock via fastboot.</li>
+        <li><strong>ADB &amp; Fastboot</strong> installed on PC.</li>
+        <li><strong>vbmeta.img</strong> extracted from your exact firmware build (or an empty/dummy vbmeta).</li>
+        <li><strong>Charged battery</strong> and a quality USB cable.</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Firmware match:</strong> use the <code>vbmeta.img</code> from the same build number currently on your device. A mismatched vbmeta can cause baseband loss or boot failure.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Boot into Fastboot mode</h3>
+      <ol>
+        <li>Enable USB Debugging on the phone.</li>
+        <li>Connect to PC and run:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot bootloader</code></pre>
+      </div>
+      <ol start="3">
+        <li>Verify the connection:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot devices</code></pre>
+      </div>
+      <p>You should see your device serial number.</p>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Flash vbmeta with disable flags</h3>
+      <p>This is the core command. It rewrites the vbmeta partition with the disable flags set:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img</code></pre>
+      </div>
+      <p>This single command is the standard method used by TWRP maintainers and the Magisk community [citation:1][citation:2].</p>
+
+      <p><strong>For A/B slot devices</strong> (most Android 10+ phones), flash both slots:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot --disable-verity --disable-verification flash vbmeta_a vbmeta.img
+fastboot --disable-verity --disable-verification flash vbmeta_b vbmeta.img</code></pre>
+      </div>
+
+      <p><strong>For devices with separate vbmeta partitions</strong> (some OEMs):</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot --disable-verity --disable-verification flash vbmeta_system vbmeta_system.img
+fastboot --disable-verity --disable-verification flash vbmeta_vendor vbmeta_vendor.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Reboot</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot</code></pre>
+      </div>
+      <p>The device may show an "Orange State" or "Bootloader Unlocked" warning for a few seconds — this is normal and cosmetic.</p>
+      <div class="note">
+        <p><strong>If it bootloops:</strong> some devices require a data wipe after disabling verity. Reboot to recovery and factory reset, or run <code>fastboot -w</code> (wipes userdata).</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Alternative — Empty / Dummy vbmeta</h3>
+      <p>Some technicians use an <strong>empty vbmeta</strong> (a pre-built image with all verification flags cleared). This is useful when you don't have the stock vbmeta or want to skip flag parsing:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot --disable-verity --disable-verification flash vbmeta vbmeta-empty.img</code></pre>
+      </div>
+      <p>Empty vbmeta images are device-agnostic and work on most Qualcomm/MediaTek devices with unlocked bootloader [citation:14].</p>
+      <div class="warning">
+        <p><strong>Risk:</strong> empty vbmeta removes all verification. Only use if you accept that the device cannot detect corruption. Do not use on devices you rely on for security-sensitive work.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Verification — did it work?</h3>
+      <p><strong>Method A — Check boot state:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot getvar all | grep -i verity
+fastboot getvar all | grep -i verified</code></pre>
+      </div>
+      <p>You should see <code>verity: disabled</code> or <code>verification: disabled</code>.</p>
+
+      <p><strong>Method B — Mount /system read-write (if rooted):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb root
+adb remount
+adb shell mount | grep system</code></pre>
+      </div>
+      <p>If it shows <code>rw</code> (not <code>ro</code>), verity is off.</p>
+
+      <p><strong>Method C — Flash TWRP:</strong> if TWRP boots without bootloop, AVB is disabled successfully.</p>
+    </li>
+
+    <li>
+      <h3>8. Common scenarios &amp; what to do</h3>
+      <table>
+        <thead>
+          <tr><th>Scenario</th><th>Flags needed</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Flash Magisk-patched boot.img</td><td>None (unlocked bootloader is enough)</td></tr>
+          <tr><td>Modify /system/app files</td><td><code>--disable-verity</code> only</td></tr>
+          <tr><td>Install TWRP / custom recovery</td><td><code>--disable-verification</code></td></tr>
+          <tr><td>Install custom ROM (LineageOS, etc.)</td><td><code>--disable-verification</code></td></tr>
+          <tr><td>Flash patched system.img</td><td>Both flags</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Bootloop after disabling</td><td>Some devices need <code>fastboot -w</code> (wipes data). Back up first.</td></tr>
+          <tr><td>"FAILED (remote: unknown command)"</td><td>Outdated fastboot. Download latest Platform Tools from Google.</td></tr>
+          <tr><td>"FAILED (remote: not allowed)"</td><td>Bootloader is still locked. Unlock it first.</td></tr>
+          <tr><td>"FAILED (remote: Flashing is not allowed in Lock State)"</td><td>Same — bootloader locked.</td></tr>
+          <tr><td>Orange/red state warning at every boot</td><td>Cosmetic — unlock state is permanent. Cannot be removed without re-locking.</td></tr>
+          <tr><td>TWRP boots but system won't</td><td>You flashed vbmeta but not the patched boot/recovery. Flash TWRP or custom ROM first.</td></tr>
+          <tr><td>Baseband becomes "Unknown" after flash</td><td>vbmeta mismatch caused modem partition corruption. Re-flash stock firmware + modem.</td></tr>
+          <tr><td>Device shows "Your device is corrupt"</td><td>vbmeta flags not properly applied. Re-run the flash command and reboot.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>10. Command cheat sheet</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Enter Fastboot
+adb reboot bootloader
+fastboot devices
+
+# Flash vbmeta with disable flags (A-only)
+fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img
+
+# Flash vbmeta with disable flags (A/B)
+fastboot --disable-verity --disable-verification flash vbmeta_a vbmeta.img
+fastboot --disable-verity --disable-verification flash vbmeta_b vbmeta.img
+
+# Flash vbmeta_system / vbmeta_vendor (some OEMs)
+fastboot --disable-verity --disable-verification flash vbmeta_system vbmeta_system.img
+fastboot --disable-verity --disable-verification flash vbmeta_vendor vbmeta_vendor.img
+
+# Empty vbmeta (all verification off)
+fastboot --disable-verity --disable-verification flash vbmeta vbmeta-empty.img
+
+# Reboot
+fastboot reboot
+
+# Wipe data if bootloop
+fastboot -w
+
+# Check flags
+fastboot getvar all | grep -i verity</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>11. Best practices</h3>
+      <ul>
+        <li>✅ Always use the exact matching <code>vbmeta.img</code> from your current build.</li>
+        <li>✅ Back up EFS/NVRAM before any vbmeta flash (see related guides).</li>
+        <li>✅ Flash both A/B slots to avoid slot-switch bootloops.</li>
+        <li>✅ Test with TWRP first — if TWRP boots, AVB is disabled correctly.</li>
+        <li>✅ Keep a copy of the original stock vbmeta for restoration.</li>
+        <li>✅ If banking apps fail after unlock, use Magisk + Universal SafetyNet Fix.</li>
+        <li>✅ Do not use on devices you didn't purchase yourself.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> after disabling AVB, immediately flash TWRP or a patched boot image. Otherwise the next OTA update may re-enable verification and cause a bootloop. Also note: <code>--disable-verity</code> is the smaller flag (only disables dm-verity hashtrees), while <code>--disable-verification</code> is the larger flag (disables the entire AVB chain) [citation:16]. Use the smallest flag that works for your goal.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="check-file-system-system-img-windows.html">Check &amp; Repair system.img on Windows</a></li>
+      <li><a href="convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw with simg2img</a></li>
+      <li><a href="../development/extract-boot-payload-bin.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="../adb-fastboot/fix-dm-verity-vbmeta.html">Fix DM-Verity &amp; VBMeta Errors</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boot into Recovery from Fastboot Mode | Tech Learn</title>
+<meta name="description" content="Learn how to boot your Android into Recovery directly from Fastboot/Bootloader mode using a single command. Includes custom recovery temporary boot.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Boot into Recovery from Fastboot Mode</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Quick Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~1 minute</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices with unlocked bootloader</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When flashing custom recoveries, unlocking bootloaders, or fixing soft-bricked devices, you often end up in Fastboot Mode. Normally you would use physical buttons to enter Recovery — but if your buttons are broken, Fastboot commands let you do it from the PC.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Method 1 — Standard boot command (most devices)</h3>
+      <ol>
+        <li>Open PowerShell in your Platform Tools folder.</li>
+        <li>Verify the phone is detected:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot devices</code></pre>
+      </div>
+      <ol start="3">
+        <li>Send the recovery boot command:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot recovery
+# or for some OEMs:
+fastboot oem reboot-recovery</code></pre>
+      </div>
+      <p>The phone will boot into Recovery within seconds.</p>
+    </li>
+
+    <li>
+      <h3>2. Method 2 — Temporary boot into a custom recovery file</h3>
+      <p>Newer devices (Android 10+, A/B slots) may not have a dedicated recovery partition. You can boot a TWRP <code>.img</code> temporarily without flashing it:</p>
+      <ol>
+        <li>Download your device's TWRP / custom recovery <code>.img</code> and place it on your desktop.</li>
+        <li>Open PowerShell and <code>cd</code> to that folder.</li>
+        <li>Boot the image temporarily:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot boot twrp.img</code></pre>
+      </div>
+      <p>The phone boots directly into that recovery from RAM — nothing is written to storage.</p>
+    </li>
+
+    <li>
+      <h3>3. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fastboot reboot recovery</code> reboots to system</td><td>Hold Volume Up while the phone restarts — most OEMs require this hardware workaround.</td></tr>
+          <tr><td><code>command ignored</code> or <code>unknown command</code></td><td>Try <code>fastboot oem reboot-recovery</code> instead (older or OEM-specific devices).</td></tr>
+          <tr><td><code>fastboot boot</code> gives an error</td><td>The recovery image is not signed or is mismatched to your device model.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="boot-into-recovery-adb-command.html">Boot recovery via ADB</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

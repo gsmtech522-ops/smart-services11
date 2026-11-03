@@ -1,0 +1,372 @@
+/* =====================================================================
+   HIGHLIGHT.JS — custom theme that matches your site
+   Add this to your guide.css
+   ===================================================================== */
+
+/* Code block container */
+.code-container {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+/* Code block base */
+pre code.hljs {
+  display: block;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  padding: 1.25rem;
+  border-radius: 8px;
+  background: #0f172a;          /* dark background */
+  color: #e2e8f0;               /* default text */
+  overflow-x: auto;
+}
+
+/* ---------- highlight.js token colors ---------- */
+
+/* Comments */
+.hljs-comment,
+.hljs-quote {
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Keywords (def, import, return, if, else...) */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-doctag,
+.hljs-type,
+.hljs-name,
+.hljs-strong {
+  color: #c084fc;
+  font-weight: 600;
+}
+
+/* Strings */
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+  color: #86efac;
+}
+
+/* Numbers */
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-link,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #fdba74;
+}
+
+/* Functions, titles, classes */
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_ {
+  color: #93c5fd;
+}
+
+/* Built-ins (print, len, type...) */
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #f0abfc;
+}
+
+/* Attributes (HTML/Python/JS) */
+.hljs-attr,
+.hljs-property {
+  color: #fbbf24;
+}
+
+/* Tags in HTML/XML */
+.hljs-tag {
+  color: #7dd3fc;
+}
+.hljs-tag .hljs-name {
+  color: #7dd3fc;
+  font-weight: 600;
+}
+.hljs-tag .hljs-attr {
+  color: #fbbf24;
+}
+.hljs-tag .hljs-string {
+  color: #86efac;
+}
+
+/* Operators & punctuation */
+.hljs-operator,
+.hljs-punctuation {
+  color: #cbd5e1;
+}
+
+/* Deletion (diff) */
+.hljs-deletion {
+  color: #fca5a5;
+}
+
+/* Emphasis */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+/* Function parameters */
+.hljs-params {
+  color: #fde68a;
+}
+
+/* Meta (e.g. shebang, preprocessor) */
+.hljs-meta {
+  color: #94a3b8;
+}
+
+/* ---------- Copy button on top of the code block ---------- */
+.code-container .copy-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #1e293b;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.code-container .copy-btn:hover {
+  background: #334155;
+}
+
+.code-container .copy-btn.copied {
+  background: #15803d;
+  border-color: #15803d;
+  color: #ffffff;
+}
+/* =====================================================================
+   CODE HIGHLIGHT + TAG/COLOR LIST STYLING
+   Used across HTML lessons for tag references and color lists.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Base code block (highlight.js compatible)
+   --------------------------------------------------------------------- */
+pre code.hljs {
+  display: block;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  padding: 1.25rem;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #e2e8f0;
+  overflow-x: auto;
+}
+
+/* ---------------------------------------------------------------------
+   highlight.js token colors
+   --------------------------------------------------------------------- */
+.hljs-comment,
+.hljs-quote {
+  color: #64748b;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-doctag,
+.hljs-type,
+.hljs-name,
+.hljs-strong {
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+  color: #86efac;
+}
+
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-link,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+  color: #fdba74;
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_ {
+  color: #93c5fd;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #f0abfc;
+}
+
+.hljs-attr,
+.hljs-property {
+  color: #fbbf24;
+}
+
+.hljs-tag { color: #7dd3fc; }
+.hljs-tag .hljs-name { color: #7dd3fc; font-weight: 600; }
+.hljs-tag .hljs-attr { color: #fbbf24; }
+.hljs-tag .hljs-string { color: #86efac; }
+
+.hljs-operator,
+.hljs-punctuation { color: #cbd5e1; }
+.hljs-deletion { color: #fca5a5; }
+.hljs-emphasis { font-style: italic; }
+.hljs-params { color: #fde68a; }
+.hljs-meta { color: #94a3b8; }
+
+/* ---------------------------------------------------------------------
+   Copy button (on top of code block)
+   --------------------------------------------------------------------- */
+.code-container {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.code-container .copy-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #1e293b;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.code-container .copy-btn:hover { background: #334155; }
+
+.code-container .copy-btn.copied {
+  background: #15803d;
+  border-color: #15803d;
+  color: #ffffff;
+}
+
+/* =====================================================================
+   TAG NAME STYLING (for reference lists)
+   ===================================================================== */
+
+code.tag-name,
+.tag-name {
+  color: #7dd3fc;
+  font-weight: 700;
+  background: rgba(125, 211, 252, 0.12);
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 0.92em;
+  border: 1px solid rgba(125, 211, 252, 0.25);
+}
+
+code.tag-deprecated,
+.tag-deprecated {
+  color: #fca5a5;
+  font-weight: 700;
+  background: rgba(252, 165, 165, 0.12);
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 0.92em;
+  border: 1px solid rgba(252, 165, 165, 0.3);
+}
+
+code.attr-name,
+.attr-name {
+  color: #fbbf24;
+  font-weight: 700;
+  background: rgba(251, 191, 36, 0.12);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 0.92em;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+/* ---------------------------------------------------------------------
+   Bold code inside tables
+   --------------------------------------------------------------------- */
+table code {
+  font-weight: 600;
+  color: #7dd3fc;
+  background: rgba(125, 211, 252, 0.1);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+tr.deprecated code,
+tr.deprecated td:first-child code {
+  color: #fca5a5;
+  background: rgba(252, 165, 165, 0.1);
+  text-decoration: line-through;
+}
+
+/* =====================================================================
+   COLOR SWATCH LIST
+   ===================================================================== */
+
+.color-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.color-name::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 4px;
+  background: var(--swatch, transparent);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.color-hex {
+  font-weight: 700;
+  color: #fbbf24;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  background: rgba(251, 191, 36, 0.12);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+table.color-table td {
+  vertical-align: middle;
+}
+
+table.color-table tr:nth-child(even) {
+  background: #f8fafc;
+}

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Unpack Signed boot.img / recovery.img / system.img (AVB) | Tech Learn</title>
+<meta name="description" content="Complete guide to unpack AVB-signed Android boot, recovery and system images. Remove hash footers with avbtool, then extract with magiskboot and simg2img.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Unpack Signed boot.img / recovery.img / system.img</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>AVB 2.0 signed Android images (Android 8+)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern Android firmware images are signed with <strong>Android Verified Boot (AVB 2.0)</strong>. The signature is stored as a <strong>footer</strong> appended to the end of <code>boot.img</code>, <code>recovery.img</code>, and a <strong>hashtree</strong> appended to <code>system.img</code>. Standard unpackers like <code>magiskboot</code> or <code>7-Zip</code> may fail or produce corrupt output because they read the extra signature data as part of the filesystem. To unpack a signed image, you must first <strong>remove the AVB footer</strong> with <code>avbtool</code>, then unpack the resulting unsigned image normally [citation:2][citation:15].</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Understand the AVB footer structure</h3>
+      <p>When a partition is signed with AVB, the tool appends extra data to the image:</p>
+      <table>
+        <thead>
+          <tr><th>Image type</th><th>AVB addition</th><th>Location</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>boot.img</code> / <code>recovery.img</code></td><td><strong>Hash footer</strong> (contains SHA256 hash + signature)</td><td>End of the image</td></tr>
+          <tr><td><code>system.img</code></td><td><strong>Hashtree footer</strong> (contains dm-verity tree + root hash + signature)</td><td>End of the image</td></tr>
+        </tbody>
+      </table>
+      <p>The footer tells the bootloader "these bytes must not be modified." For unpacking, we temporarily strip the footer so the image looks like a plain, unsigned filesystem or boot image.</p>
+      <div class="note">
+        <p><strong>Note:</strong> after modifying the image, you must re-add the footer and re-sign (or use a disabled/blank vbmeta to skip verification). The unpack guide below only covers the <em>unpack</em> half.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Python 3.5+</strong> (for <code>avbtool</code>) [citation:10]</li>
+        <li><strong>avbtool</strong> — extract from AOSP or get it from the Magisk tools package</li>
+        <li><strong>magiskboot</strong> — for boot/recovery unpacking [citation:14]</li>
+        <li><strong>simg2img</strong> — if the image is sparse</li>
+        <li><strong>e2fsck / debugfs</strong> — for ext4 system images</li>
+        <li>Linux environment (WSL2 works fine)</li>
+      </ul>
+
+      <p><strong>Install avbtool:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># From AOSP source
+git clone https://android.googlesource.com/platform/external/avb
+cd avb
+python3 avbtool.py --help
+
+# Or use the version bundled with Magisk (in the Magisk APK)
+# Extract the APK, look in lib/&lt;arch&gt;/libavb.so or the tools/ folder</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Check if the image is AVB-signed</h3>
+      <p>Use <code>avbtool</code> to inspect the image and confirm the footer exists:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 avbtool.py info_image --image boot.img</code></pre>
+      </div>
+      <p>Output will show <code>Footer version: 2.0</code>, <code>Original image size</code>, and the algorithm (e.g. <code>SHA256_RSA4096</code>). If it errors with "not an AVB image", the image is not signed — skip to Step 3.</p>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Remove the AVB footer</h3>
+      <p><code>avbtool</code> has a dedicated command to strip the footer and restore the image to its original (unsigned) size [citation:15]:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 avbtool.py erase_footer --image boot.img --output boot_unsigned.img</code></pre>
+      </div>
+      <p>For <code>system.img</code>, use the hashtree variant:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python3 avbtool.py erase_footer --image system.img --output system_unsigned.img</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Why erase_footer?</strong> It trims the image back to its declared original size, removing the hash/hashtree and signature. The result is a clean unsigned image you can unpack normally.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Unpack boot.img / recovery.img</h3>
+      <p>Once the footer is removed, use <code>magiskboot</code> to unpack [citation:14]:</p>
+
+      <p><strong>Create a working directory:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir boot_unpack && cd boot_unpack
+cp ../boot_unsigned.img .
+magiskboot unpack boot_unsigned.img</code></pre>
+      </div>
+
+      <p><strong>Output files:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">kernel
+ramdisk.cpio
+second
+dtb
+extra
+header</code></pre>
+      </div>
+
+      <p><strong>Extract the ramdisk:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir ramdisk_out
+cd ramdisk_out
+cpio -idmv < ../ramdisk.cpio</code></pre>
+      </div>
+      <p>You now have full access to <code>init</code>, <code>init.rc</code>, <code>sbin/</code>, and other ramdisk files.</p>
+
+      <div class="warning">
+        <p><strong>magiskboot error?</strong> if <code>magiskboot unpack</code> fails on the unsigned image, the image may use a vendor-specific header. Try <strong>Android Image Kitchen (AIK)</strong> instead — see the related guide.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Unpack system.img</h3>
+      <p>System images require a different workflow because they are filesystems, not boot images.</p>
+
+      <p><strong>Step A — Check if the image is sparse:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file system_unsigned.img
+xxd -l 4 system_unsigned.img</code></pre>
+      </div>
+      <p>If magic is <code>3AFF26ED</code>, it is sparse. Convert to raw [citation:6]:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img system_unsigned.img system_raw.img</code></pre>
+      </div>
+
+      <p><strong>Step B — Check the filesystem type:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file system_raw.img
+# ext4 → "Linux rev 1.0 ext4 filesystem data"
+# EROFS → "EROFS filesystem"</code></pre>
+      </div>
+
+      <p><strong>Step C — Extract ext4:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir system_extract
+sudo mount -o loop,ro system_raw.img system_extract
+# or use debugfs without mounting:
+# debugfs -R "rdump / system_extract" system_raw.img</code></pre>
+      </div>
+
+      <p><strong>Step C — Extract EROFS:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo fsck.erofs --extract=./system_extract system_raw.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Step 5 — What next? (Repack &amp; re-sign)</h3>
+      <p>After modifying the extracted files, you must repack and either <strong>re-sign</strong> the image or <strong>disable AVB</strong>:</p>
+
+      <p><strong>Option A — Repack and flash with AVB disabled (unlocked bootloader):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Repack boot
+magiskboot repack boot_unsigned.img new-boot.img
+
+# Flash with disabled vbmeta
+fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img
+fastboot flash boot new-boot.img</code></pre>
+      </div>
+
+      <p><strong>Option B — Re-add AVB footer and re-sign (requires OEM keys):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Add hash footer back
+python3 avbtool.py add_hash_footer \
+  --image new-boot.img \
+  --partition_name boot \
+  --partition_size 33554432 \
+  --key /path/to/oem_key.pem \
+  --algorithm SHA256_RSA4096
+
+# Rebuild vbmeta with new descriptors
+python3 avbtool.py make_vbmeta_image \
+  --output vbmeta_new.img \
+  --include_descriptors_from_image new-boot.img \
+  --key /path/to/oem_key.pem</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>OEM keys are private.</strong> You cannot re-sign with the manufacturer's key unless you extracted it (rare, and usually illegal). For unlocked bootloaders, disabling AVB (Option A) is the standard approach. For locked bootloaders, you cannot flash modified signed images at all.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>avbtool: not an AVB image</code></td><td>Image is not AVB-signed (older Android). Skip footer removal.</td></tr>
+          <tr><td><code>magiskboot unpack</code> fails after footer removal</td><td>Try AIK instead. Some vendor headers are non-standard.</td></tr>
+          <tr><td>system.img won't mount after footer removal</td><td>Image may still be sparse — run <code>simg2img</code> first.</td></tr>
+          <tr><td>Ramdisk cpio is empty</td><td>On Android 13+ GKI devices, ramdisk is in <code>init_boot.img</code>, not <code>boot.img</code>.</td></tr>
+          <tr><td>Device bootloop after flashing modified image</td><td>AVB rejected it. Disable verity/vbmeta, or restore stock image.</td></tr>
+          <tr><td><code>avbtool erase_footer</code> fails</td><td>Image may be truncated or corrupted. Re-extract from firmware.</td></tr>
+          <tr><td>EROFS image won't extract with e2fsck</td><td>EROFS needs <code>fsck.erofs</code>, not ext4 tools. See EROFS guide.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Check AVB footer ----
+python3 avbtool.py info_image --image boot.img
+
+# ---- Remove AVB footer ----
+python3 avbtool.py erase_footer --image boot.img --output boot_unsigned.img
+python3 avbtool.py erase_footer --image system.img --output system_unsigned.img
+
+# ---- Unpack boot/recovery ----
+mkdir boot_unpack && cd boot_unpack
+magiskboot unpack boot_unsigned.img
+mkdir ramdisk_out && cd ramdisk_out
+cpio -idmv < ../ramdisk.cpio
+
+# ---- Unpack system ----
+# 1. Convert sparse to raw if needed
+simg2img system_unsigned.img system_raw.img
+
+# 2. Check filesystem type
+file system_raw.img
+
+# 3. Extract ext4
+sudo mount -o loop,ro system_raw.img /mnt/system
+
+# 4. Extract EROFS
+sudo fsck.erofs --extract=./system_extract system_raw.img
+
+# ---- Repack boot ----
+magiskboot repack boot_unsigned.img new-boot.img
+
+# ---- Flash with AVB disabled ----
+fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img
+fastboot flash boot new-boot.img
+
+# ---- Re-add AVB footer (requires OEM key) ----
+python3 avbtool.py add_hash_footer \
+  --image new-boot.img \
+  --partition_name boot \
+  --partition_size 33554432 \
+  --key /path/to/key.pem</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Always keep the original signed image — you may need to restore it.</li>
+        <li>✅ Use <code>avbtool info_image</code> first to confirm the footer exists.</li>
+        <li>✅ Remove the footer before unpacking — otherwise unpackers read garbage.</li>
+        <li>✅ For unlocked bootloaders, disable AVB rather than trying to re-sign [citation:15].</li>
+        <li>✅ Check if the image is sparse before mounting — <code>simg2img</code> first.</li>
+        <li>✅ On Android 13+, patch <code>init_boot.img</code> for ramdisk changes.</li>
+        <li>✅ Never flash a modified signed image to a locked bootloader — it will always fail.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if your goal is simply to <strong>root</strong> the device, you do not need to unpack manually. Magisk's official patch method handles AVB and ramdisk modifications automatically. This guide is for <strong>advanced modification</strong> — editing ramdisk files, replacing <code>adbd</code>, or modifying system partitions.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="unpack-repack-android-boot-recovery-img.html">Unpack &amp; Repack boot.img / recovery.img</a></li>
+      <li><a href="unpack-erofs-system-images-android.html">Unpack EROFS System Images</a></li>
+      <li><a href="mount-ext4-android-images-windows.html">Mount &amp; Extract ext4 Android Images</a></li>
+      <li><a href="patch-boot-img-magisk-root-guide.html">Patch boot.img with Magisk</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

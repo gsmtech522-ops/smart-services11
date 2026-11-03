@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash MediaTek Firmware — Master Guide (All Methods) | Tech Learn</title>
+<meta name="description" content="Master index of all methods to flash MediaTek firmware: SP Flash Tool, MTKClient, Miracle Box, ADB/Fastboot.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Flash MediaTek Firmware — Master Guide</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Index / Comparison</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Use</dt>
+    <dd>Choose the right flash method for your device</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>MediaTek devices span from legacy feature phones to modern SLA/DAA-protected Helio and Dimensity chips. Different scenarios require different flashing tools. This master index covers the top 4 methods with links to dedicated guides.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MediaTek VCOM drivers installed.</li>
+        <li>ADB &amp; Fastboot Platform Tools.</li>
+        <li>LibUSB-win32 Filter or UsbDk (for SLA/DAA bypass).</li>
+        <li>Official firmware matching your exact model.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — SP Flash Tool</h3>
+      <p><strong>Best for:</strong> legacy to mid-tier MTK devices with scatter file available.</p>
+      <ul>
+        <li>Official MediaTek software</li>
+        <li>Multiple flash modes (Download Only / Firmware Upgrade / Format All)</li>
+        <li>Requires exact scatter file</li>
+      </ul>
+      <p>→ <a href="flash-mtk-sp-flash-tool.html">Full guide: Flash via SP Flash Tool</a></p>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — MTKClient</h3>
+      <p><strong>Best for:</strong> modern Helio P/G and Dimensity with SLA/DAA protection.</p>
+      <ul>
+        <li>100% free and open-source</li>
+        <li>Auto-bypasses SLA/DAA without <code>.auth</code></li>
+        <li>Writes to modern eMMC and UFS</li>
+      </ul>
+      <p>→ <a href="flash-mtk-mtkclient.html">Full guide: Flash via MTKClient</a></p>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — Miracle Box / Miracle Thunder</h3>
+      <p><strong>Best for:</strong> fast, GUI-driven repair workflow.</p>
+      <ul>
+        <li>Friendly interface with progress visualization</li>
+        <li>Built-in boot profile selection</li>
+        <li>Great for one-click unbricking</li>
+      </ul>
+      <p>→ <a href="flash-mtk-miracle-box.html">Full guide: Flash via Miracle Box</a></p>
+    </li>
+
+    <li>
+      <h3>5. Method 4 — ADB and Fastboot</h3>
+      <p><strong>Best for:</strong> unlocked bootloader or devices stuck in bootloader state.</p>
+      <ul>
+        <li>Official Google development tools</li>
+        <li>Perfect for individual partitions (<code>boot</code>, <code>vbmeta</code>, <code>system</code>)</li>
+        <li>Also supports ADB Sideload of signed OTA</li>
+      </ul>
+      <p>→ <a href="../adb-fastboot/flash-stock-firmware-adb-fastboot.html">Full guide: Flash via ADB/Fastboot</a></p>
+    </li>
+
+    <li>
+      <h3>6. Companion tools</h3>
+      <ul>
+        <li><strong>LibUSB-win32 / UsbDk:</strong> capture BROM USB → <a href="install-libusb-win32-filter.html">guide</a></li>
+        <li><strong>MTK VCOM drivers:</strong> core USB drivers → <a href="install-mtk-vcom-drivers.html">guide</a></li>
+        <li><strong>WWR MTK Tool:</strong> analyze dumps → <a href="wwr-mtk-tool-overview.html">guide</a></li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>7. Which method should you choose?</h3>
+      <table>
+        <thead>
+          <tr><th>Your Situation</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Modern MTK device with SLA/DAA</td><td><strong>MTKClient</strong></td></tr>
+          <tr><td>Standard MTK with scatter file</td><td><strong>SP Flash Tool</strong></td></tr>
+          <tr><td>One-click technician GUI</td><td><strong>Miracle Box</strong></td></tr>
+          <tr><td>Unlocked bootloader / signed OTA</td><td><strong>ADB / Fastboot</strong></td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="flash-mtk-sp-flash-tool.html">SP Flash Tool flash</a></li>
+      <li><a href="flash-mtk-mtkclient.html">MTKClient flash</a></li>
+      <li><a href="flash-mtk-miracle-box.html">Miracle Box flash</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

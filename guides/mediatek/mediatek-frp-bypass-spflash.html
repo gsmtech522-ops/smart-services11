@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bypass FRP on MediaTek via SP Flash Tool (Format Address Method) | Tech Learn</title>
+<meta name="description" content="Targeted manual format FRP block bypass on MediaTek using SP Flash Tool and scatter file hex addresses. Own devices only.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Bypass FRP on MediaTek via SP Flash Tool</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>MediaTek devices with scatter file available</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Legal warning:</strong> this guide is <strong>only for your own device</strong> or a device you are authorized to service. Removing FRP from someone else's phone is theft, illegal in most countries, and traceable to the service provider.</p>
+  </div>
+
+  <p>Factory Reset Protection (FRP) is an Android security feature that blocks unauthorized access after a hard reset. On MediaTek devices, the FRP flag resides in the <code>frp</code> partition. Instead of "Format All + Download" (which wipes IMEI), you can perform a <strong>targeted manual format</strong> of just the <code>frp</code> block using exact hex addresses — in under 5 seconds.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>Official <strong>MediaTek VCOM/Preloader drivers</strong> installed.</li>
+        <li><strong>SP Flash Tool</strong> (v5.x or v6.x matching your SoC).</li>
+        <li><strong>Scatter file</strong> for your exact model (from stock firmware, or generated via WWR MTK Tool).</li>
+        <li>Text editor (Notepad++ or VS Code) to inspect the scatter file.</li>
+        <li>USB cable + charged MediaTek device.</li>
+        <li><em>Optional:</em> MTK Auth Bypass Tool / MTKClient for modern SLA/DAA-protected SoCs.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Extract FRP physical memory address</h3>
+      <ol>
+        <li>Open your stock firmware folder and locate the scatter file (e.g. <code>MT6765_Android_scatter.txt</code>).</li>
+        <li>Right-click and choose <strong>Edit with Notepad++</strong>.</li>
+        <li><kbd>Ctrl</kbd>+<kbd>F</kbd> → search <code>partition_name: frp</code> → Find Next.</li>
+        <li>Scroll to the block and note two keys:
+          <ul>
+            <li><code>linear_start_addr:</code> → physical start address</li>
+            <li><code>partition_size:</code> → format length</li>
+          </ul>
+        </li>
+      </ol>
+
+      <p><strong>Example scatter entry:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">- partition_index: SYS21
+  partition_name: frp
+  file_name: NONE
+  is_download: false
+  type: NORMAL_ROM
+  linear_start_addr: 0x2d80000
+  physical_start_addr: 0x2d80000
+  partition_size: 0x100000
+  region: EMMC_USER</code></pre>
+      </div>
+      <ul>
+        <li><strong>Begin Address [HEX]:</strong> <code>0x2d80000</code></li>
+        <li><strong>Format Length [HEX]:</strong> <code>0x100000</code></li>
+      </ul>
+
+      <div class="warning">
+        <p><strong>CRITICAL:</strong> never use example addresses from other devices. Physical start addresses vary across SoCs and partition tables. Wrong addresses will overwrite bootloaders or NVRAM — hard-bricking the phone or corrupting IMEI.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Configure SP Flash Tool</h3>
+      <ol>
+        <li>Launch <code>flash_tool.exe</code> as <strong>Administrator</strong>.</li>
+        <li>In <strong>Download</strong> tab, choose Download-Agent → <code>MTK_AllInOne_DA.bin</code> (or OEM DA).</li>
+        <li>Choose Scatter-loading File → your <code>Android_scatter.txt</code>.</li>
+        <li>Switch to <strong>Format</strong> tab.</li>
+        <li>Select <strong>Manual Format Flash</strong> (do NOT choose Auto Format or Format All).</li>
+        <li>Set region as <code>EMMC_USER</code> (or match scatter's region — <code>UFS_LU0</code> on UFS devices).</li>
+        <li>Paste the extracted values:
+          <ul>
+            <li><code>linear_start_addr</code> → <strong>Begin Address [HEX]</strong></li>
+            <li><code>partition_size</code> → <strong>Format Length [HEX]</strong></li>
+          </ul>
+        </li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Execute the format</h3>
+      <ol>
+        <li>If the SoC is SLA/DAA-protected, run your auth bypass first (e.g. MTKClient, MTK Auth Bypass Tool).</li>
+        <li>Click <strong>Start</strong> in the Format tab.</li>
+        <li>Power off the phone completely.</li>
+        <li>Hold <kbd>Volume Down</kbd> (or <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd>) and connect USB.</li>
+        <li>Watch SP Flash Tool detect the Preloader/BROM COM port — red bar (DA), then green progress.</li>
+        <li>Green checkmark <strong>Format OK</strong> appears in 1–3 seconds — the <code>frp</code> block is wiped.</li>
+        <li>Disconnect, hold Power to boot, and complete the initial setup — the Google FRP prompt no longer appears.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting</h3>
+
+      <p><strong>BROM ERROR: S_DL_GET_DRAM_SETTINGS_FAIL (5054)</strong></p>
+      <p>Cause: DA and RAM communication failure.</p>
+      <p>Fix: install proper VCOM drivers, use OEM-matched DA file, verify scatter authenticity.</p>
+
+      <p><strong>STATUS_SEC_AUTH_FILE_NEEDED / SLA handshake fail</strong></p>
+      <p>Cause: hardware secure boot requires auth tokens.</p>
+      <p>Fix: run MTKClient payload or an auth bypass tool before Start.</p>
+
+      <p><strong>Phone boot loops after format</strong></p>
+      <p>Cause: wrong hex start/length wiped neighboring partitions.</p>
+      <p>Fix: re-flash full stock firmware via <strong>Download Only</strong> mode.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="mediatek-partition-map-explained.html">MediaTek partition map</a></li>
+      <li><a href="bypass-mediatek-sla-daa.html">Bypass SLA/DAA</a></li>
+      <li><a href="install-mtk-vcom-drivers.html">Install MTK VCOM drivers</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

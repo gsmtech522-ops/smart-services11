@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Sideload Flashable Zip Files Using ADB | Tech Learn</title>
+<meta name="description" content="Complete tutorial on using ADB sideload to flash OTA updates, custom ROMs and zip files via Recovery mode without an SD card.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Sideload Flashable Zip Files Using ADB</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices with Stock or Custom Recovery</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When your phone is stuck in a bootloop or you want to manually apply an official OTA, and the device has no SD card slot, ADB sideload is the rescue method. It sends <code>.zip</code> packages (OTA updates, custom ROMs, Magisk root) from your PC to the recovery in one command.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>ADB &amp; Fastboot installed</strong> — see <a href="adb-fastboot-setup-windows.html">setup guide</a>.</li>
+        <li><strong>Correct USB drivers</strong> for recovery mode (MediaTek / Qualcomm / SPD).</li>
+        <li><strong>Flashable file</strong> — the OTA or ROM <code>.zip</code> to flash.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Prepare the zip on PC</h3>
+      <ul>
+        <li>Move the downloaded zip (e.g. <code>update_file_xyz.zip</code>) into your <code>platform-tools</code> folder.</li>
+        <li>Rename it to something short like <code>update.zip</code> or <code>rom.zip</code>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Boot into Recovery</h3>
+      <ul>
+        <li>Connect your phone to the PC.</li>
+        <li>Open PowerShell / CMD.</li>
+        <li>Boot into recovery:</li>
+      </ul>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot recovery</code></pre>
+      </div>
+      <p>Or power off and hold <kbd>Power</kbd> + <kbd>Volume Up</kbd> to boot into Recovery manually.</p>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Activate ADB sideload on the phone</h3>
+      <p><strong>On Stock Recovery:</strong></p>
+      <ul>
+        <li>Use Volume keys to navigate to <strong>Apply update from ADB</strong> (or <strong>Apply update from sideload</strong>).</li>
+        <li>Press Power to select.</li>
+      </ul>
+      <p><strong>On TWRP / OrangeFox:</strong></p>
+      <ul>
+        <li>Go to <strong>Advanced → ADB Sideload</strong>.</li>
+        <li>Swipe the slider to start.</li>
+      </ul>
+      <p>The phone should now display: <em>"Sideload started… Entering ADB sideload mode"</em>.</p>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Send the sideload command from PC</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb devices
+# Expected: xxxxxx    sideload
+
+adb sideload update.zip</code></pre>
+      </div>
+      <p>You will see a progress percentage in the terminal as the file uploads.</p>
+    </li>
+
+    <li>
+      <h3>6. Step 5 — Complete the installation</h3>
+      <ul>
+        <li>When it hits 100%, you'll see <code>Total xfer: 1.00x</code>.</li>
+        <li>The recovery automatically unpacks, verifies and writes the zip.</li>
+        <li>Once you see "Install from ADB complete" or "Script succeeded", reboot:</li>
+      </ul>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Common sideload errors</h3>
+      <table>
+        <thead>
+          <tr><th>Error</th><th>Cause &amp; fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>Total xfer: 0.00x</code> (stops immediately)</td><td>Corrupt zip, wrong firmware, or mismatched model. Re-download and double-check the model code.</td></tr>
+          <tr><td><code>cannot read file</code></td><td>CMD can't find the zip — drag and drop the file into the terminal window instead of typing the path.</td></tr>
+          <tr><td><code>adb: device unauthorized</code></td><td>Accept the USB debugging prompt on the phone.</td></tr>
+          <tr><td><code>error: closed</code></td><td>Recovery doesn't support sideload — try TWRP instead of stock recovery.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="flash-stock-firmware-adb-fastboot.html">Flash stock firmware</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="backup-android-firmware-adb-fastboot.html">Backup Android firmware</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

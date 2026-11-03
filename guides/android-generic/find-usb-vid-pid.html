@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Find Android USB Vendor ID (VID) &amp; Product ID (PID) | Tech Learn</title>
+<meta name="description" content="Identify unknown Android devices by reading their USB VID and PID parameters to install the correct drivers in BROM, EDL, ADB, or Fastboot modes.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Find Android USB Vendor ID (VID) &amp; Product ID (PID)</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Reference Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices (BROM / EDL / ADB / Fastboot)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When connecting phones in special servicing modes like <strong>EDL (Emergency Download)</strong>, <strong>BROM (Boot ROM)</strong>, <strong>Fastboot</strong>, or <strong>ADB</strong>, an unconfigured system may show the phone as an "<strong>Unknown USB Device</strong>" in Device Manager. Every hardware manufacturer embeds a unique hexadecimal ID into the phone's USB controller chip. By reading the <strong>VID</strong> and <strong>PID</strong>, you can determine the exact chipset and locate the required driver package.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Understanding USB VID &amp; PID</h3>
+      <table>
+        <thead>
+          <tr><th>Identifier</th><th>Meaning</th><th>Examples</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>VID (Vendor ID)</strong></td>
+            <td>4-digit hex code assigned to hardware manufacturers</td>
+            <td>Google: <code>18D1</code> · Samsung: <code>04E8</code> · MediaTek: <code>0E8D</code> · Qualcomm: <code>05C6</code></td>
+          </tr>
+          <tr>
+            <td><strong>PID (Product ID)</strong></td>
+            <td>4-digit hex code assigned by the manufacturer to a specific hardware mode</td>
+            <td>MTP mode vs. Fastboot vs. EDL mode</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Windows matches these <strong>VID</strong> / <strong>PID</strong> entries against <code>.inf</code> setup files to bind the appropriate driver to the USB port.</p>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Windows Device Manager (built-in)</h3>
+      <p>The standard manual method to identify unidentified devices on any system.</p>
+      <ol>
+        <li>Right-click Start → <strong>Device Manager</strong>.</li>
+        <li>Connect the phone in the target mode (key combo for EDL/BROM or Fastboot).</li>
+        <li>Look under <strong>Other devices</strong> or <strong>Universal Serial Bus controllers</strong> for an entry with a yellow warning triangle.</li>
+        <li>Right-click the device → <strong>Properties</strong>.</li>
+        <li>Go to the <strong>Details</strong> tab.</li>
+        <li>In the Property dropdown, select <strong>Hardware Ids</strong>.</li>
+        <li>Examine the value string — e.g.:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">USB\VID_05C6&amp;PID_9008&amp;REV_0000</code></pre>
+      </div>
+      <ul>
+        <li>4 chars after <code>VID_</code> = Vendor ID (e.g. <code>05C6</code> → <strong>Qualcomm</strong>)</li>
+        <li>4 chars after <code>PID_</code> = Product ID (e.g. <code>9008</code> → <strong>EDL Emergency Mode</strong>)</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — USBDeview utility (automated)</h3>
+      <p>If the device connects and disconnects quickly (e.g. MediaTek BROM mode), <strong>USBDeview</strong> logs connections in real-time.</p>
+      <ol>
+        <li>Launch <strong>USBDeview</strong> as Administrator.</li>
+        <li>The tool lists all USB device configurations stored in the Windows Registry.</li>
+        <li>Sort by clicking the <strong>Last Plug/Unplug Date</strong> column header — recent connections rise to the top.</li>
+        <li>Look for columns labeled <strong>Vendor ID</strong> and <strong>Product ID</strong>.</li>
+        <li>Values appear as clean hex tokens (e.g. Vendor ID: <code>0e8d</code>, Product ID: <code>0003</code> → <strong>MediaTek USB Port</strong>). Double-click the row to copy.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — Fastboot terminal query</h3>
+      <p>If the device communicates in bootloader mode, query hardware registers directly via terminal:</p>
+      <ol>
+        <li>Boot into Fastboot mode and connect to the PC.</li>
+        <li>Open CMD inside platform-tools.</li>
+        <li>Run:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot getvar all</code></pre>
+      </div>
+      <p>Review the output for variables describing controller hardware IDs and chipset revisions.</p>
+    </li>
+
+    <li>
+      <h3>5. Common hardware ID quick reference</h3>
+      <table>
+        <thead>
+          <tr><th>Chipset / Vendor</th><th>Vendor ID (VID)</th><th>Common Modes / PIDs</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>MediaTek (MTK)</strong></td>
+            <td><code>0E8D</code></td>
+            <td><code>0003</code> (BROM / Preloader)</td>
+          </tr>
+          <tr>
+            <td><strong>Qualcomm</strong></td>
+            <td><code>05C6</code></td>
+            <td><code>9008</code> (EDL Mode)</td>
+          </tr>
+          <tr>
+            <td><strong>Samsung</strong></td>
+            <td><code>04E8</code></td>
+            <td><code>6860</code> (MTP / ADB) · <code>685D</code> (Odin Mode)</td>
+          </tr>
+          <tr>
+            <td><strong>Google / Generic Android</strong></td>
+            <td><code>18D1</code></td>
+            <td><code>4EE0</code> (Fastboot Mode)</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>6. Troubleshooting hardware IDs</h3>
+      <p><strong>VID_0000 &amp; PID_0000 shown:</strong> if the Hardware ID reads <code>VID_0000&amp;PID_0000</code>, it means hardware communication failed. Common causes:</p>
+      <ul>
+        <li>Damaged USB data pins inside the device charging port</li>
+        <li>A power-only USB cable (charge-only, no data wires)</li>
+        <li>Insufficient USB power delivery on the motherboard</li>
+      </ul>
+      <div class="note">
+        <p><strong>Fix:</strong> use a high-quality data cable connected directly to the rear motherboard USB ports (avoid front-panel USB hubs).</p>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="../mediatek/install-mtk-vcom-drivers.html">Install MTK VCOM drivers</a></li>
+      <li><a href="../adb-fastboot/enable-usb-debugging-oem-unlocking.html">Enable USB Debugging &amp; OEM Unlocking</a></li>
+      <li><a href="../adb-fastboot/adb-fastboot-errors-troubleshooting.html">ADB &amp; Fastboot errors</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

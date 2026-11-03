@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Switch A/B Slots in Fastboot &amp; Fix Slot Errors | Tech Learn</title>
+<meta name="description" content="Complete guide to switch A/B partition slots in Fastboot, check current-slot, and fix all common slot change errors on modern Android devices.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Switch A/B Slots in Fastboot &amp; Fix Slot Change Errors</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All A/B seamless-update Android devices (Android 7+)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern Android devices use an <strong>A/B (Seamless Update) partition structure</strong>. Instead of one set of system partitions (boot, system, vendor), these devices have two identical copies — <strong>Slot A</strong> and <strong>Slot B</strong>. While one slot runs the active OS, updates are installed quietly to the inactive slot in the background.</p>
+
+  <p>If a firmware flash fails, an update causes a bootloop, or the device gets stuck after flashing a boot image, manually switching the active slot via Fastboot can <strong>immediately recover the device without wiping data</strong>.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>ADB &amp; Fastboot</strong> installed on PC.</li>
+        <li>Device booted into <strong>Fastboot / Bootloader mode</strong>.</li>
+        <li><strong>Unlocked bootloader</strong> — required for manual slot changes.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Check the current active slot</h3>
+      <p>Before any change, verify which slot the device is configured to boot from:</p>
+      <ol>
+        <li>Open Command Prompt in your Fastboot directory.</li>
+        <li>Run:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot getvar current-slot</code></pre>
+      </div>
+      <p>Output is either <code>current-slot: a</code> or <code>current-slot: b</code>.</p>
+      <div class="note">
+        <p><strong>If the command errors with "unknown variable"</strong>, your device is A-only (no A/B slots) — slot switching is not supported. Skip to troubleshooting error 2.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Switch the active slot</h3>
+
+      <p><strong>Switch to Slot A:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot set_active a</code></pre>
+      </div>
+
+      <p><strong>Switch to Slot B:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot set_active b</code></pre>
+      </div>
+
+      <p><strong>Older Fastboot versions (alternative syntax):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot --set-active=a</code></pre>
+      </div>
+
+      <p>On success, terminal reports: <code>Setting current slot to 'a'... OKAY</code></p>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Reboot and test</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot</code></pre>
+      </div>
+      <p>If the alternate slot boots correctly, your device is recovered — no data loss.</p>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting slot change errors</h3>
+
+      <p><strong>Error 1: <code>FAILED (remote: 'slot change is not allowed in Lock State')</code></strong></p>
+      <p>Cause: bootloader is locked. Security policies prevent partition changes on locked bootloaders.</p>
+      <p>Fix:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flashing unlock</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>Data wipe warning:</strong> unlocking the bootloader wipes all userdata. Back up first if possible.</p>
+      </div>
+
+      <p><strong>Error 2: <code>FAILED (remote: 'Slot-count is 0')</code> or "Device does not support slots"</strong></p>
+      <p>Cause: device is A-only (traditional single-partition structure), not A/B.</p>
+      <p>Fix: do not attempt slot switching. Flash directly to standard partitions:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash boot boot.img</code></pre>
+      </div>
+
+      <p><strong>Error 3: <code>FAILED (remote: 'invalid slot name')</code></strong></p>
+      <p>Cause: uppercase letters or invalid characters in the command (e.g. <code>Slot_A</code>, <code>A</code>).</p>
+      <p>Fix: always use single lowercase — <code>a</code> or <code>b</code>.</p>
+
+      <p><strong>Error 4: Device stuck in Qualcomm CrashDump or bootloop after slot switch</strong></p>
+      <p>Cause: the inactive slot you switched to contains corrupt, empty, or incompatible firmware.</p>
+      <p>Fix: re-enter Fastboot (<kbd>Volume Down</kbd>+<kbd>Power</kbd>) and switch back to the working slot:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot set_active a</code></pre>
+      </div>
+      <p>Then flash the alternate slot's boot image with correct firmware.</p>
+    </li>
+
+    <li>
+      <h3>6. Advanced — flash to a specific slot directly</h3>
+      <p>You can target partition slots explicitly without switching the active slot first:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash boot_a boot.img
+fastboot flash boot_b boot.img
+fastboot flash system_a system.img
+fastboot flash system_b system.img
+fastboot flash vbmeta_a vbmeta.img
+fastboot flash vbmeta_b vbmeta.img</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Why flash both slots?</strong> if the other slot's boot/system is corrupt, the device will bootloop if you ever switch to it. Flashing both slots keeps them in sync.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Enter Fastboot ----
+adb reboot bootloader
+fastboot devices
+
+# ---- Check current slot ----
+fastboot getvar current-slot
+
+# ---- Switch slots ----
+fastboot set_active a
+fastboot set_active b
+
+# ---- Older syntax ----
+fastboot --set-active=a
+fastboot --set-active=b
+
+# ---- Reboot ----
+fastboot reboot
+
+# ---- Flash to specific slot without switching ----
+fastboot flash boot_a boot.img
+fastboot flash boot_b boot.img
+fastboot flash system_a system.img
+fastboot flash system_b system.img
+fastboot flash vbmeta_a vbmeta.img
+fastboot flash vbmeta_b vbmeta.img
+
+# ---- Check slot-related variables ----
+fastboot getvar slot-count
+fastboot getvar has-slot:boot
+fastboot getvar all | grep slot
+
+# ---- Unlock bootloader (wipes data!) ----
+fastboot flashing unlock</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Best practices</h3>
+      <ul>
+        <li>✅ Check <code>current-slot</code> before any flash — you may be flashing to the wrong slot.</li>
+        <li>✅ Flash both A and B slots when doing major updates — prevents slot-switch bootloops.</li>
+        <li>✅ Try A/B switch first when recovering from a bootloop — it's non-destructive.</li>
+        <li>✅ Keep the bootloader unlocked if you plan to use fastboot regularly.</li>
+        <li>✅ After A/B switch, if the alternate slot boots, re-flash the corrupt slot with correct firmware.</li>
+        <li>✅ Match firmware to the exact build — mismatched slot images cause baseband/touch failures.</li>
+        <li>✅ Back up data before any unlock — unlocking wipes userdata.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> A/B switching is the fastest, safest way to recover a bootloop that started after an OTA update. Try it first — before wiping data or flashing anything.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">ADB &amp; Fastboot Commands Cheat Sheet</a></li>
+      <li><a href="reboot-from-bricked-soft-bricked-loop.html">Recover from bricked / soft-bricked loop</a></li>
+      <li><a href="fastbootd-vs-standard-fastboot.html">Fastbootd vs Standard Fastboot</a></li>
+      <li><a href="flash-stock-firmware-adb-fastboot.html">Flash Stock Firmware via ADB &amp; Fastboot</a></li>
+      <li><a href="../android-generic/disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

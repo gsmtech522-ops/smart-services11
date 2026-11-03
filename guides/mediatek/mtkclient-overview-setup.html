@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is SP Flash Tool? Complete Guide &amp; Bio | Tech Learn</title>
+<meta name="description" content="Complete overview of Smart Phone Flash Tool (SP Flash Tool): features, flash modes, versions, system requirements and compatibility.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>What is SP Flash Tool? Complete Guide &amp; Bio</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Software Overview</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Developer</dt>
+    <dd>MediaTek Inc.</dd>
+    <dt>OS</dt>
+    <dd>Windows 7–11, Linux</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>SP Flash Tool (Smart Phone Flash Tool) is the undisputed industry standard for servicing MediaTek-powered Android devices. It establishes low-level communication with MediaTek hardware even when the OS is completely corrupted or destroyed.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Software profile</h3>
+      <table>
+        <thead>
+          <tr><th>Attribute</th><th>Details</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Software Name</td><td>Smart Phone Flash Tool (SP Flash Tool)</td></tr>
+          <tr><td>Developer</td><td>MediaTek Inc.</td></tr>
+          <tr><td>Supported OS</td><td>Windows (7, 8, 10, 11) &amp; Linux</td></tr>
+          <tr><td>Target Hardware</td><td>MediaTek SoCs (eMMC / UFS)</td></tr>
+          <tr><td>License</td><td>Freeware</td></tr>
+          <tr><td>Primary Requirement</td><td>MTK VCOM / Preloader USB Drivers</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>2. Key features</h3>
+
+      <p><strong>1. Flashing stock firmware (scatter-based)</strong></p>
+      <p>Reads an <code>Android_scatter.txt</code> that maps the device's physical partitions (boot, system, vendor, recovery, nvram, etc.) and writes each image to its designated memory sector.</p>
+
+      <p><strong>2. Unbricking &amp; dead-boot recovery</strong></p>
+      <p>Communicates with Preloader/BROM mode to reflash critical boot partitions and revive dead devices.</p>
+
+      <p><strong>3. Firmware Readback</strong></p>
+      <p>Extract the entire raw ROM (<code>ROM_0</code>) or individual partitions directly from a working MTK phone for stock backups.</p>
+
+      <p><strong>4. Memory formatting</strong></p>
+      <ul>
+        <li><strong>Format Whole Flash:</strong> completely wipes storage (erases NVRAM/IMEI — dangerous)</li>
+        <li><strong>Auto Format:</strong> safely wipes user data while preserving boot partitions</li>
+        <li><strong>Manual Format:</strong> formats specific memory sectors using exact hex addresses</li>
+      </ul>
+
+      <p><strong>5. Hardware diagnostics</strong></p>
+      <p>Built-in memory test verifies RAM (SRAM/DRAM) and internal storage (eMMC/UFS) integrity.</p>
+    </li>
+
+    <li>
+      <h3>3. The 3 flashing modes explained</h3>
+      <ul>
+        <li><strong>Download Only (Recommended):</strong> flashes only selected partitions, preserving unselected partitions and IMEI data.</li>
+        <li><strong>Firmware Upgrade:</strong> used for Android version upgrades. Wipes non-essential partitions and rewrites all firmware components.</li>
+        <li><strong>Format All + Download (Dangerous):</strong> completely erases the entire flash memory before writing.</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Warning:</strong> <code>Format All + Download</code> permanently wipes NVRAM and NVDATA, causing <strong>Invalid IMEI</strong> errors unless you have a backup.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. System requirements</h3>
+      <ul>
+        <li><strong>OS:</strong> Windows 7 / 8 / 10 / 11 (64-bit recommended)</li>
+        <li><strong>Drivers:</strong> MediaTek Preloader USB VCOM Driver</li>
+        <li><strong>Utilities:</strong> WinRAR or 7-Zip</li>
+        <li><strong>Hardware:</strong> Quality USB 2.0 micro-USB or USB-C cable</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>5. v5 vs v6</h3>
+      <ul>
+        <li><strong>SP Flash Tool v5.x:</strong> most common for legacy and mid-generation MTK chipsets (MT65xx, MT67xx with eMMC).</li>
+        <li><strong>SP Flash Tool v6.x:</strong> for modern 64-bit MTK architectures, UFS storage devices, and SLA/DAA-protected systems requiring auth files.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="flash-mtk-sp-flash-tool.html">Flash MTK via SP Flash Tool</a></li>
+      <li><a href="backup-mtk-sp-flash-tool.html">Backup MTK via SP Flash Tool</a></li>
+      <li><a href="sp-flash-tool-errors.html">SP Flash Tool error codes</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

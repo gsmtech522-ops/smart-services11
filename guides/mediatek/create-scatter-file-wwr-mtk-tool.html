@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create a Scatter File Using WWR MTK Tool | Tech Learn</title>
+<meta name="description" content="Step-by-step guide to create an Android_scatter.txt file from a raw ROM_0 dump using WWR MTK Tool.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Create a Scatter File Using WWR MTK Tool</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>MediaTek devices without stock firmware</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Without stock firmware, SP Flash Tool can't determine memory addresses for Readback or flashing. WWR MTK Tool solves this — it analyzes a raw <code>ROM_0</code> dump and generates a precise <code>Android_scatter.txt</code> along with exact memory addresses.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>WWR MTK Tool</strong> (v2.51 or newer).</li>
+        <li><strong>HxD Hex Editor</strong> (optional, for inspecting dumps).</li>
+        <li>An initial <code>ROM_0</code> dump (16 MB to 32 MB) from SP Flash Tool Readback with start <code>0x0</code> and length <code>0x2000000</code>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Initial partial readback in SP Flash Tool</h3>
+      <ol>
+        <li>Open SP Flash Tool — do NOT load a scatter file.</li>
+        <li>Go to <strong>Readback</strong> tab → <strong>Add</strong>.</li>
+        <li>Double-click the entry, save as <code>ROM_0</code>.</li>
+        <li>In the popup:
+          <ul>
+            <li>Region: <code>EMMC_USER</code></li>
+            <li>Start Address: <code>0x0000000000000000</code></li>
+            <li>Length: <code>0x0000000002000000</code> (32 MB)</li>
+          </ul>
+        </li>
+        <li>Click <strong>Readback</strong>, connect powered-off phone, wait for green checkmark.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Load ROM_0 into WWR MTK Tool</h3>
+      <ol>
+        <li>Launch <strong>WWR MTK Tool</strong>.</li>
+        <li>Go to <strong>Auto-mode</strong> tab (or click Select file).</li>
+        <li>Click <strong>Open file</strong> → select <code>ROM_0</code>.</li>
+        <li>WWR auto-analyzes: identifies platform (MT6763, MT6765, MT6785…), locates GPT/PMT partition table.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Parse &amp; generate scatter</h3>
+      <ol>
+        <li>WWR displays all partitions (preloader, pgpt, boot, recovery, system, vendor…) with start addresses and sizes.</li>
+        <li>Confirm chipset when prompted.</li>
+        <li>Click <strong>Create Android scatter file</strong> (bottom right).</li>
+        <li>Save as <code>MT67xx_Android_scatter.txt</code>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Extract readback addresses for full backup</h3>
+      <ol>
+        <li>In WWR, switch to <strong>Readback</strong> tab.</li>
+        <li>Note the Preloader and <code>ROM_1</code> (EMMC_USER) start &amp; length values.</li>
+        <li>Copy the full dump length.</li>
+        <li>In SP Flash Tool, load your new scatter, paste addresses into Readback tab.</li>
+        <li>Click Readback → full ROM dump extracted.</li>
+      </ol>
+
+      <div class="note">
+        <p><strong>Pro tip:</strong> verify the generated scatter includes the <code>preloader</code> partition. If WWR warns "missing preloader", manually select a matching preloader binary for your chipset before saving.</p>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="wwr-mtk-tool-overview.html">WWR MTK Tool overview</a></li>
+      <li><a href="backup-mtk-sp-flash-tool.html">Backup via SP Flash Tool</a></li>
+      <li><a href="mediatek-partition-map-explained.html">Partition map</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

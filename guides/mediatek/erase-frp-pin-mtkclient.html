@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erase FRP and PIN/Pattern Locks on Modern MTK using MTKClient | Tech Learn</title>
+<meta name="description" content="Use MTKClient to erase FRP and screen locks on modern MediaTek devices, bypassing SLA/DAA via BROM. Own devices only.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Erase FRP and PIN/Pattern Locks using MTKClient</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~5 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Modern Helio P/G and Dimensity devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Legal warning:</strong> only for <strong>your own device</strong> or a device you are explicitly authorized to service. Bypassing FRP or screen locks on another person's phone is illegal and can be traced.</p>
+  </div>
+
+  <p>Modern MediaTek devices enforce SLA/DAA authentication that blocks traditional tools. MTKClient exploits BROM vulnerabilities to erase FRP and screen lock partitions without paid dongles or <code>.auth</code> files.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MediaTek VCOM drivers + <strong>UsbDk</strong> drivers installed.</li>
+        <li>Python 3.9+ with "Add to PATH" enabled.</li>
+        <li>Git installed (or MTKClient zip downloaded).</li>
+        <li>Charged device + USB cable.</li>
+      </ul>
+
+      <p><strong>Install MTKClient:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">git clone https://github.com/bkerler/mtkclient.git
+cd mtkclient
+pip install -r requirements.txt</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Target partitions</h3>
+      <ul>
+        <li><code>frp</code> — Google Account Factory Reset Protection</li>
+        <li><code>userdata</code> — encrypted user data, PIN/pattern/password</li>
+        <li><code>metadata</code> — encryption key metadata (must wipe with userdata)</li>
+        <li><code>md_udc</code> — modem user data cache</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Method 1 — CLI (recommended)</h3>
+      <ol>
+        <li>Open CMD inside <code>mtkclient</code> folder.</li>
+        <li>Power off the device.</li>
+        <li><strong>Erase FRP only:</strong></li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk e frp</code></pre>
+      </div>
+      <ol start="4">
+        <li><strong>Erase FRP + all screen locks:</strong></li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk e metadata,userdata,md_udc,frp</code></pre>
+      </div>
+      <ol start="5">
+        <li>Terminal shows <code>Waiting for device...</code></li>
+        <li>Hold <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd> (or Volume Down only on some models) and plug USB.</li>
+        <li>MTKClient exploits BROM, erases partitions, shows <code>Success</code>.</li>
+        <li>Unplug and boot.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Method 2 — GUI</h3>
+      <ol>
+        <li>Launch GUI:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">python mtk_gui</code></pre>
+      </div>
+      <ol start="2">
+        <li>Power off, hold volume keys, plug USB to enter BROM.</li>
+        <li>Once SoC detected (e.g. MT6765, MT6833), go to <strong>Flash Tools</strong> tab.</li>
+        <li>Click <strong>Erase Userdata</strong> or <strong>Format Data</strong> for screen locks.</li>
+        <li>Click <strong>Erase FRP</strong> for Google lock.</li>
+        <li>Wait for green success banner.</li>
+        <li>Unplug and reboot.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting</h3>
+
+      <p><strong>UsbDk missing / device disconnects instantly</strong></p>
+      <p>Cause: Windows drops BROM handshake before MTKClient sends payload.</p>
+      <p>Fix: install latest <strong>UsbDk 64-bit</strong> installer, reboot PC.</p>
+
+      <p><strong>Charging mode instead of BROM</strong></p>
+      <p>Cause: boot keys released too early, or preloader intercepted boot.</p>
+      <p>Fix: disconnect, hold Power 10s to reset, hold boot keys firmly, then insert cable while running command.</p>
+
+      <p><strong>Device hangs on logo after wipe</strong></p>
+      <p>Cause: wiped userdata without metadata — stale crypto footers confuse init.</p>
+      <p>Fix: run <code>python mtk e metadata,userdata,md_udc</code>, then boot into stock recovery and perform Wipe Data.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="mtkclient-overview-setup.html">MTKClient setup</a></li>
+      <li><a href="mediatek-frp-bypass-spflash.html">FRP bypass via SP Flash Tool</a></li>
+      <li><a href="bypass-mediatek-sla-daa.html">Bypass SLA/DAA</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

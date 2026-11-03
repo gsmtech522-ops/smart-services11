@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Backup Android Firmware Using ADB &amp; Fastboot | Tech Learn</title>
+<meta name="description" content="Complete guide to backup Android partitions (boot, recovery, vbmeta, modem, NVRAM) using ADB dd commands, ADB backup and Fastboot fetch.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Backup Android Firmware Using ADB &amp; Fastboot</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices (root or unlocked bootloader)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Before flashing custom ROMs, modifying system partitions or rooting, creating a full system backup is your ultimate safety net. ADB and Fastboot allow you to backup partition images directly from an active Android environment or from the bootloader.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Requirements</h3>
+      <ul>
+        <li><strong>ADB &amp; Fastboot</strong> setup on your PC.</li>
+        <li><strong>USB Debugging</strong> enabled on the phone.</li>
+        <li><strong>Unlocked bootloader</strong> (for Fastboot partition dumping).</li>
+        <li><strong>Root access</strong> (for ADB dd commands while the phone is booted).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Backup individual partitions via ADB (root required)</h3>
+      <p>With Magisk or KernelSU root, ADB lets you dump raw partition images with the <code>dd</code> command.</p>
+
+      <p><strong>Step 1 — Connect and open ADB shell:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb devices
+adb shell su</code></pre>
+      </div>
+      <p>Grant superuser permission on the phone when prompted.</p>
+
+      <p><strong>Step 2 — Locate partition memory blocks:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">ls -l /dev/block/by-name/</code></pre>
+      </div>
+      <p>This shows all system partitions and their block locations (e.g. <code>boot → /dev/block/mmcblk0p21</code>).</p>
+
+      <p><strong>Step 3 — Dump critical partitions to <code>/sdcard/</code>:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Boot partition (kernel + ramdisk)
+dd if=/dev/block/by-name/boot of=/sdcard/boot.img
+
+# Recovery partition
+dd if=/dev/block/by-name/recovery of=/sdcard/recovery.img
+
+# VBMeta (verified boot)
+dd if=/dev/block/by-name/vbmeta of=/sdcard/vbmeta.img
+
+# Modem / NVRAM (IMEI + network)
+dd if=/dev/block/by-name/modem of=/sdcard/modem.img</code></pre>
+      </div>
+
+      <p><strong>Step 4 — Pull the images to your PC:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">exit
+exit
+adb pull /sdcard/boot.img C:\Android_Backup\boot.img
+adb pull /sdcard/recovery.img C:\Android_Backup\recovery.img
+adb pull /sdcard/vbmeta.img C:\Android_Backup\vbmeta.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Full system backup via <code>adb backup</code> (no root)</h3>
+      <p>If the phone is <strong>not</strong> rooted, use the legacy ADB backup bridge for user apps and system data.</p>
+      <ol>
+        <li>Connect the phone with USB Debugging on.</li>
+        <li>Run:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb backup -apk -shared -all -f C:\Android_Backup\full_backup.ab</code></pre>
+      </div>
+      <ol start="3">
+        <li>On the phone, tap <strong>Back up my data</strong>.</li>
+        <li>To restore later:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb restore C:\Android_Backup\full_backup.ab</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Note:</strong> <code>adb backup</code> is deprecated in Android 12+ — it may not work on newer OS versions.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — Dump partitions in Fastboot mode</h3>
+      <p>If your device supports raw <code>fastboot fetch</code> (some OEMs and custom fastboot protocols), you can dump without root.</p>
+
+      <p><strong>Step 1 — Reboot into Fastboot:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot bootloader
+fastboot devices</code></pre>
+      </div>
+
+      <p><strong>Step 2 — Fetch partition images:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot fetch boot boot.img
+fastboot fetch recovery recovery.img
+fastboot fetch vbmeta vbmeta.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Important tips &amp; warnings</h3>
+      <ul>
+        <li><strong>Check storage:</strong> system and super partitions can be 4–10 GB+. Ensure free space before running <code>dd</code>.</li>
+        <li><strong>Dynamic partitions (Android 10+):</strong> individual system files sit inside <code>super.img</code> — dumping it requires significant space.</li>
+        <li><strong>Save IMEI safely:</strong> always back up <code>nvram</code>, <code>nvdata</code>, <code>modem</code> and <code>persist</code> images to a secure cloud or external drive.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="flash-stock-firmware-adb-fastboot.html">Flash stock firmware</a></li>
+      <li><a href="backup-restore-apk-data-adb.html">Backup &amp; restore APK + data</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

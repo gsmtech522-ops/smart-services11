@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup MediaTek Firmware via Miracle Box / Miracle Thunder | Tech Learn</title>
+<meta name="description" content="Complete guide to backup MediaTek firmware using Miracle Box or Miracle Thunder Read Flash feature.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Backup MediaTek Firmware via Miracle Box / Miracle Thunder</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Legacy and mid-tier MTK devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Before modifying or unlocking any phone, a full hardware backup ensures you can unbrick if something goes wrong. <strong>Miracle Box / Miracle Thunder</strong> is a favorite multi-tool for GSM techs — its Read Flash feature extracts raw stock ROMs directly from MediaTek devices.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MediaTek VCOM USB drivers installed.</li>
+        <li>Miracle Box / Miracle Thunder software (with dongle or loader).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Configure Miracle Box</h3>
+      <ol>
+        <li>Launch Miracle Box / Miracle Thunder as <strong>Administrator</strong>.</li>
+        <li>Select the <strong>MediaTek (MTK)</strong> tab.</li>
+        <li>Choose the <strong>Read</strong> radio button (or <em>Read Flash</em> in some versions).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Choose boot / chipset type</h3>
+      <ol>
+        <li>In the <strong>Choose Boot</strong> dropdown, pick the correct platform:
+          <ul>
+            <li>Legacy (MT6572, MT6580…): <strong>8th Boot (MT65xx/MT67xx)</strong></li>
+            <li>Modern Helio: <strong>Auto-Detect boot</strong> or specific Helio profile</li>
+          </ul>
+        </li>
+        <li>Enable <strong>Auto Connect</strong> or <strong>Safe Mode</strong> to avoid interruptions.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Start the read</h3>
+      <ol>
+        <li>Click <strong>Start</strong>.</li>
+        <li>Choose a save location (e.g. <code>MTK_Full_Backup.bin</code>) → Save.</li>
+        <li>Miracle Box logs: <em>Waiting for USB Port…</em></li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Connect phone</h3>
+      <ol>
+        <li>Power off the device.</li>
+        <li>Hold <kbd>Volume Down</kbd> (or both volume keys).</li>
+        <li>Connect USB.</li>
+        <li>Miracle Box detects and displays hardware info (CPU, flash type, eMMC size).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Step 5 — Save partition data</h3>
+      <ol>
+        <li>When the partition list pops up (boot, recovery, system, nvram, userdata), keep all critical partitions checked.</li>
+        <li>Click OK.</li>
+        <li>Progress bar fills until <em>Read Complete!</em> or <em>Process Done!</em></li>
+        <li>Unplug the device.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Boot loading error / stuck at 5%</td><td>Device has SLA/DAA protection — run MTK Auth Bypass first, or select a higher boot version.</td></tr>
+          <tr><td>USB Port Not Found</td><td>Reinstall MTK VCOM drivers, check Device Manager for yellow warning, try a different USB 2.0 port and cable.</td></tr>
+          <tr><td>Corrupted or 0 KB backup file</td><td>Ensure PC has 8–16 GB+ free space (full dumps are large).</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="backup-mtk-mtkclient.html">Backup MTK via MTKClient</a></li>
+      <li><a href="backup-mtk-sp-flash-tool.html">Backup MTK via SP Flash Tool</a></li>
+      <li><a href="miracle-box-overview.html">Miracle Box overview</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

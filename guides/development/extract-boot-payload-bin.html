@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extract boot.img from payload.bin Firmware for Rooting | Tech Learn</title>
+<meta name="description" content="Unpack modern OTA firmware, isolate boot images, patch with Magisk and flash for root access using payload-dumper-go.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#development">Development</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Extract boot.img from payload.bin for Rooting</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>OnePlus, Xiaomi, Realme, Pixel, Motorola and other GKI-based devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern OTA firmware no longer ships loose <code>boot.img</code> / <code>system.img</code>. Everything is compressed inside <code>payload.bin</code>. Extracting <code>boot.img</code> (or <code>init_boot.img</code> on Android 13+) is mandatory before patching with Magisk / KernelSU.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>Full OTA firmware ZIP</strong> matching your exact build.</li>
+        <li>7-Zip or WinRAR.</li>
+        <li><strong>payload-dumper-go</strong> binary (or Python 3.x with <code>payload_dumper</code>).</li>
+        <li>ADB &amp; Fastboot installed.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Extract payload.bin from firmware</h3>
+      <ol>
+        <li>Download the full OTA zip for your model.</li>
+        <li>Right-click → extract with 7-Zip.</li>
+        <li>Locate <code>payload.bin</code> in the extracted folder (1–4 GB+).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Extract boot.img using payload-dumper-go (fastest)</h3>
+      <ol>
+        <li>Download the latest <code>payload-dumper-go.exe</code> for Windows.</li>
+        <li>Place it in the same folder as <code>payload.bin</code> (e.g. <code>C:\extractor</code>).</li>
+        <li>Open CMD there and extract only the boot partition:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">payload-dumper-go -p boot payload.bin</code></pre>
+      </div>
+      <p>For Android 13+ GKI devices, extract <code>init_boot</code> instead:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">payload-dumper-go -p init_boot payload.bin</code></pre>
+      </div>
+      <p>Extracted file appears in <code>extracted_...</code> subfolder.</p>
+
+      <p><strong>Alternative — Python payload_dumper:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">pip install payload_dumper
+payload_dumper --partitions boot payload.bin</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Patch with Magisk</h3>
+      <ol>
+        <li>Push the stock image to your phone:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb push boot.img /sdcard/Download/</code></pre>
+      </div>
+      <ol start="2">
+        <li>Open <strong>Magisk Manager</strong>.</li>
+        <li>Tap <strong>Install → Select and Patch a File</strong>.</li>
+        <li>Choose <code>Download/boot.img</code> and patch.</li>
+        <li>Output: <code>magisk_patched_XXXXX.img</code> saved to Download.</li>
+        <li>Pull it back to PC:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb pull /sdcard/Download/magisk_patched_XXXXX.img .</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Flash patched boot via Fastboot</h3>
+      <ol>
+        <li>Reboot into Fastboot:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot bootloader
+fastboot devices</code></pre>
+      </div>
+      <ol start="2">
+        <li>Flash:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Standard (Android 12 and older)
+fastboot flash boot magisk_patched_XXXXX.img
+
+# Android 13+ GKI / init_boot architecture
+fastboot flash init_boot magisk_patched_XXXXX.img</code></pre>
+      </div>
+      <ol start="3">
+        <li>Reboot:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Important warnings</h3>
+      <div class="warning">
+        <p><strong>Android 13+ init_boot distinction:</strong> patching <code>boot.img</code> instead of <code>init_boot.img</code> on Android 13+ devices causes a permanent bootloop. Check your ROM structure first.</p>
+        <p><strong>Firmware version match:</strong> always use the exact build number currently running. Mismatched images cause Wi-Fi, Bluetooth, or touch driver failure.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>payload_dumper errors on magic</td><td>Firmware is encrypted (OPPO/Realme .ozip). Extract with the OEM's tool first.</td></tr>
+          <tr><td>Bootloop after flash</td><td>Wrong image (init_boot vs boot). Re-flash original stock image, then retry with the correct target.</td></tr>
+          <tr><td>fastboot: command not found</td><td>Install Platform Tools; or use <code>.\fastboot</code> in PowerShell.</td></tr>
+          <tr><td>Magisk doesn't show root</td><td>OEM encryption requires disabling verity/vbmeta first — see DM-Verity guide.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="create-flashable-zip.html">Create a custom flashable ZIP</a></li>
+      <li><a href="extract-recovery-img-lz4.html">Extract recovery.img from .lz4</a></li>
+      <li><a href="../adb-fastboot/fix-dm-verity-vbmeta.html">Fix DM-Verity &amp; VBMeta</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Backup &amp; Restore EFS / IMEI via TWRP (Qualcomm &amp; Samsung) | Tech Learn</title>
+<meta name="description" content="Complete guide to backup and restore Qualcomm EFS, modemst1/modemst2, fsg and Samsung EFS partitions using TWRP custom recovery to protect IMEI and baseband.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🔵</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#qualcomm">Qualcomm</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Backup &amp; Restore EFS / IMEI via TWRP</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Qualcomm Snapdragon &amp; Samsung Exynos devices with TWRP</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Critical warning:</strong> the EFS partition holds your device's <strong>IMEI numbers, baseband calibration, Wi-Fi/BT MAC addresses and RF tuning data</strong>. Losing or corrupting EFS results in:</p>
+    <ul>
+      <li>"Invalid IMEI" or "IMEI Null" errors</li>
+      <li>"Baseband: Unknown" in Settings → About phone</li>
+      <li>No signal / Emergency calls only</li>
+      <li>Wi-Fi refusing to turn on</li>
+    </ul>
+    <p>Always back up EFS <strong>before</strong> flashing, rooting, or installing custom ROMs. And only operate on <strong>your own device</strong> — IMEI modification is illegal in most countries.</p>
+  </div>
+
+  <p>Custom recovery like <strong>TWRP</strong> or <strong>OrangeFox</strong> can back up EFS partitions as raw image files that you can restore later if something goes wrong. This is the safest, most reliable method that does not require root access.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What is EFS and why back it up?</h3>
+      <p>EFS (Encrypted File System) is a protected partition containing the files that identify your phone to the cellular network:</p>
+      <table>
+        <thead>
+          <tr><th>Partition</th><th>Contains</th><th>Where used</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>efs</code></td><td>IMEI, IMEI2, MAC addresses, calibration certificates</td><td>Samsung and some Qualcomm</td></tr>
+          <tr><td><code>modemst1</code></td><td>Primary modem NVRAM copy</td><td>Qualcomm</td></tr>
+          <tr><td><code>modemst2</code></td><td>Secondary modem NVRAM copy (mirror)</td><td>Qualcomm</td></tr>
+          <tr><td><code>fsg</code></td><td>File System Golden — protected baseband backup</td><td>Qualcomm</td></tr>
+          <tr><td><code>fsc</code></td><td>Modem file system counter</td><td>Qualcomm</td></tr>
+          <tr><td><code>persist</code></td><td>Sensor calibration + fingerprint data</td><td>All Android</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>Note:</strong> on some Qualcomm devices, EFS data lives inside the <code>modem</code> partition or a custom-named partition like <code>fsg</code>. TWRP will show you what's available on your device.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li>Your device must have a <strong>TWRP or OrangeFox custom recovery</strong> installed. If not, you need to unlock the bootloader first.</li>
+        <li>A <strong>microSD card</strong> or OTG USB drive is recommended. Backing up to internal storage is risky — a full wipe removes the backup too.</li>
+        <li>Sufficient free space: <strong>50–500 MB</strong> depending on the partitions you back up.</li>
+        <li>Charged battery (at least 50%).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Boot into TWRP recovery</h3>
+      <ol>
+        <li>Power off the device completely.</li>
+        <li>Hold the correct key combination for your model:
+          <ul>
+            <li><strong>Most Qualcomm:</strong> Volume Up + Power</li>
+            <li><strong>Samsung:</strong> Volume Up + Bixby + Power (or Volume Up + Power on older models)</li>
+            <li><strong>Xiaomi / POCO:</strong> Volume Up + Power</li>
+            <li><strong>OnePlus:</strong> Volume Down + Power → select Recovery</li>
+          </ul>
+        </li>
+        <li>When TWRP opens, swipe to "Allow Modifications" if prompted.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Backup EFS partitions</h3>
+      <ol>
+        <li>From the TWRP main menu, tap <strong>Backup</strong>.</li>
+        <li>You will see a list of partitions. <strong>Only tick the ones that matter for IMEI:</strong>
+          <ul>
+            <li><code>EFS</code> (Samsung / some Qualcomm)</li>
+            <li><code>Modem</code> (baseband firmware + NVRAM)</li>
+            <li><code>Modemst1</code> and <code>Modemst2</code> (Qualcomm NVRAM mirrors)</li>
+            <li><code>FSG</code> (Qualcomm golden backup)</li>
+            <li><code>Persist</code> (sensor calibration — optional)</li>
+          </ul>
+        </li>
+        <li>Make sure <strong>Storage</strong> at the top points to your <strong>MicroSD card</strong> (or OTG drive). Never back up to internal storage only.</li>
+        <li>Tap <strong>Select Storage</strong> if you need to switch.</li>
+        <li>Tap <strong>Backup</strong> (or swipe the slider). TWRP begins creating the archive.</li>
+        <li>Once complete, TWRP shows: <em>"Backup Complete"</em>. Note the folder name — it looks like <code>TWRP/BACKUPS/SERIAL/2026-01-15--12-34-56_LINEAGEOS</code>.</li>
+      </ol>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">TWRP/BACKUPS/
+└── SERIAL_NUMBER/
+    └── 2026-01-15--12-34-56_LINEAGEOS/
+        ├── efs.emmc.win
+        ├── efs.emmc.win.md5
+        ├── modem.emmc.win
+        ├── modemst1.emmc.win
+        ├── modemst2.emmc.win
+        ├── fsg.emmc.win
+        └── ...</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Copy backup to PC (extra safety)</h3>
+      <p>Even on SD card, EFS backups are critical. Copy the folder to your PC:</p>
+      <ol>
+        <li>Boot normally into Android.</li>
+        <li>Connect USB and switch to <strong>File Transfer / MTP</strong> mode.</li>
+        <li>Open <code>SD Card → TWRP → BACKUPS → SERIAL_NUMBER</code> and copy the whole folder to <code>D:\EFS_Backup\</code>.</li>
+        <li>Additionally, copy it to a cloud folder (Google Drive, OneDrive, etc.).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Restore EFS from backup</h3>
+      <p>Only do this if you have lost IMEI, baseband is "Unknown", or Wi-Fi won't turn on:</p>
+      <ol>
+        <li>Boot into TWRP recovery.</li>
+        <li>Go to <strong>Restore</strong> (or Restore from Backup).</li>
+        <li>Navigate to the folder that contains your EFS backup.</li>
+        <li>Select the same partitions you backed up (EFS, Modem, Modemst1, Modemst2, FSG).</li>
+        <li>Tap <strong>Restore</strong> and swipe to confirm.</li>
+        <li>Wait for the "Restore Complete" message.</li>
+        <li>Reboot to system.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Verification:</strong> after reboot, dial <kbd>*#06#</kbd> — both IMEI numbers should appear. Settings → About phone should show your baseband version (not "Unknown").</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Alternative — TWRP terminal backup (for advanced users)</h3>
+      <p>If a partition is not listed in the TWRP Backup GUI (rare), you can back it up manually using the built-in terminal:</p>
+      <ol>
+        <li>In TWRP → <strong>Advanced → Terminal</strong>.</li>
+        <li>Identify the partition block:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">ls -l /dev/block/bootdevice/by-name/ | grep -E 'efs|modem'</code></pre>
+      </div>
+      <p>You will see something like:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">lrwxrwxrwx  root  root   efs -> /dev/block/mmcblk0p21
+lrwxrwxrwx  root  root   modem -> /dev/block/mmcblk0p22
+lrwxrwxrwx  root  root   modemst1 -> /dev/block/mmcblk0p10
+lrwxrwxrwx  root  root   modemst2 -> /dev/block/mmcblk0p11</code></pre>
+      </div>
+      <ol start="3">
+        <li>Dump each partition to your SD card:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">dd if=/dev/block/bootdevice/by-name/efs of=/external_sd/efs.img
+dd if=/dev/block/bootdevice/by-name/modem of=/external_sd/modem.img
+dd if=/dev/block/bootdevice/by-name/modemst1 of=/external_sd/modemst1.img
+dd if=/dev/block/bootdevice/by-name/modemst2 of=/external_sd/modemst2.img</code></pre>
+      </div>
+      <p>To restore a dumped image:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">dd if=/external_sd/efs.img of=/dev/block/bootdevice/by-name/efs
+dd if=/external_sd/modem.img of=/dev/block/bootdevice/by-name/modem</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>Danger:</strong> <code>dd</code> writes raw bytes. If the output path is wrong, you can brick the phone. Double-check the block device name and size every time.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Samsung-specific EFS backup</h3>
+      <p>Samsung phones store IMEI in the <code>efs</code> partition, split into <code>efs.img</code> and <code>efs.img.ext4</code>. TWRP on Samsung shows <strong>EFS</strong> as a single backup option — that covers both. Restore works the same way.</p>
+      <p>To back up via ADB shell on a rooted Samsung:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell su
+dd if=/dev/block/by-name/efs of=/sdcard/efs.img
+exit
+adb pull /sdcard/efs.img D:\Backups\</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>9. Qualcomm EDL backup (deeper safety net)</h3>
+      <p>If your phone is completely dead (no recovery), you can still extract NVRAM via EDL mode using <strong>QFIL</strong> or <strong>QPST</strong>. See the Qualcomm guides for details. TWRP backup is the primary safety net — EDL is the recovery-of-last-resort.</p>
+    </li>
+
+    <li>
+      <h3>10. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>EFS not listed in TWRP Backup</td><td>Your device's TWRP build does not expose EFS. Use the terminal <code>dd</code> method in section 7.</td></tr>
+          <tr><td>Restore fails with "unable to mount efs"</td><td>Wrong filesystem — restore may need <code>ext4</code> compatibility. Use an updated TWRP or the terminal method.</td></tr>
+          <tr><td>IMEI still invalid after restore</td><td>Try restoring <code>modemst1</code> and <code>modemst2</code> as well, then reboot into bootloader and back to system.</td></tr>
+          <tr><td>Baseband still "Unknown"</td><td>The <code>fsg</code> partition is also required. Ensure both <code>modem</code> and <code>fsg</code> are restored.</td></tr>
+          <tr><td>Wi-Fi still off after restore</td><td>Wi-Fi MAC is stored in <code>persist</code>. Restore <code>persist</code> too — but only from a backup of the <em>same</em> device.</td></tr>
+          <tr><td>TWRP ignores microSD</td><td>Card format may be exFAT — TWRP supports it but may need "Mount" tab. Or use a USB OTG drive.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>11. What NOT to do</h3>
+      <ul>
+        <li>🚫 Do not use another person's EFS backup — it contains their IMEI. That is illegal and will not work.</li>
+        <li>🚫 Do not use the "Format Data" option in TWRP without first backing up EFS. Format Data erases internal storage but not EFS — yet flashing a wrong firmware might.</li>
+        <li>🚫 Do not attempt to modify IMEI numbers directly. Only restore your own backup.</li>
+        <li>🚫 Do not trust "EFS repair" tools claiming to generate IMEI — that's illegal.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> after installing any custom ROM, immediately reboot into TWRP and take a fresh EFS backup. Also, keep a copy of your backup on Google Drive or a secondary USB drive — SD cards can fail.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="../mediatek/backup-nvram-nvdata-imei.html">Backup MTK NVRAM / NVDATA / IMEI</a></li>
+      <li><a href="../mediatek/restore-imei-sn-write-tool.html">Repair IMEI via SN Write Tool (MTK)</a></li>
+      <li><a href="../mediatek/restore-imei-maui-meta.html">Restore Baseband &amp; IMEI via Maui META (MTK)</a></li>
+      <li><a href="../mediatek/mtk-database-bplgu-mddb.html">Find MTK BPLGU &amp; MDDB Files</a></li>
+      <li><a href="../../android.html#imei-repair">IMEI Repair category</a></li>
+      <li><a href="../../android.html#qualcomm">Qualcomm category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+
+</body>
+</html>

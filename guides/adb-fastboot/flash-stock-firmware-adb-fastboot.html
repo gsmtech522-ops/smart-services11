@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Flash Stock Firmware Using ADB &amp; Fastboot (Complete Guide) | Tech Learn</title>
+<meta name="description" content="Step-by-step guide to flash official stock firmware using ADB and Fastboot commands. Covers dynamic partitions, A/B slots, VBMeta and troubleshooting.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Flash Stock Firmware Using ADB &amp; Fastboot</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~30 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Pixel, Xiaomi, Motorola, OnePlus, Realme, Asus and other Fastboot-friendly devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When an Android device gets stuck in a bootloop, suffers system corruption, or needs an official OS downgrade, flashing the stock firmware is the ultimate fix. While chipset-specific tools (SP Flash Tool, Odin) operate in low-level boot modes, Fastboot flashes partition binaries directly via the bootloader interface.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Requirements &amp; prerequisites</h3>
+      <ul>
+        <li><strong>Platform Tools (ADB &amp; Fastboot)</strong> installed on your PC — see <a href="adb-fastboot-setup-windows.html">setup guide</a>.</li>
+        <li><strong>Unlocked bootloader</strong> on the target Android device (mandatory for Fastboot flashing).</li>
+        <li><strong>Official stock firmware / factory image</strong> matching your exact model.</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Warranty &amp; data loss:</strong> unlocking the bootloader wipes data and may void warranty on many phones. Back up IMEI, data and photos before starting.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Extract firmware images</h3>
+      <ol>
+        <li>Download the correct stock firmware/factory package for your phone model.</li>
+        <li>Extract the firmware archive (<code>.zip</code> or <code>.tgz</code>).</li>
+        <li>Look for raw partition images: <code>boot.img</code>, <code>recovery.img</code>, <code>system.img</code>, <code>vendor.img</code>, <code>vbmeta.img</code>, <code>super.img</code>.</li>
+        <li>Copy all <code>.img</code> files into your Platform Tools folder.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Boot into Fastboot mode</h3>
+      <ol>
+        <li>Power off the phone completely.</li>
+        <li>Hold <strong>Volume Down</strong> + <strong>Power</strong> until the Fastboot / Bootloader screen appears.</li>
+        <li>Connect the phone to the PC via USB cable.</li>
+        <li>Open CMD in your Platform Tools folder and verify:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot devices</code></pre>
+      </div>
+      <p>If your device serial appears, the connection is successful.</p>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Flash security &amp; critical boot partitions</h3>
+      <p>Flash bootloader, verification and kernel partitions first to prevent boot loops.</p>
+
+      <p><strong>Disable Android Verified Boot (AVB / VBMeta):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash vbmeta vbmeta.img --disable-verity --disable-verification</code></pre>
+      </div>
+
+      <p><strong>Flash boot partition (kernel &amp; ramdisk):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash boot boot.img</code></pre>
+      </div>
+
+      <p><strong>Flash recovery partition (optional, if present):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash recovery recovery.img</code></pre>
+      </div>
+
+      <p><strong>Flash vendor_boot (Android 12+ devices):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash vendor_boot vendor_boot.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Flash system &amp; OS partitions</h3>
+      <p>Depends on whether your phone uses standard partitions or dynamic partitions (Android 10+).</p>
+
+      <p><strong>Option A — Modern devices with dynamic partitions (<code>super.img</code>):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash super super.img</code></pre>
+      </div>
+
+      <p><strong>Option B — Legacy devices with separate partitions:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash system system.img
+fastboot flash vendor vendor.img
+fastboot flash product product.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Step 5 — Wipe data &amp; reboot</h3>
+      <p>Prevent crashes by clearing old user data that may conflict with the new system:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot erase userdata
+fastboot erase cache
+fastboot reboot</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>First boot:</strong> takes 5–10 minutes after a full flash. Do <strong>not</strong> disconnect or force reboot during the first boot.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Alternative — ADB sideload full OTA</h3>
+      <p>If your bootloader is <strong>locked</strong> or you don't want to extract images, flash a Full OTA zip via Recovery + ADB sideload.</p>
+      <ol>
+        <li>Download the Full OTA firmware package (<code>.zip</code>).</li>
+        <li>Boot into Stock Recovery (<kbd>Volume Up</kbd> + <kbd>Power</kbd>).</li>
+        <li>Select <strong>Apply update from ADB</strong> (or <strong>ADB Sideload</strong>).</li>
+        <li>Connect the phone to the PC and verify:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb devices
+# Should show: xxxxxx    sideload</code></pre>
+      </div>
+      <ol start="5">
+        <li>Send the firmware file:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb sideload official_firmware.zip</code></pre>
+      </div>
+      <ol start="6">
+        <li>Wait for 100%, then select <strong>Reboot System Now</strong> in recovery.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting &amp; pro tips</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>FAILED (remote: partition doesn't exist)</code></td><td>Device uses A/B slots — try <code>fastboot flash boot_a boot.img</code> or switch slot: <code>fastboot set_active a</code></td></tr>
+          <tr><td>Stuck in Fastboot-D Mode</td><td>Newer devices switch to FastbootD for dynamic partitions. Enter with: <code>fastboot reboot fastboot</code></td></tr>
+          <tr><td>First boot loop</td><td>Let it run 10 minutes before force restarting.</td></tr>
+          <tr><td><code>waiting for device</code></td><td>Install bootloader USB drivers (Google USB Driver or vendor driver).</td></tr>
+          <tr><td>VBMeta flags rejected</td><td>Update Platform Tools — old <code>fastboot.exe</code> does not support AVB flags.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-setup-windows.html">ADB &amp; Fastboot setup</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="sideload-zip-via-adb.html">ADB sideload zip guide</a></li>
+      <li><a href="fix-dm-verity-vbmeta.html">Fix DM-Verity &amp; VBMeta</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

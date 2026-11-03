@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup MediaTek Firmware — Master Guide (All Methods) | Tech Learn</title>
+<meta name="description" content="Master index of all methods to backup MediaTek firmware: SP Flash Tool, MTKClient, Miracle Box, ADB/Fastboot.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Backup MediaTek Firmware — Master Guide</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Index / Comparison</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Use</dt>
+    <dd>Choose the right backup method for your device</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>MediaTek devices range from legacy feature phones to modern SLA/DAA-protected Helio and Dimensity chipsets. Different scenarios require different backup tools. This master guide indexes the top 4 methods with links to dedicated guides.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites for any MTK backup</h3>
+      <ul>
+        <li>MediaTek USB VCOM drivers installed.</li>
+        <li>LibUSB-win32 Filter or UsbDk drivers (for modern security bypass).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — SP Flash Tool (Readback)</h3>
+      <p><strong>Best for:</strong> legacy to mid-tier MTK devices with a scatter file available.</p>
+      <ul>
+        <li>Direct hardware-level raw memory dumping</li>
+        <li>Requires exact start/length hex addresses from scatter file</li>
+        <li>Compatible with WWR MTK Tool for splitting <code>ROM_0</code> into images</li>
+      </ul>
+      <p>→ <a href="backup-mtk-sp-flash-tool.html">Full guide: Backup via SP Flash Tool</a></p>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — MTKClient</h3>
+      <p><strong>Best for:</strong> modern Helio P/G and Dimensity chips with SLA/DAA protection.</p>
+      <ul>
+        <li>100% free and open-source (Python)</li>
+        <li>Automatic SLA/DAA bypass</li>
+        <li>Reads raw eMMC and UFS storage without <code>.auth</code> files</li>
+      </ul>
+      <p>→ <a href="backup-mtk-mtkclient.html">Full guide: Backup via MTKClient</a></p>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — Miracle Box / Miracle Thunder</h3>
+      <p><strong>Best for:</strong> fast, GUI-driven backup of older and mid-range devices.</p>
+      <ul>
+        <li>User-friendly interface</li>
+        <li>Auto-detects partition structures and chipset</li>
+        <li>Ideal for pulling clean backups from working devices</li>
+      </ul>
+      <p>→ <a href="backup-mtk-miracle-box.html">Full guide: Backup via Miracle Box</a></p>
+    </li>
+
+    <li>
+      <h3>5. Method 4 — ADB and Fastboot</h3>
+      <p><strong>Best for:</strong> powered-on rooted devices or devices with unlocked bootloader.</p>
+      <ul>
+        <li>Works across all Android OS versions</li>
+        <li>Extracts partitions directly via <code>dd</code> commands</li>
+        <li>Excellent for quick boot/IMEI dumps without powering off</li>
+      </ul>
+      <p>→ <a href="../adb-fastboot/backup-android-firmware-adb-fastboot.html">Full guide: Backup via ADB/Fastboot</a></p>
+    </li>
+
+    <li>
+      <h3>6. Companion tools</h3>
+      <ul>
+        <li><strong>WWR MTK Tool:</strong> analyze <code>ROM_0</code> dumps, generate scatter, calculate hex addresses → <a href="wwr-mtk-tool-overview.html">guide</a></li>
+        <li><strong>LibUSB-win32 / UsbDk:</strong> filter drivers for BROM USB capture → <a href="install-libusb-win32-filter.html">guide</a></li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>7. Which method should you choose?</h3>
+      <table>
+        <thead>
+          <tr><th>Your Situation</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Modern phone (Android 10+) or Helio/Dimensity</td><td><strong>MTKClient</strong></td></tr>
+          <tr><td>Have scatter file, want precise hex dump</td><td><strong>SP Flash Tool</strong></td></tr>
+          <tr><td>Quick GUI backup on legacy models</td><td><strong>Miracle Box</strong></td></tr>
+          <tr><td>Phone is powered on and rooted</td><td><strong>ADB</strong></td></tr>
+          <tr><td>Unlocked bootloader</td><td><strong>Fastboot</strong></td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="backup-mtk-sp-flash-tool.html">SP Flash Tool Readback</a></li>
+      <li><a href="backup-mtk-mtkclient.html">MTKClient backup</a></li>
+      <li><a href="backup-mtk-miracle-box.html">Miracle Box backup</a></li>
+      <li><a href="backup-nvram-nvdata-imei.html">NVRAM / IMEI backup</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

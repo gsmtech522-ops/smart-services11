@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Take Screenshots &amp; Screen Recordings via ADB | Tech Learn</title>
+<meta name="description" content="Capture real-time Android screenshots and screen recordings directly to your PC using ADB, plus scrcpy mirroring.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Take Screenshots &amp; Screen Recordings via ADB</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~3 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Capturing screenshots and recordings via ADB is invaluable for techs who need to document issues, record bootloops, or operate broken-button phones. Frames are piped directly over USB — nothing is stored on the phone.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>ADB &amp; Fastboot installed.</li>
+        <li>USB Debugging enabled.</li>
+        <li>Device connected and authorized via <code>adb devices</code>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Screenshots — Method 1 (two-step)</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell screencap -p /sdcard/screenshot.png
+adb pull /sdcard/screenshot.png .
+adb shell rm /sdcard/screenshot.png</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Screenshots — Method 2 (one-line direct pipe)</h3>
+      <p><strong>Windows CMD:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell exec-out screencap -p > screenshot.png</code></pre>
+      </div>
+      <p><strong>PowerShell:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell "screencap -p" | Out-File -Encoding ascii screenshot.png</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Screen recording</h3>
+      <p><strong>Basic recording:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell screenrecord /sdcard/demo.mp4</code></pre>
+      </div>
+      <p>Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the terminal to stop.</p>
+
+      <p><strong>Custom bitrate, resolution and time limit:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># 8 Mbps bitrate
+adb shell screenrecord --bit-rate 8000000 /sdcard/high_quality.mp4
+
+# 720p resolution
+adb shell screenrecord --size 1280x720 /sdcard/720p_rec.mp4
+
+# 60-second limit
+adb shell screenrecord --time-limit 60 /sdcard/1min_clip.mp4</code></pre>
+      </div>
+
+      <p><strong>Pull and cleanup:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb pull /sdcard/demo.mp4 .
+adb shell rm /sdcard/demo.mp4</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Real-time screen mirroring (scrcpy)</h3>
+      <p>To view and control the phone screen in real-time without saving video files, use open-source <strong>scrcpy</strong>:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">scrcpy --max-fps 60 --bit-rate 10M</code></pre>
+      </div>
+      <p>A low-latency window of the phone's screen opens instantly.</p>
+    </li>
+
+    <li>
+      <h3>6. Limitations</h3>
+      <ul>
+        <li><strong>Blank / black video output:</strong> DRM-protected screens (banking apps, password fields) block frame capture.</li>
+        <li><strong>Recording stops at 3 minutes:</strong> Android's built-in <code>screenrecord</code> enforces a 180-second hard limit. For longer sessions, use <code>scrcpy --record long_capture.mp4</code>.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+      <li><a href="change-resolution-dpi-adb.html">Change resolution &amp; DPI</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

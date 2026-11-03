@@ -1,0 +1,453 @@
+3<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ٹیک ورکشاپ – موبائل، پرنٹنگ، ویب اور پروگرامنگ گائیڈز</title>
+<meta name="description" content="موبائل سافٹ وئیر ریپئرنگ، پرنٹنگ، ویب ڈویلپمنٹ اور پروگرامنگ کی گائیڈز، مفت ویب ایپس اور ریموٹ سروس۔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@500;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F4EF;
+  --card:#FFFFFF;
+  --ink:#1C2B2D;
+  --muted:#5B6B6E;
+  --line:#D5DAD3;
+  --mobile:#0F766E;
+  --print:#B4512B;
+  --web:#2F5BB7;
+  --code:#6B4FA3;
+  --apps:#B38600;
+  --remote:#1F7A3E;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#14201F;
+    --card:#1C2C2B;
+    --ink:#E9EFEA;
+    --muted:#9DB0AD;
+    --line:#2F4443;
+    --mobile:#4DC4B8;
+    --print:#EE8F67;
+    --web:#7FA3F0;
+    --code:#B59BEB;
+    --apps:#E8C04A;
+    --remote:#6FD08F;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  font-size:1.05rem;
+  line-height:1.9;
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--web);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* Top bar */
+.topbar{
+  position:sticky;top:0;z-index:30;
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{font-family:"Noto Nastaliq Urdu",serif;font-weight:700;font-size:1.2rem;line-height:2}
+.menu-btn{
+  display:flex;align-items:center;gap:10px;
+  background:var(--ink);color:var(--paper);
+  border:0;border-radius:10px;padding:6px 14px;
+  font:inherit;font-weight:600;cursor:pointer;
+}
+.menu-btn svg{width:20px;height:20px;stroke:currentColor}
+.menu-btn .bar{transition:transform .2s,opacity .2s;transform-origin:center}
+.menu-btn[aria-expanded="true"] .b1{transform:translateY(6px) rotate(45deg)}
+.menu-btn[aria-expanded="true"] .b2{opacity:0}
+.menu-btn[aria-expanded="true"] .b3{transform:translateY(-6px) rotate(-45deg)}
+
+/* Drawer */
+.overlay{
+  position:fixed;inset:0;z-index:40;
+  background:rgba(10,20,20,.55);
+  opacity:0;visibility:hidden;
+  transition:opacity .25s,visibility .25s;
+}
+.drawer{
+  position:fixed;top:0;bottom:0;right:0;z-index:50;
+  width:min(360px,88vw);
+  background:var(--card);
+  border-inline-start:1px solid var(--line);
+  transform:translateX(100%);
+  visibility:hidden;
+  transition:transform .28s ease,visibility .28s;
+  display:flex;flex-direction:column;
+}
+body.menu-open .overlay{opacity:1;visibility:visible}
+body.menu-open .drawer{transform:none;visibility:visible}
+body.menu-open{overflow:hidden}
+.drawer-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;border-bottom:1px solid var(--line);
+}
+.drawer-head strong{font-family:"Noto Nastaliq Urdu",serif;font-size:1.15rem;line-height:2}
+.close-btn{
+  background:transparent;border:1.5px solid var(--line);color:var(--ink);
+  width:38px;height:38px;border-radius:10px;font-size:1.4rem;line-height:1;cursor:pointer;
+}
+.drawer-body{overflow-y:auto;padding:10px 12px 24px;flex:1}
+.acc-item{border-bottom:1px solid var(--line)}
+.acc-btn{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:transparent;border:0;color:var(--ink);
+  font:inherit;font-weight:600;font-size:1.05rem;
+  padding:12px 6px;cursor:pointer;text-align:start;
+  border-inline-start:4px solid var(--c);padding-inline-start:12px;
+}
+.acc-btn .chev{
+  width:18px;height:18px;stroke:var(--muted);flex:none;
+  transition:transform .2s;
+}
+.acc-btn[aria-expanded="true"]{color:var(--c)}
+.acc-btn[aria-expanded="true"] .chev{transform:rotate(180deg);stroke:var(--c)}
+.acc-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s ease}
+.acc-panel > div{overflow:hidden;visibility:hidden;transition:visibility .25s}
+.acc-item.open .acc-panel{grid-template-rows:1fr}
+.acc-item.open .acc-panel > div{visibility:visible}
+.acc-panel a{
+  display:block;padding:6px 22px 6px 8px;margin-inline-start:4px;
+  border-inline-start:2px solid var(--line);
+  color:var(--ink);font-size:.98rem;
+}
+.acc-panel a:hover{color:var(--c);border-inline-start-color:var(--c)}
+.acc-panel .all{color:var(--muted);font-size:.9rem}
+.acc-panel > div > :last-child{margin-bottom:10px}
+
+/* leader */
+.hero{padding:48px 0 28px}
+.hero h1{
+  font-family:"Noto Nastaliq Urdu",serif;
+  font-weight:700;
+  font-size:clamp(1.9rem,5vw,3rem);
+  line-height:2;
+}
+.hero p{color:var(--muted);max-width:44ch;margin-top:4px}
+.search{
+  margin-top:24px;
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);
+  border:2px solid var(--ink);
+  border-radius:14px;
+  padding:6px 16px;
+  max-width:560px;
+}
+.search input{
+  flex:1;border:0;background:transparent;color:var(--ink);
+  font:inherit;font-size:1.05rem;padding:8px 0;outline:none;
+}
+.search:focus-within{border-color:var(--web)}
+.search svg{flex:none;width:22px;height:22px;stroke:var(--muted)}
+
+/* Quick kill */
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 8px}
+.jump a{
+  border:1.5px solid var(--c);
+  color:var(--c);
+  padding:2px 14px;border-radius:999px;font-size:.95rem;font-weight:600;
+  background:transparent;
+}
+.jump a:hover{background:var(--c);color:var(--paper)}
+
+/* Sections */
+section.cat{margin-top:44px;scroll-margin-top:72px}
+.cat-head{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  border-bottom:3px solid var(--c);
+  padding-bottom:6px;margin-bottom:18px;
+}
+.cat-head h2{
+  font-family:"Noto Nastaliq Urdu",serif;
+  font-size:1.5rem;line-height:2.1;color:var(--c);font-weight:700;
+}
+.cat-head span{color:var(--muted);font-size:.95rem}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:14px;
+}
+.item{
+  display:block;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-inline-start:5px solid var(--c);
+  border-radius:8px;
+  padding:12px 16px;
+}
+.item:hover{border-color:var(--c);transform:translateY(-2px);transition:transform .15s}
+.item h3{font-size:1.1rem;font-weight:600;line-height:1.6}
+.item p{color:var(--muted);font-size:.93rem;line-height:1.7;margin-top:2px}
+.tag{
+  display:inline-block;margin-top:6px;font-size:.8rem;
+  color:var(--c);border:1px solid var(--c);border-radius:4px;padding:0 8px;line-height:1.6;
+}
+
+.c-mobile{--c:var(--mobile)} .c-print{--c:var(--print)} .c-web{--c:var(--web)}
+.c-code{--c:var(--code)} .c-apps{--c:var(--apps)} .c-remote{--c:var(--remote)}
+
+/* Remote service call-out */
+.remote-box{
+  background:var(--card);
+  border:2px solid var(--remote);
+  border-radius:12px;
+  padding:20px 22px;
+  display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;
+}
+.remote-box h3{font-family:"Noto Nastaliq Urdu",serif;font-size:1.2rem;line-height:2}
+.remote-box p{color:var(--muted);max-width:52ch}
+.btn{
+  background:var(--remote);color:#fff;font-weight:600;
+  padding:8px 22px;border-radius:10px;display:inline-block;
+}
+@media (prefers-color-scheme:dark){.btn{color:#0b1a12}}
+.btn:hover{filter:brightness(1.1)}
+
+.empty{display:none;margin-top:40px;text-align:center;color:var(--muted)}
+
+footer{
+  margin-top:64px;border-top:1px solid var(--line);
+  padding:22px 0 40px;color:var(--muted);font-size:.92rem;
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}.item:hover{transform:none;transition:none}.drawer,.overlay,.acc-panel,.chev,.menu-btn .bar{transition:none}
+}
+</style>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">Smart Services</a>
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="drawer">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line class="bar b1" x1="4" y1="6" x2="20" y2="6"/>
+        <line class="bar b2" x1="4" y1="12" x2="20" y2="12"/>
+        <line class="bar b3" x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+      مینو
+    </button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="مین مینو">
+  <div class="drawer-head">
+    <strong>مین مینو</strong>
+    <button class="close-btn" id="closeBtn" aria-label="مینو بند کریں">×</button>
+  </div>
+  <nav class="drawer-body" id="accordion" aria-label="مین مینو"></nav>
+</aside>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1>(Smart Services & Tools)</h1>
+    <p>موبائل ریپئرنگ، پرنٹنگ، ویب اور پروگرامنگ کی گائیڈز، کام کی ویب ایپس اور ریموٹ سروس ایک ہی جگہ۔</p>
+
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="سائٹ میں تلاش کریں۔" autocomplete="off" aria-label="تلاش">
+    </label>
+
+    <nav class="jump" aria-label="سیکشنز">
+      <a href="#mobile" style="--c:var(--mobile)">موبائل ریپئرنگ</a>
+      <a href="#print" style="--c:var(--print)">کمپیوٹر ٹیکنک</a>
+      <a href="#web" style="--c:var(--web)">ویب ڈویلپمنٹ</a>
+      <a href="#code" style="--c:var(--code)">پروگرامنگ</a>
+      <a href="#apps" style="--c:var(--apps)">ویب ایپس</a>
+      <a href="#remote" style="--c:var(--remote)">ریموٹ سروس</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- موبائل -->
+  <section class="cat c-mobile" id="mobile">
+    <div class="cat-head"><h2>موبائل سافٹ وئیر ریپئرنگ</h2><span>فلیشنگ، ان لاک اور فالٹ حل</span></div>
+    <div class="grid">
+      <a class="item" href="android.html"><h3>Android</h3><p>اینڈرائیڈ فرم وئیر اپدیٹ ،بیک اپ frp unlock,pattern unlock </p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="">coming Soon<h3>iphone</h3><p>icloud unlock,jailbreakinh</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="">Coming Soon<h3>Feature Phones</h3><p>imei repair,password unlock</p><span class="tag">گائیڈ</span></a>
+    </div>
+  </section>
+  
+  <section class="cat c-print" id="print">
+    <div class="cat-head"><h2> کمپیوٹر ٹیکنک</h2><span></span></div><p>آپریٹنگ سسٹم، ہارڈ ویئر، سافٹ ویئر کی تنصیب، پی سی آپٹیمائزیشن، ٹربل شوٹنگ، ٹپس اور ٹرکس۔</p>
+    <div class="grid">
+      <a class="item" href="windows.html"><h3>Windows</h3> <p>ونڈوز 10 اور 11 کے لیے رہنما، ابتدائی سیٹ اپ سے لے کر اسکرپٹنگ، سرورز اور لوکل اے آئی (AI) تک۔</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="linux.html"><h3>Linux</h3><p>لینکس (Linux) کے بارے میں رہنمائی، ابتدائی تنصیب سے لے کر سرورز، کنٹینرز اور مقامی سطح پر چلنے والے AI تک۔ جب تک الگ سے ذکر نہ کیا گیا ہو، تمام کمانڈز اوبنٹو (Ubuntu) / ڈیبین (Debian) کے لیے ہیں۔</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="hardware-pc-building.html"><h3>Hardware & PC Building</h3><p>Choosing parts, assembly, BIOS/UEFI, benchmarking, overclocking, cooling.</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="cloud-remote-access.html"><h3>Cloud & Remote Access</h3><p>VPS setup, SSH tunnels, remote desktop, Tailscale/WireGuard, self-hosting.</p><span class="tag">گائیڈ</span></a>
+    </div>
+  </section>
+
+  <!-- ویب ڈویلپمنٹ -->
+  <section class="cat c-web" id="web">
+    <div class="cat-head"><h2>ویب ڈویلپمنٹ</h2><span>ویب سائٹ بنانا اور چلانا</span></div>
+    <div class="grid">
+      <a class="item" href="html-css.html"><h3>HTML اور CSS</h3><p>شروع سے ویب پیج بنانا</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="javascript.html"><h3>JavaScript برائے ویب</h3><p>صفحے کو متحرک بنانا</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="guides/hosting-domain.html"><h3>ڈومین اور ہوسٹنگ</h3><p>سائٹ آن لائن کرنے کے مراحل</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="guides/wordpress.html"><h3>WordPress</h3><p>انسٹالیشن، تھیم اور پلگ اِن</p><span class="tag">گائیڈ</span></a>
+    </div>
+  </section>
+
+  <!-- پروگرامنگ -->
+  <section class="cat c-code" id="code">
+    <div class="cat-head"><h2>پروگرامنگ</h2><span>زبانیں سیکھیں</span></div>
+    <div class="grid">
+      <a class="item" href="python.html"><h3>Python</h3><p>بنیادی باتوں سے پروجیکٹس تک</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="guides/javascript.html"><h3>JavaScript</h3><p>ویری ایبل، فنکشن اور DOM</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="guides/cpp.html"><h3>C / C++</h3><p>پروگرامنگ کی بنیاد</p><span class="tag">گائیڈ</span></a>
+      <a class="item" href="guides/php-mysql.html"><h3>PHP اور MySQL</h3><p>ڈیٹا بیس والی ویب سائٹ</p><span class="tag">گائیڈ</span></a>
+    </div>
+  </section>
+
+  <!-- ویب ایپس -->
+  <section class="cat c-apps" id="apps">
+    <div class="cat-head"><h2>ویب ایپس</h2><span>براؤزر میں چلنے والے مفت ٹولز</span></div>
+    <div class="grid">
+      <a class="item" href="web-apps/cv.html"><h3>سی وی میکر</h3><p>منٹوں میں پروفیشنل CV بنائیں اور PDF لیں</p><span class="tag">ایپ</span></a>
+      <a class="item" href="web-apps/passport.html"><h3>پاسپورٹ سائز فوٹو میکر</h3><p>تصویر کاٹیں اور پرنٹ شیٹ تیار کریں</p><span class="tag">ایپ</span></a>
+      <a class="item" href="web-apps/idcard.html"><h3>ID Card Duplicator</h3><p>Scan or photograph your ID card and we will create a print-ready sheet</p><span class="tag">ایپ</span></a>
+      <a class="item" href="web-apps/photostudio.html"><h3>Photo Studio</h3><p>Resize Crop Images, جوڑیں، الگ کریں اور تصویر سے تصاویر بنائیں</p><span class="tag">ایپ</span></a>
+      <a class="item" href="web-apps/text-to-video-studio.html"><h3>ٹیکسٹ ٹو ویڈیو اسٹوڈیو</h3><p>بنائین ٹیکسٹ سے وڈیو،</p><span class="tag">ایپ</span></a>
+      <a class="item" href="Ultimate stick figer.html"><h3>Stick figer video</h3><p>ٹیکسٹ سے ویو بنائیں،</p><span class="tag">ایپ</span></a>
+      <a class="item" href="web-apps/Voice Generator.html"><h3>Text to Speach</h3><p>ٹیکسٹ کو آواز میں بدلیں</p><span class="tag">ایپ</span></a>
+      <a class="item" href="web-apps/Music Studio v2.html"><h3>Music Studio v2</h3><p>میوزک بنائیں ،</p><span class="tag">ایپ</span></a>
+    </div>
+  </section>
+
+  <!-- ریموٹ سروس -->
+  <section class="cat c-remote" id="remote">
+    <div class="cat-head"><h2>ریموٹ سروس</h2><span>گھر بیٹھے کام کروائیں</span></div>
+    <div class="grid" style="margin-bottom:16px">
+      <a class="item" href="mobile-remote.html"><h3>موبائل سافٹ وئیر ریموٹ سروس</h3><p>کمپیوٹر کے ذریعے آن لائن فلیشنگ اور ان لاک</p><span class="tag">سروس</span></a>
+      <a class="item" href="pc-remote.html"><h3>کمپیوٹر ریموٹ سپورٹ</h3><p>AnyDesk کے ذریعے ونڈوز اور سافٹ وئیر مسائل</p><span class="tag">سروس</span></a>
+      <a class="item" href="web-service.html"><h3>ویب سائٹ بنوانا</h3><p>آپ کے کاروبار کے لیے سائٹ کی تیاری</p><span class="tag">سروس</span></a>
+    </div>
+    <div class="remote-box">
+      <div>
+        <h3>کام بتائیں، ہم ریموٹ پر حل کریں گے</h3>
+        <p>رابطہ کر کے فون کا ماڈل یا مسئلہ بتائیں۔ ریٹ اور وقت پہلے طے کیا جاتا ہے۔</p>
+      </div>
+      <a class="btn" href="https://wa.me/92300XXXXXXX" target="_blank" rel="noopener">واٹس ایپ پر رابطہ</a>
+    </div>
+  </section>
+
+  <p class="empty" id="empty">کوئی نتیجہ نہیں ملا۔ کوئی دوسرا لفظ لکھ کر دیکھیں۔</p>
+</main>
+
+<footer>
+  <div class="wrap">© <span id="yr"></span> ٹیک ورکشاپ۔ تمام حقوق محفوظ ہیں۔</div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ---- مینو اور اکارڈین ----
+   مینو کے لنکس نیچے والے کارڈز سے خود بنتے ہیں،
+   اس لیے کارڈ بدلیں گے تو مینو بھی بدل جائے گا۔ */
+const menuBtn = document.getElementById('menuBtn');
+const closeBtn = document.getElementById('closeBtn');
+const overlay = document.getElementById('overlay');
+const drawer = document.getElementById('drawer');
+const acc = document.getElementById('accordion');
+const chevron = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
+document.querySelectorAll('section.cat').forEach((sec, n) => {
+  const title = sec.querySelector('h2').textContent;
+  const color = getComputedStyle(sec).getPropertyValue('--c');
+  const links = [...sec.querySelectorAll('.item')].map(a =>
+    `<a href="${a.getAttribute('href')}">${a.querySelector('h3').textContent}</a>`).join('');
+  const wrap = document.createElement('div');
+  wrap.className = 'acc-item';
+  wrap.style.setProperty('--c', color);
+  wrap.innerHTML = `
+    <button class="acc-btn" id="acc-b${n}" aria-expanded="false" aria-controls="acc-p${n}">
+      <span>${title}</span>${chevron}
+    </button>
+    <div class="acc-panel" id="acc-p${n}" role="region" aria-labelledby="acc-b${n}">
+      <div><a class="all" href="#${sec.id}">پورا سیکشن دیکھیں</a>${links}</div>
+    </div>`;
+  acc.appendChild(wrap);
+});
+
+acc.addEventListener('click', e => {
+  const btn = e.target.closest('.acc-btn');
+  if (!btn) return;
+  const item = btn.parentElement;
+  const opening = !item.classList.contains('open');
+  acc.querySelectorAll('.acc-item').forEach(i => {
+    i.classList.remove('open');
+    i.querySelector('.acc-btn').setAttribute('aria-expanded', 'false');
+  });
+  if (opening) {
+    item.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+});
+
+function setMenu(open) {
+  document.body.classList.toggle('menu-open', open);
+  menuBtn.setAttribute('aria-expanded', open);
+  if (open) closeBtn.focus(); else menuBtn.focus();
+}
+menuBtn.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
+closeBtn.addEventListener('click', () => setMenu(false));
+overlay.addEventListener('click', () => setMenu(false));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.body.classList.contains('menu-open')) setMenu(false);
+});
+drawer.addEventListener('click', e => {
+  if (e.target.closest('.acc-panel a') && e.target.getAttribute('href').startsWith('#')) {
+    document.body.classList.remove('menu-open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+const q = document.getElementById('q');
+const items = [...document.querySelectorAll('.item')];
+const sections = [...document.querySelectorAll('section.cat')];
+const empty = document.getElementById('empty');
+
+q.addEventListener('input', () => {
+  const t = q.value.trim().toLowerCase();
+  items.forEach(i => {
+    i.style.display = (!t || i.textContent.toLowerCase().includes(t)) ? '' : 'none';
+  });
+  let any = false;
+  sections.forEach(s => {
+    const visible = [...s.querySelectorAll('.item')].some(i => i.style.display !== 'none');
+    const box = s.querySelector('.remote-box');
+    s.style.display = visible ? '' : 'none';
+    if (box) box.style.display = t ? 'none' : '';
+    if (visible) any = true;
+  });
+  empty.style.display = any ? 'none' : 'block';
+});
+</script>
+</body>
+</html>

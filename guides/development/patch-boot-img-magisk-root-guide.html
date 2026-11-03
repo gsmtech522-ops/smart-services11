@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Patch boot.img with Magisk &amp; Root Android | Tech Learn</title>
+<meta name="description" content="Complete guide to patch boot.img, init_boot.img or recovery.img with Magisk and flash via fastboot to gain root. Covers Android 13+ GKI, A/B slots and troubleshooting.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#bootloader-rooting">Bootloader &amp; Rooting</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Patch boot.img with Magisk &amp; Root Android</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Most Android devices with unlocked bootloader</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Critical warning:</strong> <strong>NEVER</strong> flash a patched image shared by someone else, or patch an image on a different device — even if it's the same model. Always patch the boot image <strong>on the same device</strong> where you want to install Magisk. Otherwise you may need a full data wipe to recover [citation:2].</p>
+  </div>
+
+  <p>Magisk works by patching the device's boot image (or <code>init_boot</code>/<code>recovery</code> depending on the device) and flashing it back. This guide walks through the official Magisk patch method — the safest and most reliable way to gain root on modern Android.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Which partition should you patch?</h3>
+      <table>
+        <thead>
+          <tr><th>Device era</th><th>Partition to patch</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Android ≤ 12 (most devices)</td><td><code>boot.img</code></td><td>Standard method</td></tr>
+          <tr><td>Android 13+ GKI (Pixel 7+, many 2023+ devices)</td><td><code>init_boot.img</code></td><td>If <code>init_boot.img</code> exists in the factory image, patch it instead [citation:11]</td></tr>
+          <tr><td>No ramdisk in boot (older system-as-root)</td><td><code>recovery.img</code></td><td>Root only active when booted to recovery [citation:2]</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>How to check:</strong> in the Magisk app home screen, look at the <strong>Ramdisk</strong> value. <code>Yes</code> = patch <code>boot.img</code>. <code>No</code> = patch <code>recovery.img</code> [citation:2]. If you're on Android 13+ and the factory image contains <code>init_boot.img</code>, always patch that instead.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Unlocked bootloader</strong> — mandatory for flashing boot images.</li>
+        <li><strong>ADB &amp; Fastboot</strong> installed on PC.</li>
+        <li><strong>Magisk app</strong> installed on the device (latest version).</li>
+        <li><strong>Stock boot/init_boot/recovery image</strong> matching your exact build number.</li>
+        <li><strong>USB Debugging</strong> enabled.</li>
+        <li>Charged battery (50%+) and a quality USB cable.</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Firmware match:</strong> the boot image must match the exact build currently running on your device. A mismatched image causes Wi-Fi, Bluetooth, or touch failures. Check your build number in <strong>Settings → About phone</strong> and download the matching factory image [citation:11].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Get the stock boot image</h3>
+      <p>Extract the correct image from your device's full OTA or factory package:</p>
+      <ul>
+        <li><strong>Pixel / AOSP:</strong> extract from the factory image zip.</li>
+        <li><strong>Xiaomi / OnePlus / Realme:</strong> extract from the full OTA zip or fastboot package.</li>
+        <li><strong>If the image is sparse:</strong> convert with <code>simg2img</code> first.</li>
+      </ul>
+      <p>Transfer it to the device:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb push boot.img /sdcard/Download/</code></pre>
+      </div>
+      <p>For Android 13+ GKI devices, push <code>init_boot.img</code> instead:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb push init_boot.img /sdcard/Download/</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Patch with Magisk</h3>
+      <ol>
+        <li>Open the <strong>Magisk</strong> app on the device.</li>
+        <li>In the <strong>Magisk</strong> card, tap <strong>Install</strong>.</li>
+        <li>Select <strong>Select and Patch a File</strong>.</li>
+        <li>Navigate to <code>/sdcard/Download/</code> and select <code>boot.img</code> (or <code>init_boot.img</code> / <code>recovery.img</code>).</li>
+        <li>If you are patching a <strong>recovery image</strong>, tick the <strong>Recovery Mode</strong> option [citation:2].</li>
+        <li>Tap <strong>Let's Go</strong> and wait for the process to complete.</li>
+        <li>Magisk outputs: <code>magisk_patched-XXXXX_YYYYY.img</code> in the same <code>Download</code> folder.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Pull the patched image to PC</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb pull /sdcard/Download/magisk_patched-XXXXX_YYYYY.img .</code></pre>
+      </div>
+      <p>Note the exact filename — you will need it in the next step.</p>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Test-boot before flashing (recommended)</h3>
+      <p>You can temporarily boot the patched image without writing it to storage — this verifies it works before making a permanent change [citation:5][citation:11].</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot bootloader
+fastboot boot magisk_patched-XXXXX_YYYYY.img</code></pre>
+      </div>
+      <p>If the device boots and <code>su</code> works, the image is correct. If it boots but no root, you patched the wrong partition. If it does not boot, the image is not valid for this build [citation:5].</p>
+      <div class="note">
+        <p><strong>OEM restriction:</strong> some manufacturers (notably Xiaomi) disable <code>fastboot boot</code>. If you see <code>FAILED (remote: 'unknown command')</code>, skip this step and flash directly [citation:5].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Step 5 — Flash the patched image</h3>
+      <p>Reboot into Fastboot if not already there, then flash the correct partition:</p>
+
+      <p><strong>For <code>boot.img</code> (Android 12 and older):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash boot magisk_patched-XXXXX_YYYYY.img</code></pre>
+      </div>
+
+      <p><strong>For <code>init_boot.img</code> (Android 13+ GKI):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash init_boot magisk_patched-XXXXX_YYYYY.img</code></pre>
+      </div>
+
+      <p><strong>For <code>recovery.img</code> (no-ramdisk devices):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash recovery magisk_patched-XXXXX_YYYYY.img</code></pre>
+      </div>
+
+      <p><strong>For A/B slot devices</strong>, you can flash both slots to avoid slot-switch bootloops:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash boot_a magisk_patched-XXXXX_YYYYY.img
+fastboot flash boot_b magisk_patched-XXXXX_YYYYY.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Step 6 — Reboot and verify</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot</code></pre>
+      </div>
+      <p>After boot:</p>
+      <ol>
+        <li>Open the Magisk app. The <strong>Installed</strong> field should show a version number (not N/A).</li>
+        <li>If Magisk asks for <strong>"Requires additional setup"</strong>, tap it and let the device reboot.</li>
+        <li>Verify root from PC:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell "su -c 'id'"</code></pre>
+      </div>
+      <p>You should see <code>uid=0(root)</code> in the output [citation:11].</p>
+    </li>
+
+    <li>
+      <h3>9. Optional — Disable vbmeta verification</h3>
+      <p>If the device bootloops or shows "Your device is corrupt" after flashing, you may need to disable AVB/verity:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>Data wipe warning:</strong> flashing vbmeta with these flags may wipe your data. Back up first. This is not universally required — only do it if the device fails to boot [citation:5].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Cause</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>FAILED (remote: 'Flashing is not allowed in Lock State')</code></td><td>Bootloader still locked</td><td>Unlock bootloader first [citation:5]</td></tr>
+          <tr><td><code>FAILED (remote: 'unknown command')</code> on <code>fastboot boot</code></td><td>OEM disabled RAM boot</td><td>Skip test-boot and flash directly [citation:5]</td></tr>
+          <tr><td>Boots but Magisk says "Requires additional setup"</td><td>Wrong partition patched, or app-only install</td><td>Redo the patch with the correct partition [citation:5]</td></tr>
+          <tr><td>Bootloop after flashing</td><td>Slot mismatch, or userdata cannot decrypt</td><td>Re-flash stock image, boot, retry. On A/B devices flash both slots [citation:5]</td></tr>
+          <tr><td>Device corrupt screen</td><td>AVB rejected the patched image</td><td>Flash stock factory image, then disable verity/vbmeta [citation:5]</td></tr>
+          <tr><td>Root works then stops after OTA</td><td>OTA replaced the boot partition</td><td>Re-patch the new build's image [citation:5]</td></tr>
+          <tr><td><code>getenforce</code> shows Permissive</td><td>Something ran <code>setenforce 0</code></td><td>Run <code>su -c 'setenforce 1'</code> and find the culprit [citation:5]</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>11. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Check build and unlock state ----
+adb shell getprop ro.build.fingerprint    # must match boot image
+adb shell getprop ro.boot.flash.locked    # 0 = unlocked
+adb shell getprop sys.oem_unlock_allowed
+
+# ---- Push stock image to device ----
+adb push boot.img /sdcard/Download/
+adb push init_boot.img /sdcard/Download/  # Android 13+ GKI
+
+# ---- Patch in Magisk app ----
+# Magisk → Install → Select and Patch a File → choose image
+
+# ---- Pull patched image ----
+adb pull /sdcard/Download/magisk_patched-XXXXX_YYYYY.img .
+
+# ---- Test-boot (non-persistent) ----
+adb reboot bootloader
+fastboot boot magisk_patched-XXXXX_YYYYY.img
+
+# ---- Flash permanently ----
+fastboot flash boot magisk_patched-XXXXX_YYYYY.img        # Android ≤ 12
+fastboot flash init_boot magisk_patched-XXXXX_YYYYY.img   # Android 13+ GKI
+fastboot flash recovery magisk_patched-XXXXX_YYYYY.img    # no-ramdisk devices
+
+# ---- Flash both A/B slots ----
+fastboot flash boot_a magisk_patched-XXXXX_YYYYY.img
+fastboot flash boot_b magisk_patched-XXXXX_YYYYY.img
+
+# ---- Disable vbmeta (only if bootloop) ----
+fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img
+
+# ---- Reboot ----
+fastboot reboot
+
+# ---- Verify root ----
+adb shell "su -c 'id'"
+adb shell "su -c 'magisk -v'"</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>12. Best practices</h3>
+      <ul>
+        <li>✅ Always patch the image <strong>on the same device</strong> where Magisk will be installed [citation:2].</li>
+        <li>✅ Match the exact build number — mismatched images cause hardware failures.</li>
+        <li>✅ Use <code>init_boot.img</code> on Android 13+ GKI devices [citation:11].</li>
+        <li>✅ Test with <code>fastboot boot</code> before flashing permanently, if your OEM supports it [citation:5].</li>
+        <li>✅ Flash both A/B slots to avoid slot-switch bootloops.</li>
+        <li>✅ Keep a copy of the stock boot image — you need it for OTA updates.</li>
+        <li>✅ After OTA updates, re-patch the new build's image (OTA replaces the boot partition) [citation:5].</li>
+        <li>✅ Disable vbmeta only if the device fails to boot — not as a first step.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if your device does not have a boot ramdisk (older system-as-root devices), Magisk must hijack the recovery partition. In that case, root is only active when you boot into recovery mode — a special key combo per device is required [citation:2]. For most modern devices, <code>boot.img</code> or <code>init_boot.img</code> is the correct target.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="../firmware-extracting/extract-payload-bin-android-ota-firmware.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="fix-play-integrity-safetynet-rooted-android.html">Fix Play Integrity &amp; SafetyNet on Rooted Android</a></li>
+      <li><a href="convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw</a></li>
+      <li><a href="../../android.html#bootloader-rooting">Bootloader &amp; Rooting category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

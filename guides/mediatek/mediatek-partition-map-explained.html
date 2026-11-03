@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediaTek Partition Map Explained (boot, nvram, nvdata, frp) | Tech Learn</title>
+<meta name="description" content="Complete reference for MediaTek partition layout: preloader, boot, recovery, nvram, nvdata, frp, seccfg, protect1/2, super and more.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>MediaTek Partition Map Explained</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Reference</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Use</dt>
+    <dd>Bookmark — understand every MTK partition</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Every MediaTek device organizes eMMC/UFS storage into raw logical blocks — <strong>partitions</strong>. They are indexed inside a manifest called the <strong>scatter file</strong> (e.g. <code>MT6765_Android_scatter.txt</code>). Understanding each partition is the difference between a quick repair and a hard-bricked handset with IMEI loss.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Bootloader &amp; execution partitions</h3>
+      <p>Boot happens in strict stages. Any missing/corrupted stage = no Android.</p>
+      <ul>
+        <li><strong><code>preloader</code>:</strong> primary bootloader. Executed by BROM on power-on. Initializes DRAM, manages USB BROM/VCOM, loads LK.</li>
+        <li><strong><code>lk</code> / <code>lk2</code>:</strong> Little Kernel — the Android bootloader GUI. Handles boot screen, charging indicator, fastboot mode, verified boot checks.</li>
+        <li><strong><code>boot</code>:</strong> Linux Kernel + ramdisk. Handles mounting root FS during Android startup. Modified by Magisk for root.</li>
+        <li><strong><code>vendor_boot</code>:</strong> Android 11+ (GKI). Splits OEM vendor kernel modules and ramdisk from generic kernel in <code>boot</code>.</li>
+        <li><strong><code>recovery</code>:</strong> Minimal Linux OS for emergency install, factory reset, OTA updates. On A/B seamless devices, integrated inside <code>boot</code>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Security, locking &amp; configuration partitions</h3>
+      <ul>
+        <li><strong><code>frp</code>:</strong> Google Factory Reset Protection flag and account lock parameters.</li>
+        <li><strong><code>seccfg</code>:</strong> Bootloader unlock flag and digital signature structures.</li>
+        <li><strong><code>proinfo</code>:</strong> Factory-injected device identifiers — OEM model number, region codes, serial numbers.</li>
+        <li><strong><code>tee1</code> / <code>tee2</code>:</strong> TrustZone binaries, Keystore/Keymaster, DRM certs (Widevine L1), biometric hashes.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Baseband, radio &amp; IMEI partitions</h3>
+      <div class="warning">
+        <p><strong>Formatting these destroys network connectivity.</strong> Never use "Format All + Download" without NVRAM/IMEI backup.</p>
+      </div>
+      <ul>
+        <li><strong><code>nvram</code>:</strong> permanent cellular calibration, dual IMEI, Wi-Fi/BT MAC, RF power tuning.</li>
+        <li><strong><code>nvdata</code>:</strong> dynamic runtime NVRAM parameters updated by Android. Located under <code>/vendor/nvdata</code>.</li>
+        <li><strong><code>nvram_cust</code> / <code>protect1</code> / <code>protect2</code>:</strong> hardware protection blocks mirroring critical NVRAM data. Prevent corruption during OTA or power loss.</li>
+        <li><strong><code>md1img</code> / <code>md1dsp</code>:</strong> baseband modem firmware required for SIM and cell-tower communication.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>4. OS &amp; user storage partitions</h3>
+      <ul>
+        <li><strong><code>system</code> / <code>super</code>:</strong> core Android OS. On Android 10+, <code>system</code>, <code>vendor</code>, <code>product</code> merged into dynamic <code>super</code>.</li>
+        <li><strong><code>vendor</code>:</strong> OEM HAL drivers for camera, sensors, audio, GPU.</li>
+        <li><strong><code>userdata</code>:</strong> largest partition — apps, photos, videos, PIN/pattern/password.</li>
+        <li><strong><code>metadata</code>:</strong> FBE (File-Based Encryption) keys — must wipe with userdata.</li>
+        <li><strong><code>persist</code>:</strong> persistent hardware calibration (camera sensor alignment, sensors, factory test values).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>5. Quick reference — partition matrix</h3>
+      <table>
+        <thead>
+          <tr><th>Partition</th><th>Function</th><th>Safe to format?</th><th>Backup priority</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>frp</code></td><td>Google account lock</td><td>✅ Yes (erases FRP)</td><td>Low</td></tr>
+          <tr><td><code>userdata</code></td><td>User files, PIN/pattern</td><td>✅ Yes (factory reset)</td><td>User choice</td></tr>
+          <tr><td><code>boot</code></td><td>Kernel + Magisk root</td><td>⚠️ No (bootloop)</td><td>Medium</td></tr>
+          <tr><td><code>nvram</code> / <code>nvdata</code></td><td>Dual IMEI, network calibration</td><td>❌ Critical NO (IMEI loss)</td><td>Mandatory high</td></tr>
+          <tr><td><code>proinfo</code></td><td>Serial number, model flags</td><td>❌ Critical NO (serial loss)</td><td>Mandatory high</td></tr>
+          <tr><td><code>preloader</code></td><td>Primary bootloader</td><td>❌ Critical NO (hard brick)</td><td>Mandatory high</td></tr>
+          <tr><td><code>seccfg</code></td><td>Bootloader unlock flags</td><td>⚠️ No (unlock scripts)</td><td>Medium</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> before any format operation, back up <code>nvram</code>, <code>nvdata</code>, <code>proinfo</code>, and <code>preloader</code>. See <a href="backup-nvram-nvdata-imei.html">Backup NVRAM / IMEI</a>.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="backup-nvram-nvdata-imei.html">Backup NVRAM / NVDATA / IMEI</a></li>
+      <li><a href="mediatek-frp-bypass-spflash.html">FRP bypass via SP Flash Tool</a></li>
+      <li><a href="restore-imei-sn-write-tool.html">Restore IMEI via SN Write Tool</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

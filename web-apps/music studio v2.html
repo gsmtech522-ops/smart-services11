@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Offline Music Studio v2</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #0a0a0f;
+    color: #e5e5e5;
+    margin: 0;
+    padding: 16px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 12px;
+    background: linear-gradient(90deg, #4ade80, #60a5fa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #23232e;
+  }
+  .tab {
+    padding: 8px 16px;
+    background: transparent;
+    color: #888;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .tab.active {
+    color: #4ade80;
+    border-bottom-color: #4ade80;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #15151c;
+    border-radius: 8px;
+    border: 1px solid #23232e;
+  }
+  .toolbar label { font-size: 12px; color: #999; }
+  .toolbar input[type=number], .toolbar input[type=text] {
+    padding: 5px 8px;
+    background: #0a0a0f;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  button {
+    padding: 7px 12px;
+    font-size: 12px;
+    background: #22222c;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: .15s;
+  }
+  button:hover { background: #2c2c38; }
+  button.primary { background: #4ade80; color: #000; border-color: #4ade80; font-weight: 600; }
+  button.danger { background: #7f1d1d; border-color: #991b1b; }
+  button.small { padding: 4px 8px; font-size: 11px; }
+
+  /* ============ TRACKS ============ */
+  .track {
+    background: #15151c;
+    border: 1px solid #23232e;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 150px 1fr 150px;
+    gap: 10px;
+    align-items: center;
+  }
+  .track-header { display: flex; flex-direction: column; gap: 4px; }
+  .track-name {
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .track-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+  .track select {
+    background: #0a0a0f; color: #ccc;
+    border: 1px solid #333; border-radius: 4px;
+    padding: 3px 5px; font-size: 11px;
+  }
+  .steps { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; }
+  .step {
+    aspect-ratio: 1;
+    background: #1d1d26;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: .1s;
+  }
+  .step.on { background: currentColor; box-shadow: 0 0 6px currentColor; }
+  .step.playing { outline: 2px solid #facc15; outline-offset: 1px; }
+  .step:nth-child(4n+1) { background-color: #23232e; }
+  .step:nth-child(4n+1).on { background-color: currentColor; }
+  .track-controls { display: flex; align-items: center; gap: 6px; }
+  .track-controls input[type=range] { width: 60px; accent-color: #4ade80; }
+  .vol-val { font-size: 10px; color: #888; width: 22px; }
+  .mute-btn { padding: 3px 6px; font-size: 10px; background: #1d1d26; border: 1px solid #333; }
+  .mute-btn.active { background: #dc2626; color: white; border-color: #dc2626; }
+  .solo-btn.active { background: #facc15; color: black; border-color: #facc15; }
+
+  /* ============ PIANO ROLL ============ */
+  .pianoroll-wrap {
+    background: #15151c;
+    border: 1px solid #23232e;
+    border-radius: 8px;
+    padding: 10px;
+    overflow: auto;
+  }
+  .pianoroll-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .pianoroll {
+    display: grid;
+    grid-template-columns: 60px repeat(16, 1fr);
+    gap: 2px;
+    min-width: 600px;
+  }
+  .pr-label {
+    font-size: 10px;
+    color: #666;
+    text-align: right;
+    padding-right: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 20px;
+  }
+  .pr-cell {
+    height: 20px;
+    background: #1a1a22;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: .1s;
+  }
+  .pr-cell:hover { background: #2a2a36; }
+  .pr-cell.black { background: #0f0f14; }
+  .pr-cell.black:hover { background: #1f1f28; }
+  .pr-cell.on { background: currentColor; box-shadow: 0 0 6px currentColor; }
+  .pr-cell.playing { outline: 1px solid #facc15; }
+
+  /* ============ SONG MODE ============ */
+  .patterns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .pattern-chip {
+    padding: 8px 14px;
+    background: #1d1d26;
+    border: 2px solid #333;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 44px;
+    text-align: center;
+    transition: .15s;
+  }
+  .pattern-chip.active { border-color: #4ade80; color: #4ade80; }
+  .pattern-chip.playing { background: #4ade80; color: #000; }
+  .pattern-chip.empty { opacity: 0.5; }
+
+  .chain {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 10px;
+    background: #15151c;
+    border: 1px solid #23232e;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    min-height: 60px;
+  }
+  .chain-item {
+    padding: 6px 12px;
+    background: #4ade80;
+    color: #000;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chain-item.playing { outline: 2px solid #facc15; outline-offset: 2px; }
+  .chain-item .remove {
+    background: rgba(0,0,0,0.2);
+    border-radius: 50%;
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+  }
+  .chain-item .remove:hover { background: rgba(0,0,0,0.4); }
+
+  /* ============ MASTER ============ */
+  .master {
+    background: #15151c;
+    border: 1px solid #23232e;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .master-section { display: flex; align-items: center; gap: 8px; }
+  .master-section label { font-size: 11px; color: #999; }
+  .master-section input[type=range] { width: 80px; accent-color: #60a5fa; }
+
+  .status {
+    font-size: 11px;
+    color: #888;
+    margin-top: 8px;
+    min-height: 14px;
+  }
+
+  /* ============ PROJECT MANAGER ============ */
+  .projects-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .project-card {
+    background: #15151c;
+    border: 1px solid #23232e;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .project-name { font-weight: 600; font-size: 13px; }
+  .project-date { font-size: 11px; color: #666; }
+  .project-actions { display: flex; gap: 6px; margin-top: auto; }
+
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: #15151c;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 320px;
+    max-width: 90vw;
+  }
+  .modal h3 { margin: 0 0 14px; font-size: 16px; }
+  .modal input {
+    width: 100%;
+    padding: 8px;
+    background: #0a0a0f;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 5px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+</style>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+<h1>🎛 Offline Music Studio v2</h1>
+
+<div class="tabs">
+  <button class="tab active" data-tab="sequencer">🥁 Sequencer</button>
+  <button class="tab" data-tab="pianoroll">🎹 Piano Roll</button>
+  <button class="tab" data-tab="song">🎬 Song Mode</button>
+  <button class="tab" data-tab="projects">💾 Projects</button>
+</div>
+
+<!-- =================== SEQUENCER PANEL =================== -->
+<div class="panel active" id="panel-sequencer">
+  <div class="toolbar">
+    <button id="playBtn" class="primary">▶ Play</button>
+    <button id="stopBtn">⏹ Stop</button>
+    <button id="clearBtn" class="danger">Clear</button>
+    <button id="randomBtn">🎲 Random</button>
+    <button id="exportBtn">💾 Export WAV</button>
+    <label>BPM: <input type="number" id="bpm" value="110" min="40" max="240" style="width:55px"></label>
+    <label>Bars: <input type="number" id="bars" value="1" min="1" max="8" style="width:45px"></label>
+  </div>
+  <div id="tracks"></div>
+</div>
+
+<!-- =================== PIANO ROLL PANEL =================== -->
+<div class="panel" id="panel-pianoroll">
+  <div class="toolbar">
+    <label>Track: <select id="prTrackSelect"></select></label>
+    <button id="prPlayBtn" class="primary">▶ Preview</button>
+    <button id="prClearBtn" class="danger">Clear Notes</button>
+    <label>Scale:
+      <select id="prScale">
+        <option value="chromatic">Chromatic</option>
+        <option value="major" selected>Major</option>
+        <option value="minor">Minor</option>
+        <option value="pentatonic">Pentatonic</option>
+      </select>
+    </label>
+    <label>Octave: <input type="number" id="prOctave" value="4" min="1" max="7" style="width:45px"></label>
+  </div>
+  <div class="pianoroll-wrap">
+    <div class="pianoroll" id="pianoroll"></div>
+  </div>
+</div>
+
+<!-- =================== SONG MODE PANEL =================== -->
+<div class="panel" id="panel-song">
+  <div class="toolbar">
+    <button id="songPlayBtn" class="primary">▶ Play Song</button>
+    <button id="songStopBtn">⏹ Stop</button>
+    <button id="songClearBtn" class="danger">Clear Chain</button>
+    <button id="exportSongBtn">💾 Export Song WAV</button>
+    <label>Loop Chain: <input type="checkbox" id="loopChain"></label>
+  </div>
+
+  <div style="font-size:11px;color:#888;margin-bottom:6px;">PATTERNS (click a pattern, then "Add to Chain")</div>
+  <div class="patterns" id="patterns"></div>
+  <div class="toolbar" style="margin-top:8px;">
+    <button id="addToChain" class="primary">+ Add to Chain</button>
+    <button id="newPattern">+ New Pattern</button>
+    <button id="dupPattern">Duplicate</button>
+  </div>
+
+  <div style="font-size:11px;color:#888;margin:8px 0 6px;">SONG CHAIN</div>
+  <div class="chain" id="chain"></div>
+</div>
+
+<!-- =================== PROJECTS PANEL =================== -->
+<div class="panel" id="panel-projects">
+  <div class="toolbar">
+    <button id="newProject" class="primary">+ New Project</button>
+    <button id="saveProject">💾 Save Current</button>
+    <button id="importJson">📁 Import JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <button id="exportJson">⬇ Export JSON</button>
+  </div>
+  <div class="projects-list" id="projectsList"></div>
+</div>
+
+<div class="master">
+  <div class="master-section"><label>Master</label><input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8"></div>
+  <div class="master-section"><label>Reverb</label><input type="range" id="reverbAmt" min="0" max="1" step="0.01" value="0.2"></div>
+  <div class="master-section"><label>Delay</label><input type="range" id="delayAmt" min="0" max="1" step="0.01" value="0.15"></div>
+  <div class="master-section"><label>Drive</label><input type="range" id="driveAmt" min="0" max="1" step="0.01" value="0.0"></div>
+</div>
+
+<div class="status" id="status">Ready. Works 100% offline.</div>
+
+<!-- Modal for project naming -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Save Project</h3>
+    <input type="text" id="modalInput" placeholder="Project name...">
+    <div class="modal-actions">
+      <button id="modalCancel">Cancel</button>
+      <button id="modalOk" class="primary">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS & STATE
+// ============================================================
+const STEPS = 16;
+
+const TRACK_DEFS = [
+  { name: '🥁 Kick',  color: '#ef4444', synth: 'kick',   defaultVol: 0.9 },
+  { name: '🥁 Snare', color: '#f97316', synth: 'snare',  defaultVol: 0.7 },
+  { name: '🥁 HiHat', color: '#eab308', synth: 'hihat',  defaultVol: 0.4 },
+  { name: '🎹 Bass',  color: '#4ade80', synth: 'bass',   defaultVol: 0.6, melodic: true, octave: 2 },
+  { name: '🎹 Lead',  color: '#60a5fa', synth: 'lead',   defaultVol: 0.35, melodic: true, octave: 4 },
+  { name: '🎹 Pad',   color: '#a78bfa', synth: 'pad',    defaultVol: 0.25, melodic: true, octave: 3 },
+  { name: '✨ Pluck', color: '#f472b6', synth: 'pluck',  defaultVol: 0.3, melodic: true, octave: 5 },
+];
+
+// Each pattern holds a full set of tracks
+function makeEmptyPattern(name) {
+  return {
+    name: name || 'A',
+    tracks: TRACK_DEFS.map(d => ({
+      ...d,
+      steps: Array(STEPS).fill(false),
+      notes: Array(STEPS).fill(0), // frequency in Hz; 0 = no note
+      volume: d.defaultVol,
+      muted: false,
+      solo: false,
+    })),
+  };
+}
+
+const state = {
+  patterns: [makeEmptyPattern('A')],
+  currentPatternIndex: 0,
+  chain: [],           // array of pattern indices
+  isPlaying: false,
+  currentStep: 0,
+  nextNoteTime: 0,
+  timerId: null,
+  bpm: 110,
+  bars: 1,
+  playingChainIndex: 0,
+  loopChain: false,
+  projectName: 'Untitled',
+};
+
+function currentPattern() { return state.patterns[state.currentPatternIndex]; }
+
+// ============================================================
+// AUDIO ENGINE
+// ============================================================
+let audioCtx, masterGain, reverbNode, reverbGain, delayNode, delayGain, driveNode, compressor;
+
+function initAudio() {
+  if (audioCtx) return audioCtx;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  compressor = audioCtx.createDynamicsCompressor();
+  compressor.threshold.value = -12; compressor.knee.value = 20;
+  compressor.ratio.value = 4; compressor.attack.value = 0.003;
+  compressor.release.value = 0.25;
+
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = +document.getElementById('masterVol').value;
+
+  driveNode = audioCtx.createWaveShaper();
+  driveNode.curve = makeDistortionCurve(0);
+  driveNode.oversample = '2x';
+
+  reverbNode = audioCtx.createConvolver();
+  reverbNode.buffer = makeReverbIR(audioCtx, 2.0, 2.5);
+  reverbGain = audioCtx.createGain();
+  reverbGain.gain.value = +document.getElementById('reverbAmt').value;
+
+  delayNode = audioCtx.createDelay(1.0);
+  delayNode.delayTime.value = 0.28;
+  delayGain = audioCtx.createGain();
+  delayGain.gain.value = +document.getElementById('delayAmt').value;
+  const fb = audioCtx.createGain(); fb.gain.value = 0.35;
+  delayNode.connect(fb); fb.connect(delayNode);
+
+  compressor.connect(driveNode); driveNode.connect(masterGain);
+  masterGain.connect(audioCtx.destination);
+  compressor.connect(reverbNode); reverbNode.connect(reverbGain);
+  reverbGain.connect(masterGain);
+  compressor.connect(delayNode); delayNode.connect(delayGain);
+  delayGain.connect(masterGain);
+  return audioCtx;
+}
+
+function makeDistortionCurve(amount) {
+  const n = 44100, curve = new Float32Array(n), k = amount * 50;
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1;
+    curve[i] = ((3 + k) * x * 20 * Math.PI / 180) / (Math.PI + k * Math.abs(x));
+  }
+  return curve;
+}
+
+function makeReverbIR(ctx, duration, decay) {
+  const rate = ctx.sampleRate, len = rate * duration;
+  const impulse = ctx.createBuffer(2, len, rate);
+  for (let c = 0; c < 2; c++) {
+    const data = impulse.getChannelData(c);
+    for (let i = 0; i < len; i++)
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+  }
+  return impulse;
+}
+
+// ============================================================
+// SYNTHS
+// ============================================================
+const SYNTHS = {
+  kick(ctx, dest, t) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(160, t);
+    o.frequency.exponentialRampToValueAtTime(40, t + 0.15);
+    g.gain.setValueAtTime(1, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    o.connect(g).connect(dest);
+    o.start(t); o.stop(t + 0.35);
+  },
+  snare(ctx, dest, t) {
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const n = ctx.createBufferSource(); n.buffer = buf;
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1200;
+    const ng = ctx.createGain();
+    ng.gain.setValueAtTime(0.7, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    n.connect(hp).connect(ng).connect(dest);
+    n.start(t); n.stop(t + 0.2);
+    const o = ctx.createOscillator(), og = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = 180;
+    og.gain.setValueAtTime(0.4, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    o.connect(og).connect(dest); o.start(t); o.stop(t + 0.1);
+  },
+  hihat(ctx, dest, t) {
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const n = ctx.createBufferSource(); n.buffer = buf;
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7500;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    n.connect(hp).connect(g).connect(dest);
+    n.start(t); n.stop(t + 0.05);
+  },
+  bass(ctx, dest, t, freq) {
+    const o = ctx.createOscillator(), sub = ctx.createOscillator();
+    const g = ctx.createGain(), f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(800, t);
+    f.frequency.exponentialRampToValueAtTime(200, t + 0.2);
+    f.Q.value = 6;
+    o.type = 'sawtooth'; o.frequency.value = freq;
+    sub.type = 'sine'; sub.frequency.value = freq / 2;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.9, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    o.connect(f); sub.connect(f);
+    f.connect(g).connect(dest);
+    o.start(t); o.stop(t + 0.4); sub.start(t); sub.stop(t + 0.4);
+  },
+  lead(ctx, dest, t, freq) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(2000, t);
+    f.frequency.exponentialRampToValueAtTime(600, t + 0.3);
+    o.type = 'square'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.5, t + 0.02);
+    g.gain.setValueAtTime(0.5, t + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    o.connect(f).connect(g).connect(dest);
+    o.start(t); o.stop(t + 0.4);
+  },
+  pad(ctx, dest, t, freq) {
+    const g = ctx.createGain(), f = ctx.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 1200;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.35, t + 0.3);
+    g.gain.setValueAtTime(0.35, t + 0.6);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+    [-7, 0, 7].forEach(detune => {
+      const o = ctx.createOscillator();
+      o.type = 'sawtooth'; o.frequency.value = freq; o.detune.value = detune;
+      o.connect(f); o.start(t); o.stop(t + 1.0);
+    });
+    f.connect(g).connect(dest);
+  },
+  pluck(ctx, dest, t, freq) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(4000, t);
+    f.frequency.exponentialRampToValueAtTime(400, t + 0.15);
+    f.Q.value = 4;
+    o.type = 'triangle'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.6, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    o.connect(f).connect(g).connect(dest);
+    o.start(t); o.stop(t + 0.25);
+  },
+};
+
+// ============================================================
+// NOTE HELPERS
+// ============================================================
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function freqFromMidi(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+function midiFromFreq(f) { return Math.round(69 + 12 * Math.log2(f / 440)); }
+function noteLabel(midi) {
+  return NOTE_NAMES[midi % 12] + (Math.floor(midi / 12) - 1);
+}
+function isBlackKey(midi) {
+  return [1, 3, 6, 8, 10].includes(midi % 12);
+}
+
+// Scale definitions (semitone offsets)
+const SCALES = {
+  chromatic: [0,1,2,3,4,5,6,7,8,9,10,11],
+  major:     [0,2,4,5,7,9,11],
+  minor:     [0,2,3,5,7,8,10],
+  pentatonic:[0,2,4,7,9],
+};
+
+// ============================================================
+// UI: SEQUENCER
+// ============================================================
+function buildSequencerUI() {
+  const el = document.getElementById('tracks');
+  el.innerHTML = '';
+  const pattern = currentPattern();
+  pattern.tracks.forEach((track, ti) => {
+    const row = document.createElement('div');
+    row.className = 'track';
+    row.style.color = track.color;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'track-header';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'track-name';
+    nameEl.style.color = track.color;
+    nameEl.innerHTML = `<span class="track-dot"></span>${track.name}`;
+    header.appendChild(nameEl);
+
+    // Step grid
+    const stepsEl = document.createElement('div');
+    stepsEl.className = 'steps';
+    for (let s = 0; s < STEPS; s++) {
+      const cell = document.createElement('div');
+      cell.className = 'step' + (track.steps[s] ? ' on' : '');
+      cell.dataset.track = ti;
+      cell.dataset.step = s;
+      cell.onclick = () => {
+        track.steps[s] = !track.steps[s];
+        cell.classList.toggle('on', track.steps[s]);
+      };
+      stepsEl.appendChild(cell);
+    }
+
+    // Controls
+    const controls = document.createElement('div');
+    controls.className = 'track-controls';
+    const vol = document.createElement('input');
+    vol.type = 'range'; vol.min = 0; vol.max = 1; vol.step = 0.01;
+    vol.value = track.volume;
+    const volVal = document.createElement('span');
+    volVal.className = 'vol-val';
+    volVal.textContent = Math.round(track.volume * 100);
+    vol.oninput = () => { track.volume = +vol.value; volVal.textContent = Math.round(vol.value * 100); };
+
+    const mute = document.createElement('button');
+    mute.className = 'mute-btn' + (track.muted ? ' active' : '');
+    mute.textContent = 'M';
+    mute.onclick = () => {
+      track.muted = !track.muted;
+      mute.classList.toggle('active', track.muted);
+    };
+
+    const solo = document.createElement('button');
+    solo.className = 'mute-btn solo-btn' + (track.solo ? ' active' : '');
+    solo.textContent = 'S';
+    solo.onclick = () => {
+      track.solo = !track.solo;
+      solo.classList.toggle('active', track.solo);
+    };
+
+    controls.append(vol, volVal, mute, solo);
+
+    row.append(header, stepsEl, controls);
+    el.appendChild(row);
+  });
+}
+
+function refreshSequencerUI() {
+  document.querySelectorAll('.step').forEach(cell => {
+    const ti = +cell.dataset.track, si = +cell.dataset.step;
+    const track = currentPattern().tracks[ti];
+    if (track) cell.classList.toggle('on', track.steps[si]);
+  });
+}
+
+// ============================================================
+// UI: PIANO ROLL
+// ============================================================
+let prOctave = 4;
+let prScale = 'major';
+let prTrackIndex = 3; // bass by default
+
+function buildPianoRollUI() {
+  const el = document.getElementById('pianoroll');
+  el.innerHTML = '';
+
+  // Populate track select
+  const sel = document.getElementById('prTrackSelect');
+  sel.innerHTML = '';
+  currentPattern().tracks.forEach((t, i) => {
+    if (!t.melodic) return;
+    const o = document.createElement('option');
+    o.value = i; o.textContent = t.name;
+    sel.appendChild(o);
+  });
+  sel.value = prTrackIndex;
+  sel.onchange = () => { prTrackIndex = +sel.value; buildPianoRollUI(); };
+
+  const track = currentPattern().tracks[prTrackIndex];
+  if (!track) return;
+  el.style.color = track.color;
+
+  // Range of notes: 2 octaves starting at prOctave
+  const startMidi = (prOctave + 1) * 12; // +1 because MIDI 60 = C4
+  const totalNotes = 24;
+
+  for (let row = 0; row < totalNotes; row++) {
+    const midi = startMidi + (totalNotes - 1 - row);
+    // Label
+    const label = document.createElement('div');
+    label.className = 'pr-label';
+    label.textContent = noteLabel(midi);
+    if (isBlackKey(midi)) label.style.color = '#333';
+    el.appendChild(label);
+
+    // Cells
+    for (let s = 0; s < STEPS; s++) {
+      const cell = document.createElement('div');
+      cell.className = 'pr-cell';
+      if (isBlackKey(midi)) cell.classList.add('black');
+      const existingFreq = track.notes[s];
+      if (existingFreq > 0 && Math.round(midiFromFreq(existingFreq)) === midi) {
+        cell.classList.add('on');
+      }
+      cell.dataset.step = s;
+      cell.dataset.midi = midi;
+      cell.onclick = () => {
+        const currentMidi = Math.round(midiFromFreq(track.notes[s] || 0));
+        if (currentMidi === midi) {
+          // Turn off
+          track.notes[s] = 0;
+          track.steps[s] = false;
+        } else {
+          track.notes[s] = freqFromMidi(midi);
+          track.steps[s] = true;
+        }
+        buildPianoRollUI();
+        refreshSequencerUI();
+      };
+      el.appendChild(cell);
+    }
+  }
+}
+
+// ============================================================
+// UI: SONG MODE
+// ============================================================
+function buildSongUI() {
+  // Pattern chips
+  const patsEl = document.getElementById('patterns');
+  patsEl.innerHTML = '';
+  state.patterns.forEach((pat, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'pattern-chip' + (i === state.currentPatternIndex ? ' active' : '');
+    // Check if pattern has any steps
+    const hasNotes = pat.tracks.some(t => t.steps.some(s => s));
+    if (!hasNotes) chip.classList.add('empty');
+    chip.textContent = pat.name;
+    chip.onclick = () => {
+      state.currentPatternIndex = i;
+      buildSongUI();
+      buildSequencerUI();
+      buildPianoRollUI();
+    };
+    patsEl.appendChild(chip);
+  });
+
+  // Chain
+  const chainEl = document.getElementById('chain');
+  chainEl.innerHTML = '';
+  if (state.chain.length === 0) {
+    chainEl.innerHTML = '<div style="color:#555;font-size:12px;">Empty — click "Add to Chain" to build your song.</div>';
+  }
+  state.chain.forEach((patIdx, i) => {
+    const item = document.createElement('div');
+    item.className = 'chain-item';
+    item.textContent = state.patterns[patIdx]?.name || '?';
+    const rm = document.createElement('span');
+    rm.className = 'remove';
+    rm.textContent = '×';
+    rm.onclick = (e) => {
+      e.stopPropagation();
+      state.chain.splice(i, 1);
+      buildSongUI();
+    };
+    item.appendChild(rm);
+    chainEl.appendChild(item);
+  });
+}
+
+// ============================================================
+// PLAYBACK
+// ============================================================
+function stepDuration() { return 60 / state.bpm / 4; }
+
+function applySoloLogic(pattern) {
+  // If any track has solo, mute others
+  const anySolo = pattern.tracks.some(t => t.solo);
+  return pattern.tracks.map(t => ({
+    ...t,
+    effectiveMute: t.muted || (anySolo && !t.solo),
+  }));
+}
+
+function scheduleStep(pattern, step, time, context, dest) {
+  const ctx = context || audioCtx;
+  const destNode = dest || compressor;
+  const tracks = applySoloLogic(pattern);
+
+  tracks.forEach(track => {
+    if (!track.steps[step] || track.effectiveMute) return;
+    const gain = ctx.createGain();
+    gain.gain.value = track.volume;
+    gain.connect(destNode);
+    const synth = SYNTHS[track.synth];
+    if (track.melodic && track.notes[step]) {
+      synth(ctx, gain, time, track.notes[step]);
+    } else if (!track.melodic) {
+      synth(ctx, gain, time);
+    }
+  });
+
+  if (!context) {
+    // Live playback: update UI
+    const delay = (time - audioCtx.currentTime) * 1000;
+    setTimeout(() => {
+      document.querySelectorAll('.step.playing, .pr-cell.playing').forEach(el => el.classList.remove('playing'));
+      document.querySelectorAll(`.step[data-step="${step}"]`).forEach(el => el.classList.add('playing'));
+      // Piano roll highlight
+      if (prTrackIndex >= 0) {
+        const track = pattern.tracks[prTrackIndex];
+        if (track && track.notes[step]) {
+          const midi = Math.round(midiFromFreq(track.notes[step]));
+          document.querySelectorAll(`.pr-cell[data-midi="${midi}"][data-step="${step}"]`)
+            .forEach(el => el.classList.add('playing'));
+        }
+      }
+    }, Math.max(0, delay));
+  }
+}
+
+let songMode = false; // Whether we're playing the chain
+
+function scheduler() {
+  const lookahead = 0.1;
+  while (state.nextNoteTime < audioCtx.currentTime + lookahead) {
+    let pattern;
+    if (songMode && state.chain.length > 0) {
+      pattern = state.patterns[state.chain[state.playingChainIndex]] || currentPattern();
+    } else {
+      pattern = currentPattern();
+    }
+    scheduleStep(pattern, state.currentStep, state.nextNoteTime);
+
+    state.nextNoteTime += stepDuration();
+    state.currentStep++;
+    if (state.currentStep >= STEPS) {
+      state.currentStep = 0;
+      if (songMode && state.chain.length > 0) {
+        state.playingChainIndex++;
+        if (state.playingChainIndex >= state.chain.length) {
+          if (state.loopChain) {
+            state.playingChainIndex = 0;
+          } else {
+            stopPlayback();
+            return;
+          }
+        }
+        // Highlight the chain item
+        setTimeout(() => {
+          document.querySelectorAll('.chain-item.playing').forEach(el => el.classList.remove('playing'));
+          const items = document.querySelectorAll('.chain-item');
+          if (items[state.playingChainIndex]) items[state.playingChainIndex].classList.add('playing');
+        }, 0);
+      }
+    }
+  }
+}
+
+function startPlayback(song) {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  state.isPlaying = true;
+  songMode = !!song;
+  state.currentStep = 0;
+  state.playingChainIndex = 0;
+  state.nextNoteTime = audioCtx.currentTime + 0.05;
+  state.timerId = setInterval(scheduler, 25);
+  setStatus(song ? '▶ Playing song...' : '▶ Playing pattern...');
+  if (song) buildSongUI();
+}
+
+function stopPlayback() {
+  state.isPlaying = false;
+  songMode = false;
+  clearInterval(state.timerId);
+  document.querySelectorAll('.step.playing, .pr-cell.playing, .chain-item.playing')
+    .forEach(el => el.classList.remove('playing'));
+  setStatus('⏹ Stopped');
+}
+
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+// ============================================================
+// WAV EXPORT
+// ============================================================
+async function exportWAV(song) {
+  setStatus('🎧 Rendering...');
+  const sd = stepDuration();
+  let totalSteps, patternSequence;
+
+  if (song && state.chain.length > 0) {
+    totalSteps = state.chain.length * STEPS;
+    patternSequence = state.chain.map(i => state.patterns[i]);
+  } else {
+    totalSteps = STEPS * state.bars;
+    patternSequence = [];
+    for (let b = 0; b < state.bars; b++) patternSequence.push(currentPattern());
+  }
+
+  const dur = sd * totalSteps + 2; // tail for reverb
+  const sr = 44100;
+  const offline = new OfflineAudioContext(2, Math.ceil(sr * dur), sr);
+
+  // Offline master chain
+  const oComp = offline.createDynamicsCompressor();
+  oComp.threshold.value = -12; oComp.knee.value = 20;
+  oComp.ratio.value = 4; oComp.attack.value = 0.003; oComp.release.value = 0.25;
+
+  const oMaster = offline.createGain();
+  oMaster.gain.value = +document.getElementById('masterVol').value;
+
+  const oDrive = offline.createWaveShaper();
+  oDrive.curve = makeDistortionCurve(+document.getElementById('driveAmt').value);
+
+  const oReverb = offline.createConvolver();
+  oReverb.buffer = makeReverbIR(offline, 2.0, 2.5);
+  const oRevGain = offline.createGain();
+  oRevGain.gain.value = +document.getElementById('reverbAmt').value;
+
+  const oDelay = offline.createDelay(1.0);
+  oDelay.delayTime.value = 0.28;
+  const oDelayGain = offline.createGain();
+  oDelayGain.gain.value = +document.getElementById('delayAmt').value;
+  const oFb = offline.createGain(); oFb.gain.value = 0.35;
+  oDelay.connect(oFb); oFb.connect(oDelay);
+
+  oComp.connect(oDrive); oDrive.connect(oMaster); oMaster.connect(offline.destination);
+  oComp.connect(oReverb); oReverb.connect(oRevGain); oRevGain.connect(oMaster);
+  oComp.connect(oDelay); oDelay.connect(oDelayGain); oDelayGain.connect(oMaster);
+
+  // Schedule
+  let stepIndex = 0;
+  patternSequence.forEach((pattern, pIdx) => {
+    for (let s = 0; s < STEPS; s++) {
+      const t = stepIndex * sd + 0.05;
+      scheduleStep(pattern, s, t, offline, oComp);
+      stepIndex++;
+    }
+  });
+
+  const buffer = await offline.startRendering();
+  const wav = audioBufferToWav(buffer);
+  const url = URL.createObjectURL(wav);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${state.projectName || 'track'}-${Date.now()}.wav`;
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus('✅ WAV downloaded!');
+}
+
+function audioBufferToWav(buffer) {
+  const numCh = buffer.numberOfChannels, sr = buffer.sampleRate, len = buffer.length;
+  const dataLen = len * numCh * 2;
+  const ab = new ArrayBuffer(44 + dataLen), view = new DataView(ab);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0,'RIFF'); view.setUint32(4, 36 + dataLen, true); ws(8,'WAVE');
+  ws(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true); view.setUint32(24,sr,true);
+  view.setUint32(28,sr*numCh*2,true); view.setUint16(32,numCh*2,true);
+  view.setUint16(34,16,true); ws(36,'data'); view.setUint32(40,dataLen,true);
+  const chans = [];
+  for (let c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+  let off = 44;
+  for (let i = 0; i < len; i++) {
+    for (let c = 0; c < numCh; c++) {
+      let s = Math.max(-1, Math.min(1, chans[c][i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      off += 2;
+    }
+  }
+  return new Blob([view], { type: 'audio/wav' });
+}
+
+// ============================================================
+// INDEXEDDB PROJECT STORAGE
+// ============================================================
+const DB_NAME = 'music-studio-db';
+const DB_VERSION = 1;
+const STORE = 'projects';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        const store = db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+        store.createIndex('name', 'name', { unique: false });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveProject(name) {
+  const db = await openDB();
+  const tx = db.transaction(STORE, 'readwrite');
+  const store = tx.objectStore(STORE);
+  const data = serializeProject(name);
+  // If project with same name exists, update; else add
+  const existing = await new Promise(res => {
+    const req = store.index('name').get(name);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => res(null);
+  });
+  if (existing) {
+    data.id = existing.id;
+    store.put(data);
+  } else {
+    store.add(data);
+  }
+  return new Promise(res => { tx.oncomplete = () => res(true); });
+}
+
+async function listProjects() {
+  const db = await openDB();
+  const tx = db.transaction(STORE, 'readonly');
+  const store = tx.objectStore(STORE);
+  return new Promise(res => {
+    const req = store.getAll();
+    req.onsuccess = () => res(req.result);
+  });
+}
+
+async function deleteProject(id) {
+  const db = await openDB();
+  const tx = db.transaction(STORE, 'readwrite');
+  tx.objectStore(STORE).delete(id);
+  return new Promise(res => { tx.oncomplete = () => res(true); });
+}
+
+async function loadProject(id) {
+  const db = await openDB();
+  const tx = db.transaction(STORE, 'readonly');
+  return new Promise(res => {
+    const req = tx.objectStore(STORE).get(id);
+    req.onsuccess = () => res(req.result);
+  });
+}
+
+function serializeProject(name) {
+  return {
+    name: name || state.projectName,
+    savedAt: Date.now(),
+    bpm: state.bpm,
+    bars: state.bars,
+    patterns: state.patterns.map(p => ({
+      name: p.name,
+      tracks: p.tracks.map(t => ({
+        name: t.name,
+        synth: t.synth,
+        color: t.color,
+        melodic: !!t.melodic,
+        octave: t.octave,
+        steps: [...t.steps],
+        notes: [...t.notes],
+        volume: t.volume,
+        muted: t.muted,
+        solo: t.solo,
+      })),
+    })),
+    chain: [...state.chain],
+    master: {
+      volume: +document.getElementById('masterVol').value,
+      reverb: +document.getElementById('reverbAmt').value,
+      delay: +document.getElementById('delayAmt').value,
+      drive: +document.getElementById('driveAmt').value,
+    },
+  };
+}
+
+function deserializeProject(data) {
+  state.projectName = data.name || 'Untitled';
+  state.bpm = data.bpm || 110;
+  state.bars = data.bars || 1;
+  state.patterns = data.patterns.map(p => ({
+    name: p.name,
+    tracks: p.tracks.map(t => ({
+      ...t,
+      steps: [...t.steps],
+      notes: [...t.notes],
+    })),
+  }));
+  state.chain = [...(data.chain || [])];
+  state.currentPatternIndex = 0;
+
+  if (data.master) {
+    document.getElementById('masterVol').value = data.master.volume ?? 0.8;
+    document.getElementById('reverbAmt').value = data.master.reverb ?? 0.2;
+    document.getElementById('delayAmt').value = data.master.delay ?? 0.15;
+    document.getElementById('driveAmt').value = data.master.drive ?? 0;
+    if (masterGain) masterGain.gain.value = data.master.volume ?? 0.8;
+    if (reverbGain) reverbGain.gain.value = data.master.reverb ?? 0.2;
+    if (delayGain) delayGain.gain.value = data.master.delay ?? 0.15;
+    if (driveNode) driveNode.curve = makeDistortionCurve(data.master.drive ?? 0);
+  }
+  document.getElementById('bpm').value = state.bpm;
+  document.getElementById('bars').value = state.bars;
+
+  rebuildAllUI();
+}
+
+// ============================================================
+// PROJECTS PANEL UI
+// ============================================================
+async function refreshProjectsList() {
+  const list = document.getElementById('projectsList');
+  const projects = await listProjects();
+  list.innerHTML = '';
+  if (projects.length === 0) {
+    list.innerHTML = '<div style="color:#555;font-size:12px;">No saved projects yet.</div>';
+    return;
+  }
+  projects.sort((a, b) => b.savedAt - a.savedAt).forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    const date = new Date(p.savedAt).toLocaleString();
+    card.innerHTML = `
+      <div class="project-name">${p.name}</div>
+      <div class="project-date">${date}</div>
+      <div class="project-date">${p.patterns?.length || 0} patterns • BPM ${p.bpm}</div>
+      <div class="project-actions">
+        <button class="small load-btn">Load</button>
+        <button class="small danger delete-btn">Delete</button>
+      </div>
+    `;
+    card.querySelector('.load-btn').onclick = async () => {
+      const full = await loadProject(p.id);
+      deserializeProject(full);
+      setStatus(`Loaded "${p.name}"`);
+    };
+    card.querySelector('.delete-btn').onclick = async () => {
+      if (confirm(`Delete "${p.name}"?`)) {
+        await deleteProject(p.id);
+        refreshProjectsList();
+      }
+    };
+    list.appendChild(card);
+  });
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function showModal(title, placeholder, defaultValue, onOk) {
+  const backdrop = document.getElementById('modalBackdrop');
+  document.getElementById('modalTitle').textContent = title;
+  const input = document.getElementById('modalInput');
+  input.value = defaultValue || '';
+  input.placeholder = placeholder || '';
+  backdrop.classList.add('show');
+  input.focus();
+  input.select();
+
+  const ok = document.getElementById('modalOk');
+  const cancel = document.getElementById('modalCancel');
+
+  const cleanup = () => {
+    backdrop.classList.remove('show');
+    ok.onclick = null; cancel.onclick = null;
+    input.onkeydown = null;
+  };
+
+  ok.onclick = () => { const v = input.value.trim(); cleanup(); if (v) onOk(v); };
+  cancel.onclick = cleanup;
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') { const v = input.value.trim(); cleanup(); if (v) onOk(v); }
+    if (e.key === 'Escape') cleanup();
+  };
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'song') buildSongUI();
+    if (tab.dataset.tab === 'pianoroll') buildPianoRollUI();
+    if (tab.dataset.tab === 'projects') refreshProjectsList();
+  };
+});
+
+// ============================================================
+// REBUILD ALL
+// ============================================================
+function rebuildAllUI() {
+  buildSequencerUI();
+  buildPianoRollUI();
+  buildSongUI();
+}
+
+// ============================================================
+// EVENT WIRING
+// ============================================================
+// Sequencer toolbar
+document.getElementById('playBtn').onclick = () => state.isPlaying ? stopPlayback() : startPlayback(false);
+document.getElementById('stopBtn').onclick = stopPlayback;
+document.getElementById('clearBtn').onclick = () => {
+  currentPattern().tracks.forEach(t => { t.steps.fill(false); t.notes.fill(0); });
+  refreshSequencerUI();
+  buildPianoRollUI();
+  setStatus('Cleared pattern.');
+};
+document.getElementById('randomBtn').onclick = () => {
+  const pattern = currentPattern();
+  pattern.tracks.forEach((track, ti) => {
+    track.steps.fill(false);
+    if (!track.melodic) {
+      const density = ti === 0 ? 0.25 : ti === 2 ? 0.5 : 0.15;
+      for (let s = 0; s < STEPS; s++) if (Math.random() < density) track.steps[s] = true;
+      track.steps[0] = true;
+    } else {
+      const scale = SCALES[prScale];
+      const octave = track.octave || 4;
+      const base = (octave + 1) * 12;
+      for (let s = 0; s < STEPS; s++) {
+        if (Math.random() < 0.4) {
+          track.steps[s] = true;
+          const semi = scale[Math.floor(Math.random() * scale.length)];
+          track.notes[s] = freqFromMidi(base + semi);
+        }
+      }
+    }
+  });
+  refreshSequencerUI();
+  buildPianoRollUI();
+};
+document.getElementById('exportBtn').onclick = () => exportWAV(false);
+document.getElementById('bpm').onchange = e => state.bpm = +e.target.value;
+document.getElementById('bars').onchange = e => state.bars = +e.target.value;
+
+// Piano roll
+document.getElementById('prPlayBtn').onclick = () => state.isPlaying ? stopPlayback() : startPlayback(false);
+document.getElementById('prClearBtn').onclick = () => {
+  const track = currentPattern().tracks[prTrackIndex];
+  track.notes.fill(0); track.steps.fill(false);
+  buildPianoRollUI();
+  refreshSequencerUI();
+};
+document.getElementById('prScale').onchange = e => prScale = e.target.value;
+document.getElementById('prOctave').onchange = e => { prOctave = +e.target.value; buildPianoRollUI(); };
+
+// Song mode
+document.getElementById('songPlayBtn').onclick = () => state.isPlaying ? stopPlayback() : startPlayback(true);
+document.getElementById('songStopBtn').onclick = stopPlayback;
+document.getElementById('songClearBtn').onclick = () => { state.chain = []; buildSongUI(); };
+document.getElementById('exportSongBtn').onclick = () => exportWAV(true);
+document.getElementById('loopChain').onchange = e => state.loopChain = e.target.checked;
+document.getElementById('addToChain').onclick = () => {
+  state.chain.push(state.currentPatternIndex);
+  buildSongUI();
+};
+document.getElementById('newPattern').onclick = () => {
+  const letter = String.fromCharCode(65 + state.patterns.length);
+  state.patterns.push(makeEmptyPattern(letter));
+  state.currentPatternIndex = state.patterns.length - 1;
+  rebuildAllUI();
+};
+document.getElementById('dupPattern').onclick = () => {
+  const copy = JSON.parse(JSON.stringify(currentPattern()));
+  const letter = String.fromCharCode(65 + state.patterns.length);
+  copy.name = letter;
+  state.patterns.push(copy);
+  state.currentPatternIndex = state.patterns.length - 1;
+  rebuildAllUI();
+};
+
+// Projects
+document.getElementById('newProject').onclick = () => {
+  if (!confirm('Discard current work and start new?')) return;
+  state.patterns = [makeEmptyPattern('A')];
+  state.currentPatternIndex = 0;
+  state.chain = [];
+  state.projectName = 'Untitled';
+  rebuildAllUI();
+  setStatus('New project started.');
+};
+document.getElementById('saveProject').onclick = () => {
+  showModal('Save Project', 'My Song', state.projectName, async (name) => {
+    state.projectName = name;
+    await saveProject(name);
+    setStatus(`Saved "${name}"`);
+    refreshProjectsList();
+  });
+};
+document.getElementById('importJson').onclick = () => document.getElementById('importFile').click();
+document.getElementById('importFile').onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  try {
+    const data = JSON.parse(text);
+    deserializeProject(data);
+    setStatus(`Imported "${data.name}"`);
+  } catch (err) {
+    setStatus('❌ Invalid JSON');
+  }
+  e.target.value = '';
+};
+document.getElementById('exportJson').onclick = () => {
+  const data = serializeProject(state.projectName);
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${state.projectName}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+// Master effects
+document.getElementById('masterVol').oninput = e => { if (masterGain) masterGain.gain.value = +e.target.value; };
+document.getElementById('reverbAmt').oninput = e => { if (reverbGain) reverbGain.gain.value = +e.target.value; };
+document.getElementById('delayAmt').oninput = e => { if (delayGain) delayGain.gain.value = +e.target.value; };
+document.getElementById('driveAmt').oninput = e => { if (driveNode) driveNode.curve = makeDistortionCurve(+e.target.value); };
+
+// ============================================================
+// BOOT
+// ============================================================
+// Starter beat
+(function seedPattern() {
+  const p = currentPattern();
+  [0,4,8,12].forEach(s => p.tracks[0].steps[s] = true);
+  [4,12].forEach(s => p.tracks[1].steps[s] = true);
+  for (let i = 0; i < STEPS; i += 2) p.tracks[2].steps[i] = true;
+  // Bass line
+  [0,3,6,8,11,14].forEach(s => { p.tracks[3].steps[s] = true; p.tracks[3].notes[s] = freqFromMidi(36 + (s % 4 === 0 ? 0 : 7)); });
+  // Lead
+  [0,4,7,10,14].forEach((s, i) => { p.tracks[4].steps[s] = true; p.tracks[4].notes[s] = freqFromMidi(60 + [0,4,7,9,5][i]); });
+  // Pad
+  [0,8].forEach(s => { p.tracks[5].steps[s] = true; p.tracks[5].notes[s] = freqFromMidi(48 + (s === 0 ? 0 : 5)); });
+})();
+
+rebuildAllUI();
+setStatus('Ready — 4 tabs: Sequencer, Piano Roll, Song Mode, Projects. All offline.');
+</script>
+</body>
+</html>

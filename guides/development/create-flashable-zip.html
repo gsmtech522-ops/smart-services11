@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Create a Custom Flashable ZIP (MTK &amp; Unisoc) | Tech Learn</title>
+<meta name="description" content="Step-by-step developer guide to build an updater-script based flashable ZIP file for TWRP / OrangeFox on MediaTek and Unisoc devices.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#development">Development</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Create a Custom Flashable ZIP for MTK &amp; Unisoc Devices</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Developer Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>MediaTek &amp; Unisoc / Spreadtrum devices with TWRP/OrangeFox</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Custom recoveries like TWRP, OrangeFox, or PitchBlack let you modify system environments instantly. Instead of flashing single partitions one by one, you can pack modifications into one flashable ZIP and install via recovery — perfect for boot animations, pre-installed system apps, or raw partition images (<code>boot.img</code>, <code>recovery.img</code>) on MediaTek (MTK) and Unisoc/SPD platforms.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Anatomy of a flashable ZIP</h3>
+      <p>Every flashable ZIP must have this exact directory tree:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">Your_Custom_Patch.zip
+├── META-INF/
+│   └── com/
+│       └── google/
+│           └── android/
+│               ├── update-binary
+│               └── updater-script      <-- core code lives here
+├── system/                             (optional - push files)
+└── boot.img / recovery.img             (optional - flash raw images)</code></pre>
+      </div>
+      <ul>
+        <li><strong>update-binary:</strong> compiled executable that interprets recovery instructions.</li>
+        <li><strong>updater-script:</strong> plain text in <strong>Edify language</strong> — tells recovery what files to copy, where to map partitions, and what permissions to set.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Obtain the base META structure</h3>
+      <p>Don't compile <code>update-binary</code> yourself. Extract the working <strong>META-INF</strong> folder from a light patch or Magisk installer ZIP.</p>
+      <ol>
+        <li>Create an empty folder on Desktop: <code>MyFlashablePatch</code>.</li>
+        <li>Inside, create <code>META-INF/com/google/android/</code>.</li>
+        <li>Place a compatible <code>update-binary</code> file inside.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Write updater-script</h3>
+      <p>Create a blank text file inside <code>META-INF/com/google/android/</code> and name it <strong>exactly</strong> <code>updater-script</code> (remove <code>.txt</code> extension). Open with Notepad++ to write commands.</p>
+
+      <p><strong>Scenario A — Flash raw image (boot/recovery) on MTK:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">ui_print("=================================");
+ui_print(" Flashing Boot Image for MTK ");
+ui_print("=================================");
+package_extract_file("boot.img", "/dev/block/by-name/boot");
+ui_print("Success! Boot partition restored.");</code></pre>
+      </div>
+
+      <p><strong>Scenario A — Unisoc / SPD devices:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">ui_print("=================================");
+ui_print(" Deploying Unisoc Patch ");
+ui_print("=================================");
+package_extract_file("boot.img", "/dev/block/by-name/boot");</code></pre>
+      </div>
+
+      <p><strong>Scenario B — Push system files (apps, animations):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">ui_print("Mounting System Partitions...");
+mount("ext4", "EMMC", "/dev/block/by-name/system", "/system");
+package_extract_dir("system", "/system");
+set_metadata_recursive("/system/media", "uid", 0, "gid", 0, "fmode", 0644, "dmode", 0755);
+unmount("/system");
+ui_print("System update injected successfully!");</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Populate custom files</h3>
+      <p>Inside <code>MyFlashablePatch</code>:</p>
+      <ul>
+        <li><strong>Scenario A:</strong> copy your <code>boot.img</code> or <code>recovery.img</code> here.</li>
+        <li><strong>Scenario B:</strong> create a <code>system/</code> folder and mirror the target path (e.g. <code>system/media/bootanimation.zip</code>).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Compress correctly (crucial)</h3>
+      <p>TWRP is sensitive to compression. Wrong settings trigger <em>"Error 7"</em> or <em>"Invalid ZIP file zone"</em>.</p>
+      <ol>
+        <li>Select <strong>all items inside</strong> the folder (META-INF + others) — not the parent folder itself.</li>
+        <li>Right-click → <strong>Add to archive…</strong></li>
+        <li>Format: strictly <strong>ZIP</strong>.</li>
+        <li>Compression: <strong>Normal</strong> or <strong>Store</strong> (never Ultra / Maximum).</li>
+        <li>Click OK.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Step 5 — Test the ZIP safely</h3>
+      <ol>
+        <li>Copy the <code>.zip</code> to internal or SD storage.</li>
+        <li>Boot into recovery (TWRP / OrangeFox).</li>
+        <li>Install → select the ZIP → swipe to flash.</li>
+        <li>Watch terminal logs — every <code>ui_print</code> line should output without errors.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Error 7</td><td>Wrong update-binary or corrupted ZIP. Ensure ZIP compression is Normal/Store.</td></tr>
+          <tr><td>Invalid ZIP file zone</td><td>Re-zip; select items inside folder, not the folder itself.</td></tr>
+          <tr><td>Partition not found</td><td>Different block path on A/B slots — use <code>/dev/block/by-name/boot_a</code> or <code>boot_b</code>.</td></tr>
+          <tr><td>System files don't stick after reboot</td><td>Missing <code>unmount()</code> before reboot, or partition read-only — verify dm-verity disabled.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="extract-boot-payload-bin.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="extract-recovery-img-lz4.html">Extract recovery.img from .lz4</a></li>
+      <li><a href="../../android.html#development">Development category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

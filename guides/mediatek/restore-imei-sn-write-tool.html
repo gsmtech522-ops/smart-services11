@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restore Null/Invalid IMEI via SN Write Tool (Dual SIM MTK) | Tech Learn</title>
+<meta name="description" content="Repair null or invalid IMEI on MediaTek Dual SIM devices using SN Write Tool with BPLGU and APDB database files.">
+<link rel="stylesheet" href="../../../styles/style.css">
+<link rel="stylesheet" href="../../../styles/guide.css">
+<link rel="stylesheet" href="../../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Restore Null/Invalid IMEI via SN Write Tool</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Dual SIM MediaTek devices with wiped NVRAM</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Legal warning:</strong> only restore the <strong>original IMEI of your own device</strong>. Changing IMEI is illegal in most countries (Pakistan: PTA, India: DoT, USA: FCC). The IMEI is printed on the box or battery label.</p>
+  </div>
+
+  <p>After full firmware flash, format operations, or NVRAM corruption, MTK phones often lose cellular credentials → "Invalid IMEI", "Null IMEI", or "No Service". <strong>SN Write Tool</strong> is the official MediaTek utility to write IMEI, Wi-Fi MAC, Bluetooth MAC, and serial numbers into NVRAM by parsing modem database files.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MTK VCOM / CDC USB drivers installed.</li>
+        <li>SN Write Tool (v2.x or v5.x).</li>
+        <li><strong>BPLGU</strong> modem database file from stock firmware.</li>
+        <li><strong>APDB</strong> file from stock firmware.</li>
+        <li>Original 15-digit IMEI numbers (from box or battery label).</li>
+        <li>Quality USB cable + charged device.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Extract database files</h3>
+      <ol>
+        <li>Unpack your device's official stock firmware.</li>
+        <li>Locate <code>BPLGUInfoCustomAppSrcP_...</code> (modem database).</li>
+        <li>Locate <code>APDB_...</code> (AP database).</li>
+        <li>Copy both files to a clean folder on your desktop.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Configure SN Write Tool</h3>
+      <ol>
+        <li>Extract the SN Write Tool zip and run <code>SN Write Tool.exe</code> as Administrator.</li>
+        <li>Set <strong>ComPort</strong> dropdown → <code>USB VCOM</code>.</li>
+        <li>Set <strong>Target Type</strong> → <code>Smart Phone</code> (or Feature Phone for legacy MT6261).</li>
+        <li>Click <strong>System Config</strong>.</li>
+        <li>In <strong>Write Option</strong>, check:
+          <ul>
+            <li><code>IMEI</code></li>
+            <li><code>Dual IMEI</code> (for dual SIM devices)</li>
+          </ul>
+        </li>
+        <li>Optional: check <code>Wi-Fi Address</code> / <code>BT Address</code> for missing MAC.</li>
+        <li>In <strong>Database File</strong>:
+          <ul>
+            <li><strong>MD1_DB</strong> → browse to <code>BPLGU...</code></li>
+            <li><strong>AP_DB</strong> → browse to <code>APDB...</code></li>
+          </ul>
+        </li>
+        <li>Click <strong>Save</strong>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Execute IMEI writing</h3>
+      <ol>
+        <li>Click <strong>Start</strong>.</li>
+        <li>A <strong>Scan Data</strong> popup asks for IMEI strings.</li>
+        <li>Enter:
+          <ul>
+            <li><strong>IMEI 1</strong>: primary SIM IMEI</li>
+            <li><strong>IMEI 2</strong>: secondary SIM IMEI</li>
+          </ul>
+        </li>
+        <li>Click OK → log shows <code>Wait for Cell Connect...</code></li>
+        <li>Power off the phone.</li>
+        <li>Connect USB (press Volume Down/Up if required for META/Boot).</li>
+        <li>SN Write Tool switches phone into <strong>META Mode</strong>, parses DBs, writes IMEI to NVRAM/NVDATA.</li>
+        <li>Green <strong>PASS</strong> banner = success.</li>
+        <li>Unplug, boot, dial <kbd>*#06#</kbd> to verify both IMEIs.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting</h3>
+
+      <p><strong>Fail to connect / META Mode timeout</strong></p>
+      <p>Fix: install MTK CDC drivers manually, ensure phone is completely off before plugging, use SLA/DAA auth bypass on protected chips.</p>
+
+      <p><strong>Load Database File Failed / APDB mismatch</strong></p>
+      <p>Fix: extract fresh BPLGU and APDB from the exact stock firmware for your specific build.</p>
+
+      <p><strong>IMEI shows correct but "No Service" remains</strong></p>
+      <p>Fix: radio calibration was erased. Restore a valid nvram/nvdata backup or write a working donor dump via Maui META first.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="mtk-database-bplgu-mddb.html">Find BPLGU &amp; MDDB files</a></li>
+      <li><a href="restore-imei-maui-meta.html">Restore via Maui META</a></li>
+      <li><a href="backup-nvram-nvdata-imei.html">Backup NVRAM / IMEI</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

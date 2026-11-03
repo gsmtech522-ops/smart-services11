@@ -1,0 +1,310 @@
+/* ==========================================================
+   Tech Learn - style.css
+   Works with the current index.html (no class changes needed)
+   ========================================================== */
+
+/* ---------- Design tokens ---------- */
+:root {
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --ink: #15202b;
+  --ink-soft: #4a5866;
+  --line: #d5dce4;
+
+  --computer: #1f5fd6;      /* blue  - Computer Technique */
+  --computer-tint: #e6eefc;
+  --mobile: #0c8a6a;        /* green - Mobile Technique   */
+  --mobile-tint: #dff3ed;
+
+  --radius: 14px;
+  --gap: 1.5rem;
+  --font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151c;
+    --surface: #18212b;
+    --ink: #e8eef4;
+    --ink-soft: #a3b1bf;
+    --line: #2b3745;
+
+    --computer: #6b9cff;
+    --computer-tint: #1b2a47;
+    --mobile: #3fcfa6;
+    --mobile-tint: #153629;
+  }
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* ---------- Page layout: header + 2 cards + footer ---------- */
+body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+  max-width: 1100px;
+  margin-inline: auto;
+  padding: 1.5rem 1.25rem 0;
+  align-content: start;
+}
+
+body > header,
+body > footer {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Header ---------- */
+body > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem 0 1.5rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.site-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1rem;
+  align-items: center;
+  max-width: 46rem;
+}
+
+.brand-icon {
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  font-size: 2.2rem;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.site-header p {
+  grid-column: 2;
+  margin: 0.35rem 0 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  max-width: 60ch;
+}
+
+.header-info {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--computer);
+  background: var(--computer-tint);
+  border-radius: 999px;
+}
+
+.badge-green {
+  color: var(--mobile);
+  background: var(--mobile-tint);
+}
+
+/* ---------- Section cards ---------- */
+body > section {
+  display: flex;
+}
+
+body > section > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.75rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 8px solid var(--accent, var(--computer));
+  border-radius: var(--radius);
+}
+
+/* One accent colour per section */
+body > section:nth-of-type(1) > div {
+  --accent: var(--computer);
+  --accent-tint: var(--computer-tint);
+}
+
+body > section:nth-of-type(2) > div {
+  --accent: var(--mobile);
+  --accent-tint: var(--mobile-tint);
+}
+
+body > section h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+body > section p {
+  margin: 0 0 1.5rem;
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+
+/* ---------- Category list pages (Computer / Mobile) ----------
+   Use <body class="list-page"> for Computer Technique
+   and <body class="list-page mobile-page"> for Mobile Technique */
+body.list-page > section > div {
+  --accent: var(--computer);
+  --accent-tint: var(--computer-tint);
+}
+
+body.list-page.mobile-page > section > div {
+  --accent: var(--mobile);
+  --accent-tint: var(--mobile-tint);
+}
+
+@media (min-width: 1000px) {
+  body.list-page {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 1200px;
+  }
+}
+
+body.list-page > section h2 {
+  font-size: 1.35rem;
+}
+
+body.list-page > section p {
+  font-size: 0.98rem;
+}
+
+/* Back link in header */
+.header-info a {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+}
+
+.header-info a:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ---------- Button-style link ---------- */
+body > section a {
+  align-self: flex-start;
+  margin-top: auto;               /* keeps buttons level across both cards */
+  padding: 0.7rem 1.4rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background: var(--accent);
+  border-radius: 8px;
+  transition: background-color 0.15s, transform 0.15s;
+}
+
+body > section a:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+body > section a:active {
+  transform: translateY(0);
+}
+
+/* Dark-mode accent colours are light, so use dark button text */
+@media (prefers-color-scheme: dark) {
+  body > section a {
+    color: #0b1117;
+  }
+}
+
+/* ---------- Keyboard focus ---------- */
+a:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  margin-top: 1rem;
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 720px) {
+  body {
+    grid-template-columns: 1fr;
+    padding-inline: 1rem;
+  }
+
+  body > header {
+    padding-top: 1.25rem;
+  }
+
+  .site-header {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-icon {
+    grid-row: auto;
+    margin-bottom: 0.75rem;
+  }
+
+  .site-header p {
+    grid-column: 1;
+  }
+
+  body > section > div {
+    padding: 1.25rem;
+  }
+
+  body > section a {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

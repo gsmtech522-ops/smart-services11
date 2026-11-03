@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fix DM-Verity &amp; Boot Verification Errors via VBMeta | Tech Learn</title>
+<meta name="description" content="Bypass Android Verified Boot (AVB 2.0) and fix dm-verity bootloop errors using Fastboot VBMeta flags.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Fix DM-Verity &amp; Boot Verification Errors via VBMeta</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android 8+ devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern Android uses <strong>Android Verified Boot (AVB 2.0)</strong> to prevent unauthorized system modifications. When you patch <code>boot.img</code> for root, modify system files, or flash custom recoveries without disabling verification, you get warnings like <em>"Your device is corrupt"</em> or red <strong>dm-verity bootloops</strong>. Patching <code>vbmeta.img</code> via Fastboot disables those checks.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>Device in <strong>Fastboot / Bootloader mode</strong>.</li>
+        <li><strong>Unlocked bootloader</strong>.</li>
+        <li>Stock <code>vbmeta.img</code> extracted from the exact matching firmware for your device.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Understand the VBMeta flags</h3>
+      <table>
+        <thead>
+          <tr><th>Flag</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>--disable-verity</code></td><td>Disables integrity verification for dynamic system/vendor partitions</td></tr>
+          <tr><td><code>--disable-verification</code></td><td>Disables digital signature checks on patched boot/recovery images</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>3. Flash disabled VBMeta</h3>
+      <p><strong>Standard single-slot (A-only) devices:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash vbmeta --disable-verity --disable-verification vbmeta.img</code></pre>
+      </div>
+
+      <p><strong>A/B slot devices (patch both):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash vbmeta_a --disable-verity --disable-verification vbmeta.img
+fastboot flash vbmeta_b --disable-verity --disable-verification vbmeta.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Handle auxiliary VBMeta partitions</h3>
+      <p>Some OEMs split verification across <code>vbmeta_system</code> and <code>vbmeta_vendor</code>:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash vbmeta_system --disable-verity --disable-verification vbmeta_system.img
+fastboot flash vbmeta_vendor --disable-verity --disable-verification vbmeta_vendor.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Wipe data and reboot</h3>
+      <p>Disabling AVB triggers a security state transition — a factory reset is required:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot erase userdata
+fastboot reboot</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Troubleshooting</h3>
+
+      <p><strong>Error: <code>FAILED (remote: 'Unknown flag --disable-verity')</code></strong></p>
+      <p>Cause: outdated fastboot.exe without AVB 2.0 support.</p>
+      <p>Fix: update SDK Platform Tools with the latest binaries from Google.</p>
+
+      <p><strong>Orange/red state warning still shows on boot</strong></p>
+      <p>Cause: Orange State (unlocked bootloader notification) is enforced by hardware boot ROM — not software.</p>
+      <p>Fix: it is purely cosmetic and safe to ignore as long as the device boots into Android.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="flash-stock-firmware-adb-fastboot.html">Flash stock firmware</a></li>
+      <li><a href="fastbootd-vs-standard-fastboot.html">Fastbootd vs standard Fastboot</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۲: بنیادی ٹیگز اور ساخت (Basic Tags & Structure)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.8;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #1e3a8a;
+        }
+        pre {
+            background: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #0f172a;
+            font-family: monospace;
+        }
+        .interactive-editor-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1e293b;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .editor-toolbar {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .editor-toolbar .actions button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .editor-toolbar .actions button.run-btn {
+            background: #10b981;
+        }
+        .code-input-area {
+            width: 100%;
+            height: 250px;
+            background: #1e293b;
+            color: #f8fafc;
+            border: none;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+        }
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #cbd5e1;
+            padding: 10px;
+        }
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #334155;
+        }
+        .preview-iframe {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <h1>سبق ۲: بنیادی ٹیگز اور ساخت (Basic Tags & Structure)</h1>
+    <p>HTML میں ہر چیز tags سے — ہر tag براؤزر کو بتاتا ہے کہ content کیسے دکھانا ہے۔ Opening tag، closing tag، element، attribute — سب سمجھیں۔ Headings (h1-h6)، paragraphs (p)، line breaks (br)، horizontal rules (hr) — سب سے زیادہ استعمال ہونے والے tags۔</p>
+
+    <h3>1. Tag کا ڈھانچہ</h3>
+    <pre dir="ltr" style="text-align:left">
+&lt;tagname attribute="value"&gt;content&lt;/tagname&gt;
+    │       │              │        │
+ Opening  Attribute      Content   Closing
+    </pre>
+
+    <h3>2. Headings — h1 سے h6</h3>
+    <ul>
+        <li><strong>h1:</strong> سب سے بڑی — صفحے کا مرکزی عنوان (ایک ہی ہو)۔</li>
+        <li><strong>h2:</strong> section headings۔</li>
+        <li><strong>h3-h6:</strong> مزید ذیلی۔</li>
+    </ul>
+    <p><strong>اہم:</strong> سائز کے لیے نہیں — hierarchy کے لیے۔ CSS سے سائز بدلیں۔</p>
+
+    <h3>3. Paragraph</h3>
+    <pre dir="ltr" style="text-align:left">
+&lt;p&gt;یہ ایک پیراگراف ہے۔ اردو میں طویل متن یہاں آتا ہے۔&lt;/p&gt;
+    </pre>
+
+    <h3>4. Line Break اور Horizontal Rule</h3>
+    <ul>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;br&gt;</code> — نئی لائن (self-closing)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;hr&gt;</code> — افقی لکیر (self-closing)۔</li>
+    </ul>
+
+    <h3>5. کوڈ کی مکمل مثال</h3>
+    <div class="interactive-editor-box">
+        <div class="editor-toolbar">
+            <span>HTML — basic-tags.html</span>
+            <div class="actions">
+                <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+            </div>
+        </div>
+        <textarea class="code-input-area" dir="ltr" spellcheck="false" style="direction:ltr;text-align:left;unicode-bidi:isolate"><!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بنیادی ٹیگز کی مثال</title>
+</head>
+<body>
+    <h1>ویب ڈیولپمنٹ سیکھیں</h1>
+    <p>ویب سائٹ بنانے کی پہلی سیڑھی HTML ہے۔</p>
+
+    <hr>
+
+    <h2>مشق کرنا</h2>
+    <p>
+        پروگرامنگ سیکھنے کے لیے مسلسل مشق ضروری ہے۔
+        <br>
+        روزانہ نیا سبق پڑھیں اور کوڈ لکھیں۔
+    </p>
+
+    <h2>تیسری سرخی</h2>
+    <p>یہ ایک اور پیراگراف ہے۔</p>
+</body>
+</html></textarea>
+        <div class="preview-container">
+            <div class="preview-title">براؤزر میں رزلٹ:</div>
+            <iframe class="preview-iframe"></iframe>
+        </div>
+    </div>
+
+    <p><strong>▶ اس کوڈ کی وضاحت — قدم بہ قدم:</strong></p>
+    <ul>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;h1&gt;</code> — صفحے کا مرکزی عنوان۔ پورے صفحے پر صرف ایک بار استعمال کریں؛ براؤزر اسے سب سے بڑا اور موٹا دکھاتا ہے۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;p&gt;</code> — ہر پیراگراف الگ بلاک بنتا ہے۔ اوپر نیچے خالی جگہ براؤزر خود چھوڑ دیتا ہے، آپ کو کچھ نہیں کرنا پڑتا۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;hr&gt;</code> — ایک افقی لکیر کھینچتا ہے تاکہ صفحے کے دو حصے الگ نظر آئیں۔ اس کا closing tag نہیں ہوتا۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;h2&gt;</code> — ذیلی عنوان۔ یہ h1 کے نیچے کے حصوں کے لیے ہے، اس لیے مثال میں دو بار آیا ہے۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;br&gt;</code> — پیراگراف کے اندر ہی نئی لائن شروع کرتا ہے۔ نیا پیراگراف نہیں بنتا، صرف لائن بدلتی ہے۔</li>
+        <li><strong>رزلٹ:</strong> بڑا عنوان، پھر لکیر، پھر دو سرخیاں؛ پہلے پیراگراف کا متن دو لائنوں میں ٹوٹا نظر آئے گا۔</li>
+    </ul>
+
+    <h3>6. Self-closing Tags</h3>
+    <ul>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;br&gt;</code> — line break</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;hr&gt;</code> — horizontal rule</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;img&gt;</code> — image</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;input&gt;</code> — form field</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;meta&gt;</code> — metadata</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;link&gt;</code> — external file</li>
+    </ul>
+
+    <h3>7. Nesting — ترتیب اہم</h3>
+    <pre dir="ltr" style="text-align:left">
+✅ صحیح:
+&lt;p&gt;&lt;strong&gt;بولڈ متن&lt;/strong&gt;&lt;/p&gt;
+
+❌ غلط (crossed tags):
+&lt;p&gt;&lt;strong&gt;بولڈ&lt;/p&gt;&lt;/strong&gt;
+    </pre>
+    <p>پہلے کھلا = آخر میں بند۔</p>
+
+    <h3>8. Attributes</h3>
+    <pre dir="ltr" style="text-align:left">
+&lt;a href="page.html" target="_blank"&gt;لنک&lt;/a&gt;
+    │    │       │      │
+  Tag  Attr1   Value1  Attr2  Value2
+    </pre>
+
+    <h3>اہم باتیں</h3>
+    <ul>
+        <li>✅ <strong>h1 صرف ایک:</strong> صفحے کا مرکزی عنوان۔</li>
+        <li>✅ <strong>Hierarchy:</strong> h1 → h2 → h3 (نہ چھوڑیں)۔</li>
+        <li>✅ <strong>br/ hr خود بند:</strong> کوئی closing نہیں۔</li>
+        <li>✅ <strong>Nesting صحیح:</strong> پہلے کھلا آخر بند۔</li>
+        <li>✅ <strong>Indentation:</strong> nested tags اندر۔</li>
+    </ul>
+
+    <h3>عمل / مشق (Task)</h3>
+    <ol>
+        <li>ایک صفحہ بنائیں — h1، h2، 3 paragraphs۔</li>
+        <li>Paragraphs میں br سے line breaks۔</li>
+        <li>2 sections — hr سے الگ۔</li>
+        <li>Nesting — strong + em ایک ساتھ۔</li>
+    </ol>
+
+    <script>
+        function runCodeFromEditor(btn) {
+            const container = btn.closest('.interactive-editor-box');
+            const code = container.querySelector('.code-input-area').value;
+            const iframe = container.querySelector('.preview-iframe');
+            iframe.srcdoc = code;
+        }
+
+        function copyCodeFromEditor(btn) {
+            const container = btn.closest('.interactive-editor-box');
+            const code = container.querySelector('.code-input-area').value;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('کوڈ کاپی ہو گیا ہے!');
+            });
+        }
+
+        window.onload = function() {
+            document.querySelectorAll('.run-btn').forEach(btn => runCodeFromEditor(btn));
+        };
+    </script>
+</body>
+</html>

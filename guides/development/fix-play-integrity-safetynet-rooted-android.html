@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fix Play Integrity &amp; SafetyNet on Rooted Android | Tech Learn</title>
+<meta name="description" content="Complete guide to fix Play Integrity (BASIC/DEVICE/STRONG) on rooted Android using Play Integrity Fix/Fork, Tricky Store, and proper root hiding. Covers Magisk, KernelSU and APatch.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Fix Play Integrity &amp; SafetyNet on Rooted Android</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Magisk, KernelSU, KernelSU-Next, APatch (Android 8–16)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <div class="warning">
+    <p><strong>Important:</strong> SafetyNet is <strong>deprecated</strong> — Google replaced it with the <strong>Play Integrity API</strong> [citation:5]. This guide focuses on Play Integrity. Rooting weakens security; only proceed on your own device and accept the trade-offs.</p>
+  </div>
+
+  <p>When you root or install a custom ROM, Google Play Integrity checks fail — banking apps, Google Wallet, and some games stop working. The fix requires two components: <strong>spoofing device identity</strong> (Play Integrity Fix/Fork) and <strong>spoofing hardware attestation</strong> (Tricky Store + keybox). This guide covers both, plus troubleshooting.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Understand the verdicts</h3>
+      <table>
+        <thead>
+          <tr><th>Verdict</th><th>Meaning</th><th>Required by</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>MEETS_BASIC_INTEGRITY</code></td><td>Device passes basic check</td><td>Most apps</td></tr>
+          <tr><td><code>MEETS_DEVICE_INTEGRITY</code></td><td>Device is certified (locked bootloader check)</td><td>Google Play certification, Wallet, RCS</td></tr>
+          <tr><td><code>MEETS_STRONG_INTEGRITY</code></td><td>Hardware-backed attestation (TEE)</td><td>Only high-security apps (rarely needed)</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>Real-world advice:</strong> most apps work with <strong>BASIC + DEVICE</strong> only. STRONG is rarely needed and requires a valid unrevoked keybox, which is hard to obtain and often revoked quickly [citation:5]. Do not chase STRONG unless an app explicitly demands it.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Root manager:</strong> Magisk (with Zygisk), KernelSU (with ZygiskNext), or APatch (with ZygiskNext).</li>
+        <li><strong>Zygisk enabled</strong> — required for the fix modules to inject into Google Play Services [citation:5].</li>
+        <li><strong>DenyList configured</strong> in your root manager (if using Enforce DenyList).</li>
+        <li><strong>Play Integrity Checker app</strong> (from Play Store) to test verdicts.</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Critical:</strong> <strong>do NOT</strong> put Google Play Services (<code>com.google.android.gms</code>) on the DenyList when using Play Integrity Fix — it interferes with injection [citation:4].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Install Play Integrity Fix (PIF)</h3>
+      <p>The original PIF by chiteroman was removed from GitHub. Use one of the actively maintained forks:</p>
+
+      <table>
+        <thead>
+          <tr><th>Module</th><th>Developer</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>PlayIntegrityFork</strong></td><td>osm0sis</td><td>Actively maintained, supports custom fields [citation:2]</td></tr>
+          <tr><td><strong>PlayIntegrityFix Inject</strong></td><td>KOWX712</td><td>Preserved continuation of chiteroman's PIF [citation:10]</td></tr>
+          <tr><td><strong>PlayIntegritySuperFork</strong></td><td>frpunlocking-com</td><td>Fork with autopif2 [citation:4]</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Installation:</strong></p>
+      <ol>
+        <li>Download the latest <code>.zip</code> from the fork's GitHub releases.</li>
+        <li>Open your root manager → <strong>Modules</strong> → <strong>Install from storage</strong>.</li>
+        <li>Select the ZIP and flash.</li>
+        <li><strong>Reboot</strong>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Install Tricky Store (for DEVICE integrity)</h3>
+      <p>Tricky Store spoofs the hardware keystore attestation — required for <code>MEETS_DEVICE_INTEGRITY</code> on Android 13+ [citation:6].</p>
+
+      <ol>
+        <li>Download <strong>Tricky Store</strong> from its XDA thread or GitHub.</li>
+        <li>Flash it via your root manager.</li>
+        <li>Reboot.</li>
+        <li>Configure <code>target.txt</code> to include:
+          <ul>
+            <li><code>com.google.android.gms</code></li>
+            <li><code>com.android.vending</code></li>
+          </ul>
+        </li>
+      </ol>
+
+      <div class="note">
+        <p><strong>Keybox:</strong> Tricky Store needs a <strong>keybox.xml</strong> to spoof hardware attestation. Without a valid keybox, you can only pass BASIC (not DEVICE) [citation:5]. Some all-in-one modules (e.g. <code>PlayIntegrity-TrickyStore-AIO.zip</code>) bundle a keybox [citation:6], but these are often revoked quickly.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Configure DenyList &amp; root hiding</h3>
+      <ol>
+        <li>Open your root manager's settings.</li>
+        <li>Enable <strong>Zygisk</strong> (Magisk) or install <strong>ZygiskNext</strong> (KernelSU/APatch).</li>
+        <li>Enable <strong>Enforce DenyList</strong>.</li>
+        <li>Add these to the DenyList:
+          <ul>
+            <li>Your banking apps</li>
+            <li>Google Wallet / Google Pay</li>
+            <li>Any app that detects root</li>
+          </ul>
+        </li>
+        <li><strong>Do NOT add Google Play Services</strong> — it breaks PIF [citation:4].</li>
+        <li>Reboot.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Test the verdicts</h3>
+      <ol>
+        <li>Install the <strong>Play Integrity API Checker</strong> app from Play Store.</li>
+        <li>Run the check.</li>
+        <li>Expected results:
+          <ul>
+            <li><code>MEETS_BASIC_INTEGRITY</code> ✅</li>
+            <li><code>MEETS_DEVICE_INTEGRITY</code> ✅ (with valid keybox + Tricky Store)</li>
+            <li><code>MEETS_STRONG_INTEGRITY</code> ⚠️ (only with unrevoked keybox)</li>
+          </ul>
+        </li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting — common failures</h3>
+
+      <p><strong>Failing BASIC integrity:</strong></p>
+      <ul>
+        <li>Your setup is fundamentally wrong. Disable all modules except PIF and retry [citation:4].</li>
+        <li>Try a different <code>custom.pif.json</code> (fingerprint).</li>
+        <li>Xposed/LSPosed modules that hook GMS can trigger detection [citation:4].</li>
+      </ul>
+
+      <p><strong>Failing DEVICE integrity:</strong></p>
+      <ul>
+        <li><strong>KernelSU/APatch:</strong> disable Zygisk Next → reboot → re-enable Zygisk Next → reboot [citation:4].</li>
+        <li><strong>Custom kernel:</strong> check if your kernel name is on the banned list. Run <code>adb shell uname -r</code> [citation:5].</li>
+        <li><strong>Custom ROM:</strong> your ROM may be signed with the AOSP testkey. Check: <code>adb shell unzip -l /system/etc/security/otacerts.zip</code> [citation:4].</li>
+        <li><strong>Keybox revoked:</strong> if you were passing DEVICE and suddenly only pass BASIC, your keybox was revoked. Find a new one or accept BASIC only [citation:5].</li>
+      </ul>
+
+      <p><strong>Play Store shows "Device is not certified":</strong></p>
+      <ul>
+        <li>Reflash PIF module.</li>
+        <li>Clear Google Play Store cache/data (<code>com.android.vending</code>).</li>
+        <li>Clear Google Play Services cache/data (<code>com.google.android.gms</code>) — this may require re-pairing WearOS devices [citation:2].</li>
+      </ul>
+
+      <p><strong>Google Wallet / Tap to Pay fails:</strong></p>
+      <ul>
+        <li>Ensure you pass <strong>DEVICE integrity</strong> (Wallet checks it internally even on Android 13+) [citation:2].</li>
+        <li>Clear Google Wallet cache.</li>
+        <li>Clear Google Play Services data and wait 24–72 hours for it to settle [citation:2].</li>
+      </ul>
+
+      <p><strong>RCS (Google Messages) fails:</strong></p>
+      <ul>
+        <li>Clear Google Messages cache/data [citation:2].</li>
+        <li>Ensure DEVICE integrity passes.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>8. Reading module logs</h3>
+      <p>If PIF is installed but not working, check its logs:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell "logcat | grep 'PIF/'"
+# or if rooted:
+su -c "logcat | grep 'PIF/'"</code></pre>
+      </div>
+      <p>To increase log verbosity, edit <code>custom.pif.prop</code> and set <code>verboseLogs=100</code> [citation:2].</p>
+    </li>
+
+    <li>
+      <h3>9. Alternative — All-in-one modules</h3>
+      <p>If manual setup is frustrating, some modules bundle PIF + Tricky Store + keybox:</p>
+      <ul>
+        <li><code>PlayIntegrity-TrickyStore-AIO.zip</code> — combines PIF Fork v18 and Tricky Store with a pre-installed keybox [citation:6].</li>
+        <li><code>JerryManager</code> — KernelSU/APatch module with Web UI for root hiding and integrity [citation:3].</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Risk:</strong> bundled keyboxes are often revoked quickly. These modules are convenient but may stop working without notice.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Complete module cheat sheet</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext"># ---- Required modules ----
+PlayIntegrityFork (osm0sis)          # spoofs device identity
+   or PlayIntegrityFix Inject (KOWX712)
+Tricky Store                         # spoofs hardware attestation
+ZygiskNext (KernelSU/APatch only)    # enables Zygisk on non-Magisk root
+
+# ---- Optional all-in-one ----
+PlayIntegrity-TrickyStore-AIO.zip
+JerryManager (KernelSU/APatch)
+
+# ---- DenyList ----
+Add banking apps, Wallet, games
+DO NOT add com.google.android.gms
+
+# ---- Verify ----
+Play Integrity API Checker app
+Expected: BASIC ✅, DEVICE ✅ (with keybox)
+
+# ---- Logs ----
+adb shell "logcat | grep 'PIF/'"
+verboseLogs=100 in custom.pif.prop
+
+# ---- Fix Play Store ----
+Clear com.android.vending cache/data
+Clear com.google.android.gms cache/data</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>11. Best practices</h3>
+      <ul>
+        <li>✅ Use <strong>PlayIntegrityFork</strong> (osm0sis) — most actively maintained [citation:2].</li>
+        <li>✅ Enable Zygisk and configure DenyList properly.</li>
+        <li>✅ Test with Play Integrity Checker after every change.</li>
+        <li>✅ Accept BASIC + DEVICE as "good enough" for most apps.</li>
+        <li>✅ Do not chase STRONG integrity unless absolutely necessary [citation:5].</li>
+        <li>✅ Keep your root manager and modules updated.</li>
+        <li>✅ If on a custom ROM, ask the maintainer to sign with a release key, not testkey [citation:4].</li>
+        <li>✅ Back up your working configuration before updating modules.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> Play Integrity is a moving target — Google updates detection regularly. If a module stops working, check the GitHub releases for updates. The community moves fast; a fix that works today may fail next month.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="../adb-fastboot/fix-dm-verity-vbmeta.html">Fix DM-Verity &amp; VBMeta Errors</a></li>
+      <li><a href="../development/extract-boot-payload-bin.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="../../android.html#bootloader-rooting">Bootloader &amp; Rooting category</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

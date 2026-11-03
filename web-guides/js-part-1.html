@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۱: جاوا اسکرپٹ کا تعارف، Setup اور پہلا Program</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #2563eb;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-color: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .category {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #475569;
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent-color);
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        h4 {
+            color: #334155;
+            font-size: 16px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        ul, ol {
+            margin-right: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            dir: ltr;
+            display: inline-block;
+        }
+
+        .interactive-editor-box {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .editor-toolbar {
+            background: #1e293b;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: #white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 6px;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .editor-toolbar .actions button.run-btn:hover {
+            background: #15803d;
+        }
+
+        .code-input-area {
+            width: 100%;
+            height: 180px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+            tab-size: 4;
+        }
+
+        .code-input-area:focus {
+            outline: none;
+        }
+
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <div class="container">
+        <span class="category">JavaScript گائیڈ</span>
+        <h1>سبق ۱: جاوا اسکرپٹ کا تعارف، Setup اور پہلا Program</h1>
+        
+        <div class="description">
+            اگر HTML کسی ویب سائٹ کا ڈھانچہ (Skeleton) ہے اور CSS اس کا روپ/ڈیزائن (Styling) ہے، تو JavaScript اس کا دماغ (Brain) ہے۔ یہ ویب پیج پر کلک کرنے، ڈیٹا پروسیس کرنے، اینیمیشنز چلانے اور بغیر پیج ریفریش کیے ڈیٹا لوڈ کرنے کا کام کرتی ہے۔
+        </div>
+
+        <h3>JavaScript کیا ہے؟</h3>
+        <p><strong>JavaScript (JS)</strong> ایک پروگرامنگ زبان ہے جو براؤزر میں چلتی ہے۔ یہ ویب پیج کو متحرک (Dynamic) بناتی ہے — بٹن کا کلک سنبھالنا، ڈیٹا کا حساب کرنا، HTML کو تبدیل کرنا، اور صارف کے ساتھ تعامل کرنا۔</p>
+
+        <h3>HTML میں JavaScript شامل کرنے کے 3 طریقے</h3>
+        <ul>
+            <li><strong>Inline:</strong> کسی ٹیگ کے اندر <code>onclick="..."</code> وغیرہ (سادہ کاموں کے لیے)۔</li>
+            <li><strong>Internal:</strong> HTML کے اندر <code>&lt;script&gt; ... &lt;/script&gt;</code> ٹیگ میں۔</li>
+            <li><strong>External:</strong> (بہترین طریقہ) الگ <code>main.js</code> فائل بنا کر <code>&lt;script src="js/main.js"&gt;&lt;/script&gt;</code> سے جوڑنا — <code>&lt;/body&gt;</code> سے بالکل پہلے۔</li>
+        </ul>
+
+        <h3>1. Internal JavaScript کی مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>HTML کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area"><!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Internal JS کی مثال</title>
+</head>
+<body>
+    <h1>جاوا اسکرپٹ کا پہلا سبق</h1>
+    <p>F12 دبا کر Console ٹیب کھولیں۔</p>
+
+    <script>
+        console.log("سلام دنیا! JavaScript میں خوش آمدید۔");
+    </script>
+</body>
+</html></textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ (Console دیکھیں):</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>2. External JavaScript کی مثال</h3>
+        <h4>index.html</h4>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>HTML کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area"><!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>External JS کی مثال</title>
+</head>
+<body>
+    <h1>External JavaScript</h1>
+
+    <!-- JS فائل کو لنک کریں -->
+    <script src="js/main.js"></script>
+</body>
+</html></textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h4>js/main.js</h4>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>JavaScript کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">// یہ سنگل لائن کمنٹ ہے
+
+/*
+   یہ ملٹی لائن کمنٹ ہے
+   براؤزر میں یہ ایگزیکیوٹ نہیں ہوتا
+*/
+
+// 1. Console میں میسج پرنٹ کرنا
+console.log("سلام دنیا! JavaScript میں خوش آمدید۔");
+
+// 2. پاپ اپ الرٹ
+alert("مبارک ہو! آپ کا پہلا JS کوڈ چل گیا۔");</textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>Console کہاں ہے؟</h3>
+        <p>براؤزر میں <strong>F12</strong> دبائیں یا right-click → Inspect → <strong>Console</strong> ٹیب کھولیں۔ <code>console.log()</code> کا نتیجہ وہاں نظر آئے گا۔</p>
+
+        <h3>اہم باتیں اور قواعد</h3>
+        <ul>
+            <li><strong>سیمیکولن (;):</strong> ہر statement کے بعد لگانا اچھی عادت ہے (لازمی نہیں، لیکن محفوظ)۔</li>
+            <li><strong>کیس سینسیٹو (Case-Sensitive):</strong> <code>console</code> اور <code>Console</code> مختلف ہیں۔</li>
+            <li><strong>Comments:</strong> <code>//</code> ایک لائن، <code>/* ... */</code> کئی لائنیں۔</li>
+            <li><strong>External بہتر:</strong> کوڈ کو الگ فائل میں رکھیں تاکہ HTML صاف رہے۔</li>
+        </ul>
+
+        <h3>عمل / مشق (Task)</h3>
+        <ol>
+            <li>اپنے <code>js_lessons/</code> فولڈر میں <code>lesson1.html</code> اور <code>js/main.js</code> بنائیں۔</li>
+            <li><code>console.log()</code> سے اپنا نام پرنٹ کریں۔</li>
+            <li>ایک <code>alert()</code> شامل کریں جو خوش آمدید کہے۔</li>
+        </ol>
+    </div>
+
+    <script>
+        // کاپی کمانڈ کے لیے جدید اور بہترین جاوا اسکرپٹ فنکشن
+        async function copyCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const codeText = textArea.value;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(codeText);
+                } else {
+                    // Fallback طریقہ
+                    textArea.select();
+                    document.execCommand('copy');
+                }
+
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = "Copied! ✅";
+                buttonElement.style.backgroundColor = "#16a34a";
+
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    buttonElement.style.backgroundColor = "";
+                }, 2000);
+            } catch (err) {
+                console.error('کپی کرنے میں ناکامی:', err);
+                alert('کپی کرنے میں مسئلہ پیش آیا!');
+            }
+        }
+
+        // کوڈ چلانے کے لیے ایڈیٹر فنکشن
+        function runCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const iframe = editorBox.querySelector('.preview-iframe');
+            
+            const code = textArea.value;
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            // Console.log output handling inside iframe preview
+            const wrappedCode = code.includes('<html') ? code : `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 10px; background: #1e293b; color: #f8fafc; font-size: 13px; }
+                        .log { color: #38bdf8; margin-bottom: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <div id="console-output"></div>
+                    <script>
+                        const output = document.getElementById('console-output');
+                        const origLog = console.log;
+                        console.log = function(...args) {
+                            origLog.apply(console, args);
+                            const div = document.createElement('div');
+                            div.className = 'log';
+                            div.textContent = '> ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+                            output.appendChild(div);
+                        };
+                        try {
+                            ${code}
+                        } catch(e) {
+                            console.log('Error: ' + e.message);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            iframeDoc.write(wrappedCode);
+            iframeDoc.close();
+        }
+    </script>
+</body>
+</html>

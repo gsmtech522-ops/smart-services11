@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Setup ADB &amp; Fastboot on Windows PC — Step-by-Step Guide | Tech Learn</title>
+<meta name="description" content="Complete guide to install ADB and Fastboot on Windows 10/11 using automatic installer or official Platform Tools, install Google USB drivers, and verify both work.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<!-- ==================== HEADER ==================== -->
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<!-- ==================== BREADCRUMB ==================== -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<!-- ==================== GUIDE ==================== -->
+<article>
+  <h1>How to Setup ADB &amp; Fastboot on Windows PC</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Windows 10 and Windows 11</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Whether you want to service Android firmware, unlock a bootloader, flash a custom recovery, or run terminal commands on your Android device, having <strong>ADB (Android Debug Bridge)</strong> and <strong>Fastboot</strong> configured on your PC is essential.</p>
+
+  <p>While setting up the official <strong>Android SDK Platform Tools</strong> can feel overwhelming for beginners, the methods below make the entire process fast and simple. This guide walks you through both automated and manual methods on Windows.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <p>Before starting, make sure you have:</p>
+      <ul>
+        <li><strong>USB Debugging enabled</strong> on your Android phone (Settings → About phone → tap Build number 7 times → Developer options → USB debugging).</li>
+        <li><strong>Google USB Driver</strong> — download from the official <a href="https://developer.android.com/studio/run/win-usb" target="_blank" rel="noopener">Android Developers site</a>.</li>
+        <li><strong>SDK Platform Tools</strong> — download from the official <a href="https://developer.android.com/tools/releases/platform-tools" target="_blank" rel="noopener">Platform Tools page</a>.</li>
+        <li>A working USB data cable (not a charge-only cable).</li>
+      </ul>
+      <div class="note">
+        <p><strong>Tip:</strong> Use a USB 2.0 port if your phone does not appear in <code>adb devices</code> — USB 3.x can occasionally cause detection issues on older PCs.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Automatic installation (easiest)</h3>
+      <p>The automated installer configures ADB, Fastboot and system-wide drivers in under a minute.</p>
+      <ol>
+        <li>Download the <strong>15-Second ADB Installer</strong> from the link in Method 3 below.</li>
+        <li>Extract the <code>.zip</code> or <code>.rar</code> file to a folder.</li>
+        <li>Right-click <code>adb-setup.exe</code> and select <strong>Run as Administrator</strong>.</li>
+        <li>Answer <strong>Y</strong> (yes) to all three prompts: install ADB and Fastboot, install system-wide, and install device drivers.</li>
+        <li>Complete the driver installation wizard — click <strong>Next</strong>, then <strong>Install</strong>, then <strong>Finish</strong>.</li>
+        <li>Close and reopen the terminal before testing.</li>
+      </ol>
+      <div class="warning">
+        <p><strong>Only download from trusted sources.</strong> Random "ADB installer" files from unofficial sites can contain malware. Prefer Method 2 (official Google Platform Tools) when you are unsure.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Manual install via official Platform Tools (recommended)</h3>
+      <p>This is the safest and most up-to-date method. You are downloading directly from Google — no third-party installers involved.</p>
+
+      <p><strong>Step 1 — Download Google USB Driver.</strong> From the official <a href="https://developer.android.com/studio/run/win-usb" target="_blank" rel="noopener">Android Developers site</a>. Extract the zip file.</p>
+
+      <p><strong>Step 2 — Download Platform Tools.</strong> From the official <a href="https://developer.android.com/tools/releases/platform-tools" target="_blank" rel="noopener">Platform Tools page</a>. Extract the zip to a permanent location — for example:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">C:\platform-tools\</code></pre>
+      </div>
+      <p>Inside that folder you should see <code>adb.exe</code>, <code>fastboot.exe</code>, and <code>AdbWinApi.dll</code>.</p>
+
+      <p><strong>Step 3 — Install ADB drivers manually.</strong></p>
+      <ol>
+        <li>Open <strong>Device Manager</strong> (press <kbd>Win</kbd> + <kbd>X</kbd> → Device Manager).</li>
+        <li>Connect your phone to the PC with a USB cable.</li>
+        <li>Under <strong>Other devices</strong>, find <strong>Android ADB Interface</strong> or <strong>Unknown device</strong>.</li>
+        <li>Right-click it and choose <strong>Update driver</strong>.</li>
+        <li>Select <strong>Browse my computer for drivers</strong>.</li>
+        <li>Choose <strong>Let me pick from a list of available drivers on my computer</strong> → <strong>Next</strong>.</li>
+        <li>Click <strong>Have Disk…</strong> → <strong>Browse…</strong> and navigate to your extracted Google USB Driver folder.</li>
+        <li>Select <code>android_winusb.inf</code> → <strong>Open</strong> → <strong>OK</strong>.</li>
+        <li>Select <strong>Android ADB Interface</strong> from the list → <strong>Next</strong> to finish installation.</li>
+      </ol>
+
+      <div class="note">
+        <p><strong>Windows 11 note:</strong> if the driver is blocked by signature enforcement, temporarily disable it from <em>Advanced Startup → Troubleshoot → Advanced options → Startup Settings</em>, install the driver, then re-enable.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Verify ADB &amp; Fastboot detection</h3>
+      <p>Once the drivers are installed, confirm that your computer communicates with your phone.</p>
+
+      <p><strong>Testing ADB mode:</strong></p>
+      <ol>
+        <li>Open your extracted <code>platform-tools</code> folder.</li>
+        <li>Hold <kbd>Shift</kbd> and right-click anywhere in the folder's empty space → <strong>Open PowerShell window here</strong> (or <strong>Open Terminal here</strong>).</li>
+        <li>Connect your phone via USB and unlock its screen.</li>
+        <li>Run the command:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">.\adb devices</code></pre>
+      </div>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Command Prompt (not PowerShell)
+adb devices</code></pre>
+      </div>
+      <ol start="5">
+        <li>A prompt will appear on your phone: <strong>"Allow USB debugging?"</strong> — tick <strong>Always allow from this computer</strong> and tap <strong>Allow</strong>.</li>
+        <li>Run <code>adb devices</code> again. You should see your device's serial number followed by the word <strong>device</strong>:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">List of devices attached
+R58M123ABCD     device</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>If you see "unauthorized":</strong> unlock the phone and accept the prompt again. If you see "offline", unplug and replug the USB cable, then run <code>adb kill-server</code> followed by <code>adb start-server</code>.</p>
+      </div>
+
+      <p><strong>Testing Fastboot (bootloader) mode:</strong></p>
+      <ol>
+        <li>Reboot the phone into Fastboot directly from the terminal:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot bootloader</code></pre>
+      </div>
+      <ol start="2">
+        <li>Your phone restarts into a screen showing <strong>FASTBOOT</strong> or <strong>BOOTLOADER</strong>.</li>
+        <li>In your PC terminal, confirm the connection:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot devices</code></pre>
+      </div>
+      <ol start="4">
+        <li>You should see your device's serial number listed. Return the phone to normal mode:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot reboot</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Method 3 — 15-Second ADB Installer (fastest)</h3>
+      <p>The quickest path if you trust the source and want everything done in one shot.</p>
+      <ol>
+        <li><strong>Download &amp; extract</strong> the 15-Second ADB Installer package (<code>.zip</code> or <code>.rar</code>).</li>
+        <li><strong>Run as Administrator:</strong> right-click <code>adb-setup.exe</code> → <strong>Run as Administrator</strong>. This is needed to copy files into your system directory.</li>
+        <li><strong>Configure installation:</strong> a blue Command Prompt window appears with three questions — answer <strong>Y</strong> to all:
+          <ul>
+            <li>Install ADB and Fastboot? → <strong>Y</strong></li>
+            <li>Install ADB system-wide? → <strong>Y</strong> (lets you run ADB from any folder)</li>
+            <li>Install device drivers? → <strong>Y</strong></li>
+          </ul>
+        </li>
+        <li><strong>Complete driver setup:</strong> in the Device Driver Installation Wizard, click <strong>Next</strong>.</li>
+        <li>If a Windows Security prompt appears, click <strong>Install this driver software anyway</strong>.</li>
+        <li>Click <strong>Finish</strong>. Open a new terminal and run <code>adb devices</code> to confirm.</li>
+      </ol>
+      <div class="warning">
+        <p><strong>Source safety:</strong> only download the installer from trusted mirrors (e.g. SourceForge: <a href="https://sourceforge.net/projects/quickadb/" target="_blank" rel="noopener">QuickADB</a>). Avoid unknown blogs and file-sharing links.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Add Platform Tools to PATH (optional but useful)</h3>
+      <p>If you want to run <code>adb</code> and <code>fastboot</code> from any folder — not just the platform-tools folder — add it to PATH:</p>
+      <ol>
+        <li>Press <kbd>Win</kbd>, type <code>env</code>, and select <strong>Edit the system environment variables</strong>.</li>
+        <li>Click <strong>Environment Variables…</strong></li>
+        <li>Under <strong>User variables</strong>, select <code>Path</code> → <strong>Edit</strong>.</li>
+        <li>Click <strong>New</strong> and paste your platform-tools path:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">C:\platform-tools</code></pre>
+      </div>
+      <ol start="5">
+        <li>Click <strong>OK</strong> on all windows. Open a <strong>new</strong> terminal and run <code>adb version</code> from any folder to confirm.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>adb is not recognized</code></td><td>Run it from inside the platform-tools folder with <code>.\adb</code>, or add the folder to PATH.</td></tr>
+          <tr><td>Device shows <strong>unauthorized</strong></td><td>Unlock the phone and tap <strong>Allow</strong> on the USB debugging prompt.</td></tr>
+          <tr><td>Device shows <strong>offline</strong></td><td>Run <code>adb kill-server</code> then <code>adb start-server</code>, and replug the cable.</td></tr>
+          <tr><td><code>adb devices</code> is empty</td><td>Try a different USB cable and USB 2.0 port. Check Device Manager for "Unknown device".</td></tr>
+          <tr><td>Fastboot not detecting</td><td>Reinstall Google USB Driver; on Windows 11, disable driver signature enforcement temporarily.</td></tr>
+          <tr><td>Driver install blocked</td><td>Run the installer as Administrator; temporarily disable antivirus.</td></tr>
+          <tr><td>Multiple phones connected</td><td>Specify serial: <code>adb -s &lt;serial&gt; shell</code></td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>8. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- ADB basics ----
+adb version                     # show installed version
+adb devices                     # list connected devices
+adb start-server                # start ADB daemon
+adb kill-server                 # stop ADB daemon
+
+# ---- ADB file transfer ----
+adb push file.txt /sdcard/      # PC → phone
+adb pull /sdcard/file.txt .     # phone → PC
+
+# ---- ADB device control ----
+adb reboot                      # normal reboot
+adb reboot bootloader           # into Fastboot
+adb reboot recovery             # into Recovery
+
+# ---- ADB shell ----
+adb shell                       # open a shell on the phone
+adb shell pm list packages      # list installed packages
+adb shell dumpsys battery       # battery info
+
+# ---- Sideload OTA ----
+adb sideload update.zip
+
+# ---- Fastboot ----
+fastboot devices                # list devices in Fastboot
+fastboot reboot                 # reboot to system
+fastboot flashing unlock        # unlock bootloader (supported devices)
+fastboot flash boot boot.img    # flash a boot image
+fastboot flash recovery rec.img # flash a recovery image
+fastboot oem device-info        # device info (some OEMs)
+fastboot getvar all             # dump all bootloader variables
+
+# ---- Fix common issues ----
+adb kill-server && adb start-server
+adb -s &lt;serial&gt; shell            # target a specific device</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>9. Safety &amp; legal notes</h3>
+      <ul>
+        <li>✅ Only use ADB and Fastboot on <strong>your own devices</strong>, or devices you are <strong>authorized to service</strong>.</li>
+        <li>✅ Back up your data and IMEI before flashing anything.</li>
+        <li>⚠️ <code>fastboot flashing unlock</code> <strong>wipes all data</strong> on most phones — this is intentional.</li>
+        <li>⚠️ Flashing the wrong image can brick the phone — always download firmware matching your exact model and region.</li>
+        <li>🚫 Do not bypass another person's phone lock, FRP, or account — it is illegal in most countries.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>10. Conclusion</h3>
+      <p>Your Windows PC is now fully configured with ADB and Fastboot. You can safely run terminal commands, debug software issues, or communicate with Android servicing tools — from any folder if you set up PATH.</p>
+      <p>Next steps to explore:</p>
+      <ul>
+        <li>Unlock the bootloader on a supported device</li>
+        <li>Install a custom recovery (TWRP)</li>
+        <li>Flash stock firmware to unbrick a phone</li>
+        <li>Explore chipset-specific tools: <a href="../../mediatek.html">MediaTek</a>, <a href="../../qualcomm.html">Qualcomm</a>, <a href="../../spd.html">SPD</a></li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> bookmark this page and use <kbd>Ctrl</kbd>+<kbd>F</kbd> to search any command. Keep the platform-tools folder in a short, permanent path like <code>C:\platform-tools</code> — moving it later breaks the PATH entry.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+      <li><a href="../../android.html#mediatek">MediaTek repair</a></li>
+      <li><a href="../../android.html#qualcomm">Qualcomm repair</a></li>
+      <li><a href="../../android.html#spd">SPD repair</a></li>
+      <li><a href="../../android.html#driver-installation">Driver installation</a></li>
+      <li><a href="../../android.html#firmware-flashing">Firmware flashing</a></li>
+      <li><a href="../../android.html#bootloader-rooting">Bootloader &amp; rooting</a></li>
+    </ul>
+  </div>
+</article>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<!-- highlight.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => {
+      button.innerText = "Copy";
+      button.classList.remove("copied");
+    }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Unpack &amp; Repack Android boot.img / recovery.img | Tech Learn</title>
+<meta name="description" content="Complete guide to unpack and repack Android boot.img and recovery.img using Android Image Kitchen (AIK) and magiskboot. Covers ramdisk editing, kernel replacement and repack workflow.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Unpack &amp; Repack Android boot.img / recovery.img</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android boot/recovery images (AOSP, GKI, vendor_boot)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Android's <code>boot.img</code> and <code>recovery.img</code> are not simple archives — they are structured binary images containing a kernel, a ramdisk (cpio archive), device tree blobs (DTB), and metadata headers. To modify the ramdisk (e.g. add an init script, patch <code>init.rc</code>, or replace <code>adbd</code>), you must properly unpack and repack the image. This guide covers the two most reliable tools: <strong>Android Image Kitchen (AIK)</strong> and <strong>magiskboot</strong>.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What's inside boot.img / recovery.img?</h3>
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Content</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Header</strong></td><td>Image format version, page size, offsets, sizes</td></tr>
+          <tr><td><strong>Kernel</strong></td><td>Linux kernel binary (often compressed)</td></tr>
+          <tr><td><strong>Ramdisk</strong></td><td>cpio archive containing <code>/init</code>, <code>/sbin/adbd</code>, <code>/etc/init.rc</code></td></tr>
+          <tr><td><strong>Second</strong></td><td>Optional second-stage bootloader</td></tr>
+          <tr><td><strong>DTB</strong></td><td>Device Tree Blob (hardware description)</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>Android 13+ GKI devices:</strong> the kernel lives in <code>boot.img</code> but the ramdisk lives in <code>init_boot.img</code>. Patch <code>init_boot.img</code> for ramdisk changes on these devices.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Stock boot.img or recovery.img</strong> matching your exact build number.</li>
+        <li><strong>AIK (Android Image Kitchen)</strong> — Windows, Linux or macOS package [citation:4].</li>
+        <li>Or <strong>magiskboot</strong> (comes with Magisk, or download separately) [citation:7].</li>
+        <li>A Linux environment (WSL2 is fine) for the most reliable results.</li>
+        <li>Backup of the original image — never overwrite it.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Method 1 — Android Image Kitchen (AIK) — recommended</h3>
+      <p>AIK is the industry standard for unpacking and repacking boot/recovery images. It preserves the original format, compression, and offsets [citation:4].</p>
+
+      <p><strong>Step 1 — Download and extract AIK:</strong></p>
+      <ul>
+        <li>Get the AIK package for your OS (Windows ZIP includes batch scripts).</li>
+        <li>Extract to a folder, e.g. <code>C:\AIK\</code>.</li>
+      </ul>
+
+      <p><strong>Step 2 — Unpack the image:</strong></p>
+      <p><strong>On Windows:</strong> drag <code>boot.img</code> onto <code>unpackimg.bat</code>.</p>
+      <p><strong>On Linux/WSL:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cd ~/AIK
+./unpackimg.sh /path/to/boot.img</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Examine the unpacked output:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">split_img/
+├── boot.img-kernel
+├── boot.img-ramdisk.cpio.gz
+├── boot.img-dtb
+├── boot.img-second
+└── boot.img-header
+
+ramdisk/
+├── init
+├── init.rc
+├── sbin/
+├── etc/
+└── ...</code></pre>
+      </div>
+
+      <p><strong>Step 4 — Modify files inside <code>ramdisk/</code>:</strong></p>
+      <ul>
+        <li>Edit <code>init.rc</code> to add services or change properties.</li>
+        <li>Replace <code>adbd</code> with a custom version.</li>
+        <li>Add scripts under <code>/sbin/</code>.</li>
+      </ul>
+
+      <p><strong>Step 5 — Repack the image:</strong></p>
+      <p><strong>On Windows:</strong> double-click <code>repackimg.bat</code>.</p>
+      <p><strong>On Linux/WSL:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">./repackimg.sh</code></pre>
+      </div>
+      <p>AIK produces <code>image-new.img</code> in the AIK directory. Rename it to <code>boot_new.img</code>.</p>
+
+      <div class="warning">
+        <p><strong>AIK caveat:</strong> AIK prepares images but does not validate device-specific signing, bootloader, or verified-boot requirements [citation:4]. Flash only on an unlocked bootloader and test with <code>fastboot boot</code> first.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Method 2 — magiskboot (official Magisk tool)</h3>
+      <p><code>magiskboot</code> is Magisk's built-in unpack/repack tool. It parses headers, detects compression, and preserves the original format on repack [citation:7].</p>
+
+      <p><strong>Step 1 — Get magiskboot:</strong></p>
+      <ul>
+        <li>On a rooted device: <code>/data/adb/magisk/magiskboot</code>.</li>
+        <li>On PC: extract from the Magisk APK (it's inside the <code>lib/</code> folder).</li>
+      </ul>
+
+      <p><strong>Step 2 — Unpack:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cd /path/to/boot_folder
+magiskboot unpack boot.img</code></pre>
+      </div>
+      <p>Output files: <code>kernel</code>, <code>ramdisk.cpio</code>, <code>second</code>, <code>dtb</code>, <code>extra</code> [citation:7].</p>
+
+      <p><strong>Step 3 — Modify the ramdisk:</strong></p>
+      <p><code>ramdisk.cpio</code> is a cpio archive. You can extract it:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir ramdisk_out
+cd ramdisk_out
+cpio -idmv < ../ramdisk.cpio</code></pre>
+      </div>
+      <p>Edit files, then repack the cpio:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">find . | cpio -o -H newc > ../ramdisk_new.cpio
+cd ..
+mv ramdisk_new.cpio ramdisk.cpio</code></pre>
+      </div>
+
+      <p><strong>Step 4 — Repack:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">magiskboot repack boot.img new-boot.img</code></pre>
+      </div>
+      <p>The original header and compression are preserved; only the modified ramdisk is replaced [citation:7].</p>
+    </li>
+
+    <li>
+      <h3>5. Method 3 — Carliv Image Kitchen (Windows GUI)</h3>
+      <p>Carliv Image Kitchen is a Windows-native GUI alternative to AIK. It supports Android 10–14, AVB 2.0, dynamic partitions, and GKI [citation:8].</p>
+      <ol>
+        <li>Download and extract Carliv Image Kitchen.</li>
+        <li>Drag <code>boot.img</code> into the tool window.</li>
+        <li>Click <strong>Unpack</strong> — it produces <code>kernel</code>, <code>ramdisk.cpio</code>, <code>dtb</code>, <code>second</code>.</li>
+        <li>Modify files as needed.</li>
+        <li>Click <strong>Repack</strong> to generate a new image.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Why choose Carliv:</strong> it avoids Cygwin/WSL compatibility issues and Windows NTFS permission loss that can break the ramdisk [citation:8].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Verification before flashing</h3>
+      <p>After repacking, verify the new image is valid:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Compare size
+ls -l boot.img new-boot.img
+
+# Check header magic (should be ANDROID!)
+xxd -l 8 new-boot.img
+
+# Unpack again to verify integrity
+mkdir verify && cd verify
+magiskboot unpack ../new-boot.img
+ls -la</code></pre>
+      </div>
+      <p>If unpacking succeeds without error, the image structure is intact.</p>
+    </li>
+
+    <li>
+      <h3>7. Flashing the new image</h3>
+      <p><strong>Test without permanent write (recommended):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb reboot bootloader
+fastboot boot new-boot.img</code></pre>
+      </div>
+      <p>If the device boots successfully, flash permanently:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fastboot flash boot new-boot.img
+
+# For recovery
+fastboot flash recovery new-recovery.img
+
+# For Android 13+ GKI
+fastboot flash init_boot new-init_boot.img</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>Bootloop risk:</strong> if the repacked image fails to boot, re-flash the stock boot image immediately. Keep a copy of the original <code>boot.img</code> in a safe folder.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AIK: "Unsupported format"</td><td>Image is not a standard boot image (could be vendor_boot or GKI). Use the matching unpacker.</td></tr>
+          <tr><td>AIK repack produces a larger image</td><td>Compression level differs. AIK preserves original compression where possible, but ramdisk changes affect size.</td></tr>
+          <tr><td><code>magiskboot unpack</code> fails</td><td>Image is corrupted or an unsupported format. Try AIK instead.</td></tr>
+          <tr><td>Device bootloop after flash</td><td>AVB rejected the modified image. Disable verity/vbmeta or re-sign the image.</td></tr>
+          <tr><td>Ramdisk changes don't apply</td><td>On Android 13+, ramdisk is in <code>init_boot.img</code>, not <code>boot.img</code>.</td></tr>
+          <tr><td>Windows AIK batch script fails</td><td>Run as Administrator; ensure path has no spaces.</td></tr>
+          <tr><td>Carliv can't find kernel</td><td>Image might be vendor_boot with a different structure. Use AIK with explicit flags.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- AIK (Linux/WSL) ----
+cd ~/AIK
+./unpackimg.sh /path/to/boot.img
+# edit ramdisk/ files
+./repackimg.sh
+# output: image-new.img
+
+# ---- AIK (Windows) ----
+# Drag boot.img onto unpackimg.bat
+# Edit ramdisk/ folder
+# Double-click repackimg.bat
+
+# ---- magiskboot ----
+magiskboot unpack boot.img
+# files: kernel, ramdisk.cpio, dtb, second, extra
+
+# Extract ramdisk cpio
+mkdir rd && cd rd
+cpio -idmv < ../ramdisk.cpio
+# edit files
+find . | cpio -o -H newc > ../ramdisk_new.cpio
+cd .. && mv ramdisk_new.cpio ramdisk.cpio
+
+# Repack
+magiskboot repack boot.img new-boot.img
+
+# ---- Verify ----
+xxd -l 8 new-boot.img         # should show ANDROID!
+mkdir verify && cd verify
+magiskboot unpack ../new-boot.img
+
+# ---- Flash ----
+fastboot boot new-boot.img     # test
+fastboot flash boot new-boot.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Always keep an untouched copy of the original image.</li>
+        <li>✅ Use <strong>AIK</strong> for stability — it preserves original format and compression [citation:4].</li>
+        <li>✅ Use <strong>magiskboot</strong> for scripted/automated workflows [citation:7].</li>
+        <li>✅ Test with <code>fastboot boot</code> before flashing permanently.</li>
+        <li>✅ On Android 13+ GKI, patch <code>init_boot.img</code> for ramdisk changes.</li>
+        <li>✅ Disable vbmeta/verity if the device rejects the modified image.</li>
+        <li>✅ Repack on the same build's original image — mismatched headers cause bootloops.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if you're modifying the ramdisk to add a script or patch <code>init.rc</code>, AIK is the safest choice. It records original offsets and compression parameters, so the repacked image is structurally identical to the stock one. Only the ramdisk contents change.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="patch-boot-img-magisk-root-guide.html">Patch boot.img with Magisk &amp; Root Android</a></li>
+      <li><a href="unpack-erofs-system-images-android.html">Unpack EROFS System Images</a></li>
+      <li><a href="mount-ext4-android-images-windows.html">Mount &amp; Extract ext4 Android Images on Windows</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="../firmware-extracting/extract-payload-bin-android-ota-firmware.html">Extract payload.bin from OTA</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

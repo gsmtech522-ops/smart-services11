@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۲: ویری ایبلز (Variables) اور ڈیٹا ٹائپس</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #2563eb;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+            --code-color: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .category {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #475569;
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent-color);
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        p {
+            margin-bottom: 12px;
+        }
+
+        ul, ol {
+            margin-right: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            dir: ltr;
+            display: inline-block;
+        }
+
+        .interactive-editor-box {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .editor-toolbar {
+            background: #1e293b;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 6px;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .editor-toolbar .actions button.run-btn:hover {
+            background: #15803d;
+        }
+
+        .code-input-area {
+            width: 100%;
+            height: 220px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+            tab-size: 4;
+        }
+
+        .code-input-area:focus {
+            outline: none;
+        }
+
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 120px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <div class="container">
+        <span class="category">JavaScript گائیڈ</span>
+        <h1>سبق ۲: ویری ایبلز (Variables) اور ڈیٹا ٹائپس</h1>
+        
+        <div class="description">
+            ویری ایبل ایک ڈبہ (Container) ہے جس میں آپ ڈیٹا رکھتے ہیں — نمبر، متن، یا true/false۔ JavaScript میں تین طرح سے ویری ایبل بنائے جاتے ہیں: var (پرانا)، let (تبدیل ہو سکتا ہے)، اور const (تبدیل نہیں ہو سکتا)۔
+        </div>
+
+        <h3>ویری ایبل کیا ہے؟</h3>
+        <p><strong>ویری ایبل</strong> ایک نامزد ڈبہ ہے جس میں ڈیٹا محفوظ کیا جاتا ہے۔ بعد میں اس نام سے ڈیٹا استعمال یا تبدیل کیا جا سکتا ہے۔</p>
+
+        <h3>1. var، let، const کا فرق</h3>
+        <ul>
+            <li><strong><code>var</code>:</strong> پرانا طریقہ — block scope نہیں ہوتا، آج کل کم استعمال ہوتا ہے۔</li>
+            <li><strong><code>let</code>:</strong> جدید طریقہ — قدر بعد میں بدلی جا سکتی ہے۔</li>
+            <li><strong><code>const</code>:</strong> مستقل — ایک بار قدر دینے کے بعد بدلی نہیں جا سکتی۔</li>
+        </ul>
+
+        <h3>2. بنیادی ڈیٹا ٹائپس</h3>
+        <ul>
+            <li><strong>Number:</strong> <code>let age = 25;</code></li>
+            <li><strong>String:</strong> <code>let name = "احمد";</code> (سنگل یا ڈبل کوٹس)</li>
+            <li><strong>Boolean:</strong> <code>let isActive = true;</code></li>
+            <li><strong>Undefined:</strong> <code>let x;</code> (قدر نہیں دی گئی)</li>
+            <li><strong>Null:</strong> <code>let y = null;</code> (جان بوجھ کر خالی)</li>
+            <li><strong>Object / Array:</strong> (اگلے اسباق میں)</li>
+        </ul>
+
+        <h3>3. کوڈ کی مثال</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>JavaScript کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">// let — بعد میں بدل سکتے ہیں
+let userName = "علی";
+let userAge = 22;
+
+console.log("نام:", userName);
+console.log("عمر:", userAge);
+
+userName = "حسن"; // تبدیل کیا
+console.log("نیا نام:", userName);
+
+// const — تبدیل نہیں ہو سکتا
+const country = "پاکستان";
+console.log("ملک:", country);
+
+// country = "بھارت"; // ❌ یہ error دے گا
+
+// مختلف ڈیٹا ٹائپس
+let isStudent = true;
+let score = 95.5;
+let city;
+console.log("طالب علم:", isStudent);
+console.log("نمبر:", score);
+console.log("شہر:", city); // undefined
+
+// typeof سے ٹائپ معلوم کریں
+console.log(typeof userName);   // string
+console.log(typeof userAge);    // number
+console.log(typeof isStudent);  // boolean</textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ (Console):</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>اہم باتیں اور قواعد</h3>
+        <ul>
+            <li><strong>نام رکھنے کے اصول:</strong> حروف، اعداد، <code>_</code>, <code>$</code> — لیکن ہندسے سے شروع نہیں کر سکتے۔</li>
+            <li><strong>camelCase:</strong> <code>userName</code>, <code>totalPrice</code> — یہ JS میں عام ہے۔</li>
+            <li><strong>const ترجیح دیں:</strong> جہاں ممکن ہو <code>const</code> استعمال کریں — یہ bug کم کرتا ہے۔</li>
+            <li><strong>Template Literals:</strong> <code>`مرحبا ${userName}`</code> — بیک ٹک سے متغیر embed کر سکتے ہیں۔</li>
+        </ul>
+
+        <h3>عمل / مشق (Task)</h3>
+        <ol>
+            <li>اپنا نام، عمر اور شہر تین ویری ایبلز میں رکھیں۔</li>
+            <li>ایک <code>const</code> ویری ایبل سے اپنا پسندیدہ رنگ رکھیں۔</li>
+            <li>سب کو <code>console.log()</code> سے پرنٹ کریں۔</li>
+        </ol>
+    </div>
+
+    <script>
+        async function copyCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const codeText = textArea.value;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(codeText);
+                } else {
+                    textArea.select();
+                    document.execCommand('copy');
+                }
+
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = "Copied! ✅";
+                buttonElement.style.backgroundColor = "#16a34a";
+
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    buttonElement.style.backgroundColor = "";
+                }, 2000);
+            } catch (err) {
+                console.error('کپی کرنے میں ناکامی:', err);
+                alert('کپی کرنے میں مسئلہ پیش آیا!');
+            }
+        }
+
+        function runCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const iframe = editorBox.querySelector('.preview-iframe');
+            
+            const code = textArea.value;
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            const wrappedCode = code.includes('<html') ? code : `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 10px; background: #1e293b; color: #f8fafc; font-size: 13px; }
+                        .log { color: #38bdf8; margin-bottom: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <div id="console-output"></div>
+                    <script>
+                        const output = document.getElementById('console-output');
+                        const origLog = console.log;
+                        console.log = function(...args) {
+                            origLog.apply(console, args);
+                            const div = document.createElement('div');
+                            div.className = 'log';
+                            div.textContent = '> ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+                            output.appendChild(div);
+                        };
+                        try {
+                            ${code}
+                        } catch(e) {
+                            console.log('Error: ' + e.message);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            iframeDoc.write(wrappedCode);
+            iframeDoc.close();
+        }
+    </script>
+</body>
+</html>

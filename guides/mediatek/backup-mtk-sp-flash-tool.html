@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup MediaTek Firmware via SP Flash Tool (Readback) | Tech Learn</title>
+<meta name="description" content="Complete guide to Readback backup MediaTek ROM using SP Flash Tool with exact hex addresses.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Backup MediaTek Firmware via SP Flash Tool (Readback)</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All MTK devices with scatter file</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Before flashing custom ROMs, rooting, or hardware repairs, a full stock firmware backup is the safest precaution. SP Flash Tool's built-in <strong>Readback</strong> feature extracts complete raw partition dumps directly from the phone's storage.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MediaTek VCOM / Preloader drivers installed.</li>
+        <li>Latest compatible <strong>SP Flash Tool</strong>.</li>
+        <li>Device's original <code>Android_scatter.txt</code> (or generated via WWR MTK Tool).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Load scatter file</h3>
+      <ol>
+        <li>Launch <code>flash_tool.exe</code> as Administrator.</li>
+        <li>In <strong>Download</strong> tab, choose the scatter file (<code>MT67xx_Android_scatter.txt</code>).</li>
+        <li>SP Flash Tool displays the device's partition map.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Switch to Readback tab &amp; configure output</h3>
+      <ol>
+        <li>Click <strong>Readback</strong> tab.</li>
+        <li>Click <strong>Add</strong> to add a new entry.</li>
+        <li>Double-click the file path line.</li>
+        <li>Choose a save folder, name the file (<code>ROM_0</code> or <code>boot.img</code>), click Save.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Set hex addresses</h3>
+      <p>A <strong>Readback item address</strong> popup appears:</p>
+      <ol>
+        <li>Type: <strong>Hex</strong></li>
+        <li>Region: <code>EMMC_USER</code> (or <code>UFS_LUN0</code> for UFS)</li>
+        <li>Start Address:
+          <ul>
+            <li>Full backup: <code>0x0000000000000000</code></li>
+            <li>Specific partition: copy the partition's <code>linear_start_addr</code></li>
+          </ul>
+        </li>
+        <li>Length: copy partition size from scatter; for full dump, copy userdata start address to get everything.</li>
+        <li>Click OK.</li>
+      </ol>
+      <div class="note">
+        <p><strong>Pro tip:</strong> if you don't know exact addresses, load your initial <code>ROM_0</code> into WWR MTK Tool — it calculates hex start/length for every partition.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Execute readback</h3>
+      <ol>
+        <li>Click green <strong>Readback</strong> button.</li>
+        <li>Power off the phone.</li>
+        <li>Hold <kbd>Volume Down</kbd> (or both volume keys) and connect USB.</li>
+        <li>Watch: Red bar (DA Download) → Blue/Yellow bar (Readback).</li>
+        <li>Green checkmark <strong>Readback OK</strong> confirms success.</li>
+        <li>Unplug.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Step 5 — Extract partition images (optional)</h3>
+      <p>If you saved a full <code>ROM_0</code> dump, use <strong>WWR MTK Tool</strong>:</p>
+      <ol>
+        <li>Open WWR MTK Tool.</li>
+        <li>Load <code>ROM_0</code>.</li>
+        <li>Use the Cut/Split ROM feature to slice it into individual <code>.img</code> files.</li>
+      </ol>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="wwr-mtk-tool-overview.html">WWR MTK Tool overview</a></li>
+      <li><a href="backup-mtk-mtkclient.html">Backup MTK via MTKClient</a></li>
+      <li><a href="backup-nvram-nvdata-imei.html">Backup NVRAM / IMEI</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

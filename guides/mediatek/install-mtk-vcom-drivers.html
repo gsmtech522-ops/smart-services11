@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Install MediaTek (MTK) VCOM Drivers on Windows (Auto &amp; Manual) | Tech Learn</title>
+<meta name="description" content="Complete guide to install MediaTek MTK VCOM USB drivers on Windows using automatic installer or manual Device Manager method.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Install MediaTek (MTK) VCOM Drivers on Windows</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Windows 7, 8, 10, 11</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>For any MediaTek (MTK) repair — flashing firmware, running SP Flash Tool, CM2, Miracle Box, or MTKClient — the first step is installing the correct USB drivers. Without MTK VCOM drivers, your PC will not detect the phone in Preloader/BROM mode, and every servicing tool will fail with connection errors.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites (crucial step)</h3>
+      <p>Before installing — <strong>especially on Windows 8, 10, or 11</strong> — you must disable Driver Signature Enforcement. Windows blocks unsigned drivers by default, which is the #1 reason MTK driver setup fails.</p>
+      <div class="warning">
+        <p><strong>Windows blocks unsigned drivers.</strong> Follow the "Disable Driver Signature Enforcement" guide first, or the MTK driver installation will show "cannot verify publisher" and fail.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Automatic installation (easiest)</h3>
+      <ol>
+        <li><strong>Download &amp; extract</strong> the MediaTek Driver package (from trusted sources like mtkdriver.com or the official MediaTek support page). Use WinRAR or 7-Zip.</li>
+        <li><strong>Locate the setup file</strong> inside the extracted "Auto-Installer" folder.</li>
+        <li><strong>Run Installer:</strong> right-click <code>Install.exe</code> or <code>DriverInstall.exe</code> → <strong>Run as Administrator</strong>.</li>
+        <li><strong>Begin setup:</strong> click <strong>Install</strong> when the wizard launches.</li>
+        <li><strong>Complete &amp; reboot:</strong> wait for the "Success" message, click Finish, and restart your PC.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Manual install via Device Manager</h3>
+      <p>If the automatic installer fails, or the device connects/disconnects rapidly, install manually for a stable connection.</p>
+      <ol>
+        <li><strong>Extract CDC drivers:</strong> locate the <strong>MTK CDC Drivers</strong> sub-folder in your extracted driver package.</li>
+        <li><strong>Open Device Manager</strong> — <kbd>Win</kbd>+<kbd>X</kbd> → Device Manager.</li>
+        <li><strong>Add legacy hardware:</strong> click your <strong>Computer Name</strong> at the top, then <strong>Action → Add legacy hardware → Next</strong>.</li>
+        <li><strong>Select manual option:</strong> choose <strong>"Install the hardware that I manually select from a list (Advanced)"</strong> → Next.</li>
+        <li><strong>Show all devices</strong> → Next.</li>
+        <li><strong>Browse files:</strong> click <strong>Have Disk…</strong> → <strong>Browse</strong> → navigate to your MTK CDC Driver folder.</li>
+        <li><strong>Choose file:</strong> select the sub-folder matching your Windows version (Win7 or Win10) and pick the <code>.inf</code> file (e.g. <code>usb2ser.inf</code>, <code>cdc-acm.inf</code>, or <code>mtk_usb_vcom.inf</code>) → Open → OK.</li>
+        <li><strong>Select driver:</strong> choose <strong>MediaTek DA USB VCOM Port</strong> (or <strong>MediaTek Preloader USB VCOM Port</strong>) → Next.</li>
+        <li><strong>Confirm:</strong> if Windows Security warns "Windows can't verify the publisher", click <strong>Install this driver software anyway</strong>.</li>
+        <li><strong>Finish.</strong></li>
+      </ol>
+      <div class="note">
+        <p><strong>"Code 10" error:</strong> if you see "This device cannot start (Code 10)" in Device Manager after manual install, you can safely ignore it — the driver is loaded manually without an active device connected.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Verify the drivers work</h3>
+      <ol>
+        <li>Keep <strong>Device Manager</strong> open.</li>
+        <li>Power off your MediaTek device completely.</li>
+        <li>Hold <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd> (or just Volume Down, depending on the model) and connect the phone to the PC.</li>
+        <li>Watch the <strong>Ports (COM &amp; LPT)</strong> section — you should briefly see <strong>MediaTek Preloader USB VCOM (Android)</strong> or <strong>MTK USB Port</strong> appear without a yellow warning icon.</li>
+      </ol>
+      <div class="note">
+        <p><strong>For modern Helio/Dimensity devices</strong> requiring SLA/DAA auth bypass, VCOM drivers alone are not enough. You also need the <strong>LibUSB-win32 Filter Driver</strong> — see <a href="install-libusb-win32-filter.html">Install LibUSB-win32 Filter Driver</a>.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Driver install fails on Win 10/11</td><td>Disable Driver Signature Enforcement first, reboot, then retry.</td></tr>
+          <tr><td>Device appears then vanishes instantly</td><td>Connect within 2 seconds of the driver install window opening. Use a USB 2.0 port.</td></tr>
+          <tr><td>Yellow warning persists</td><td>Uninstall device in Device Manager, replug, and let Windows reinstall.</td></tr>
+          <tr><td>Code 10 error</td><td>Safe to ignore — driver is loaded, just no active device connected.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="install-libusb-win32-filter.html">Install LibUSB-win32 Filter Driver</a></li>
+      <li><a href="sp-flash-tool-complete-guide.html">SP Flash Tool complete guide</a></li>
+      <li><a href="bypass-mediatek-sla-daa.html">Bypass SLA/DAA security</a></li>
+      <li><a href="../../android.html#mediatek">MediaTek category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Installed App Package Name &amp; UID via ADB | Tech Learn</title>
+<meta name="description" content="Complete guide to find any Android app's package name and UID (User ID) using simple ADB commands on Windows PC.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Find Installed App Package Name &amp; UID via ADB</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Quick Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~2 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All Android devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>In Android customization and troubleshooting, knowing the app's display name (like "WhatsApp") is not enough. Android identifies apps by two unique identifiers: <strong>Package Name</strong> (e.g. <code>com.whatsapp</code>) and <strong>UID</strong> (User ID, e.g. <code>u0_a123</code>). ADB is the fastest way to find both.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li><strong>ADB &amp; Fastboot</strong> installed — see <a href="adb-fastboot-setup-windows.html">setup guide</a>.</li>
+        <li><strong>USB Debugging</strong> enabled — see <a href="enable-usb-debugging-oem-unlocking.html">this guide</a>.</li>
+        <li>Phone connected to the PC and authorized.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Part 1 — Find app package names</h3>
+      <ol>
+        <li>Open PowerShell in Platform Tools.</li>
+        <li>Verify the connection:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb devices</code></pre>
+      </div>
+      <ol start="3">
+        <li>Enter the device shell:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell</code></pre>
+      </div>
+      <ol start="4">
+        <li>List apps by category:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># All packages
+pm list packages
+
+# Third-party (user-installed) apps
+pm list packages -3
+
+# System apps
+pm list packages -s</code></pre>
+      </div>
+
+      <p><strong>Search for a specific app (grep):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">pm list packages | grep facebook</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Part 2 — Find app UID</h3>
+      <p>Once you have the package name, find its UID inside <code>adb shell</code>:</p>
+
+      <p><strong>Method 1 — dumpsys (fastest):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">dumpsys package com.whatsapp | grep userId</code></pre>
+      </div>
+      <p>Output will show something like <code>userId=10135</code> — that number is the app's UID.</p>
+
+      <p><strong>Method 2 — ps (only if the app is running):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">ps -A | grep com.whatsapp</code></pre>
+      </div>
+      <p>The first column of the output shows the UID (e.g. <code>u0_a135</code>).</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="backup-restore-apk-data-adb.html">Backup &amp; restore APK + data</a></li>
+      <li><a href="debloat-android-adb.html">Debloat Android via ADB</a></li>
+      <li><a href="adb-fastboot-commands-cheatsheet.html">Commands cheat sheet</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bypass MediaTek SLA/DAA Auth Security | Tech Learn</title>
+<meta name="description" content="Complete guide to bypass MediaTek SLA (Serial Link Authentication) and DAA (Download Agent Authentication) protection.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Bypass MediaTek SLA/DAA Security Protection</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Helio P/G and Dimensity chipsets</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern MediaTek SoCs (Helio, Dimensity) enforce <strong>SLA</strong> (Serial Link Authentication) and <strong>DAA</strong> (Download Agent Authentication). These block unauthorized servicing tools — forcing technicians to use paid authorization or OEM servers.</p>
+  <p>Without bypassing, tools throw errors like <strong>STATUS_SEC_AUTH_FILE_NEEDED (0xC0020002)</strong> or <strong>BROM ERROR: 6047</strong>.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What are SLA and DAA?</h3>
+      <ul>
+        <li><strong>SLA:</strong> a cryptographic handshake between Boot ROM and an online OEM server verifying flashing authorization.</li>
+        <li><strong>DAA:</strong> validates the <code>DA.bin</code> signature inside SP Flash Tool, preventing custom or modified binaries.</li>
+      </ul>
+      <p>Bypassing temporarily disables signature verification in the CPU's SRAM, allowing tools like SP Flash Tool, Miracle Box, or UnlockTool to communicate without an <code>.auth</code> file.</p>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li>MediaTek VCOM / Preloader drivers installed.</li>
+        <li>LibUSB-win32 filter driver package installed.</li>
+        <li>MTK Auth Bypass Tool (or MCT utility / MTKClient).</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Install LibUSB driver filter</h3>
+      <ol>
+        <li>Launch <code>install-filter-driver.exe</code> from the LibUSB package.</li>
+        <li>Power off the phone.</li>
+        <li>Hold volume keys, connect USB.</li>
+        <li>Locate <code>MediaTek PreLoader USB VCOM</code> or <code>MTK USB Port</code> in LibUSB, select it, click <strong>Install</strong>.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Bypass via MTK Auth Bypass Tool</h3>
+      <ol>
+        <li>Open <strong>MTK Auth Bypass Tool</strong>.</li>
+        <li>Leave the default Auto-detect settings.</li>
+        <li>Click <strong>Bypass</strong>. Log shows: <code>Waiting for MTK USB device…</code></li>
+        <li>Power off the device.</li>
+        <li>Hold <kbd>Volume Up</kbd>+<kbd>Volume Down</kbd>, plug USB.</li>
+        <li>The tool logs success:
+          <pre style="color: #4ade80;">Device Found!<br>Hardware ID: MT6765 [Helio P35]<br>Disable Watchdog... OK<br>Bypass SLA / DAA... OK<br>Protection Disabled Successfully!<br>COM Port Assigned: COM14</pre>
+        </li>
+        <li><strong>DO NOT disconnect USB</strong> — the watchdog is now frozen on the assigned COM port.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Use SP Flash Tool without auth file</h3>
+      <ol>
+        <li>Launch SP Flash Tool.</li>
+        <li>Load your scatter file.</li>
+        <li>Leave the <strong>Authentication File (.auth)</strong> field BLANK.</li>
+        <li><strong>Options → Option → Connection</strong> tab:
+          <ul>
+            <li>Choose UART (or USB)</li>
+            <li>Select the COM Port assigned by the Auth tool (e.g. COM14)</li>
+            <li>Baud Rate: 921600 or 115200</li>
+          </ul>
+        </li>
+        <li>Close Options, click <strong>Download</strong> — flashing proceeds without auth.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Alternative — Command line (MTKClient)</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cd mtkclient
+python mtk payload</code></pre>
+      </div>
+      <p>Connect the powered-off device with volume keys held. MTKClient sends the payload, disables SLA/DAA, and exposes a clean COM port.</p>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+
+      <p><strong>Phone reboots into charging mode before LibUSB capture</strong></p>
+      <p>Fix: unplug, hold Power + Volume Down 10s to hard reset. Open LibUSB filter installer first, then plug cable with volume keys held.</p>
+
+      <p><strong>SP Flash Tool hangs on Download DA 0%</strong></p>
+      <p>Fix: verify COM Port and Baud Rate match the Auth tool output, or switch connection mode between USB and UART.</p>
+
+      <p><strong>Does auth bypass wipe user data or IMEI?</strong></p>
+      <p>Fix: No. It only freezes the hardware security watchdog in SRAM — no data is altered.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="install-libusb-win32-filter.html">Install LibUSB filter driver</a></li>
+      <li><a href="install-mtk-vcom-drivers.html">Install MTK VCOM drivers</a></li>
+      <li><a href="mtkclient-overview-setup.html">MTKClient setup</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

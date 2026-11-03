@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Extract Proprietary Vendor Blobs from Android Firmware | Tech Learn</title>
+<meta name="description" content="Complete guide to extract proprietary vendor blobs (HALs, camera, GPU, RIL, sensors) from Android vendor.img, system.img and super.img for custom ROM development.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📦</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#firmware-extracting">Firmware Extracting</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Extract Proprietary Vendor Blobs from Android Firmware</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Developer Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~30 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Custom ROM developers, device tree maintainers, advanced technicians</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When building a custom ROM (LineageOS, Pixel Experience, crDroid) or a device tree, the open-source Android framework alone is not enough. Your device also needs the <strong>proprietary vendor blobs</strong> — the closed-source binaries supplied by the OEM/chipset vendor that make your specific hardware work:</p>
+
+  <ul>
+    <li>Camera HALs (Sony, Samsung ISOCELL, Omnivision)</li>
+    <li>GPU drivers (Adreno, Mali)</li>
+    <li>Baseband / RIL (Qualcomm, MediaTek modem)</li>
+    <li>Audio HALs (Qualcomm Aqstic, Dolby, Dirac)</li>
+    <li>Sensor HALs (accelerometer, gyro, proximity)</li>
+    <li>Fingerprint HAL (Goodix, FPC, Synaptics)</li>
+    <li>Wi-Fi/BT firmware (Broadcom, Qualcomm, MediaTek)</li>
+    <li>DRM (Widevine L1), biometrics, and codec libraries</li>
+  </ul>
+
+  <p>This guide shows how to extract those blobs from your device's <strong>vendor.img</strong>, <strong>system.img</strong>, <strong>odm.img</strong>, or <strong>super.img</strong> and organize them into a proper device tree.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What are vendor blobs?</h3>
+      <p>Vendor blobs are the shared library files (<code>.so</code>), firmware files (<code>.bin</code>, <code>.fw</code>), executables, and configuration files that implement the <strong>Hardware Abstraction Layer (HAL)</strong> between Android's framework and your device's physical hardware.</p>
+
+      <table>
+        <thead>
+          <tr><th>Blob type</th><th>Location</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Camera HAL</td><td><code>/vendor/lib64/hw/camera.*.so</code></td><td><code>camera.qcom.so</code></td></tr>
+          <tr><td>GPU driver</td><td><code>/vendor/lib64/egl/</code></td><td><code>libGLESv2_adreno.so</code></td></tr>
+          <tr><td>Audio HAL</td><td><code>/vendor/lib64/hw/audio.*.so</code></td><td><code>audio.primary.default.so</code></td></tr>
+          <tr><td>RIL (radio)</td><td><code>/vendor/lib64/libril*.so</code></td><td><code>libril-qc-qmi-1.so</code></td></tr>
+          <tr><td>Sensors HAL</td><td><code>/vendor/lib64/hw/sensors.*.so</code></td><td><code>sensors.ssc.so</code></td></tr>
+          <tr><td>Fingerprint</td><td><code>/vendor/lib64/hw/fingerprint.*.so</code></td><td><code>fingerprint.goodix.so</code></td></tr>
+          <tr><td>Wi-Fi/BT firmware</td><td><code>/vendor/firmware/</code></td><td><code>wlan.elf</code>, <code>bt_fw.bin</code></td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Linux PC</strong> (Ubuntu 20.04/22.04 recommended) — Windows workflows are painful for this.</li>
+        <li><strong>Full stock firmware</strong> for your device (from the OTA or vendor site).</li>
+        <li>Partition images: <code>vendor.img</code>, <code>system.img</code>, <code>odm.img</code>, or <code>super.img</code>.</li>
+        <li>Tools: <code>simg2img</code>, <code>lpunpack</code>, <code>7-Zip</code>, <code>erofs-utils</code>, <code>ext4fuse</code>, <code>git</code>.</li>
+        <li>At least <strong>20 GB free disk</strong>.</li>
+      </ul>
+
+      <p><strong>Install tools on Ubuntu:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo apt update
+sudo apt install -y android-sdk-libsparse-utils \
+  erofs-utils ext4fuse git python3 python3-pip
+pip3 install payload_dumper</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Prepare the vendor image</h3>
+      <p>Depending on your firmware format, your <code>vendor.img</code> may be:</p>
+      <ul>
+        <li><strong>Sparse</strong> (magic <code>3A FF 26 ED</code>) → convert to raw first.</li>
+        <li><strong>Inside super.img</strong> (dynamic partitions) → extract with <code>lpunpack</code>.</li>
+        <li><strong>Already raw ext4</strong> → ready to mount.</li>
+      </ul>
+
+      <p><strong>Check file type:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file vendor.img
+xxd -l 4 vendor.img</code></pre>
+      </div>
+
+      <p><strong>If sparse, convert:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img vendor.img vendor_raw.img</code></pre>
+      </div>
+
+      <p><strong>If inside super.img, extract:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img super.img super_raw.img
+mkdir super_parts
+lpunpack super_raw.img super_parts/</code></pre>
+      </div>
+      <p>This yields <code>vendor.img</code>, <code>system.img</code>, <code>product.img</code>, <code>odm.img</code>, <code>system_ext.img</code>.</p>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Mount the vendor image</h3>
+      <p>Vendor images are typically ext4. Mount them read-only to explore the filesystem:</p>
+
+      <p><strong>ext4 (most common):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo mkdir -p /mnt/vendor
+sudo mount -o loop,ro vendor_raw.img /mnt/vendor
+ls /mnt/vendor</code></pre>
+      </div>
+
+      <p><strong>EROFS (Android 11+ on some devices):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo mkdir -p /mnt/vendor
+sudo mount -t erofs -o loop,ro vendor_raw.img /mnt/vendor</code></pre>
+      </div>
+      <p>If kernel does not support EROFS mount:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir -p ./vendor_extracted
+fsck.erofs --extract=./vendor_extracted vendor_raw.img</code></pre>
+      </div>
+
+      <p><strong>Windows only (read-only via WSL):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">wsl --mount --vhd vendor_raw.img --bare
+# or use 7-Zip to open ext4 read-only</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Explore the vendor directory</h3>
+      <p>Key folders inside a mounted <code>/vendor</code>:</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">vendor/
+├── bin/                → vendor executables (ril-daemon, etc.)
+├── etc/                → config files (audio_policy, camera_config)
+├── firmware/           → Wi-Fi/BT/modem firmware files (.elf, .bin)
+├── lib/                → 32-bit native libs
+├── lib64/              → 64-bit native libs
+│   ├── hw/             → HAL implementations (camera.*.so, sensors.*.so)
+│   ├── egl/            → GPU drivers (libGLESv2_*.so)
+│   └── soundfx/        → audio effects
+├── app/                → vendor apps (Camera, permissions)
+├── overlay/            → RRO overlays for system
+├── build.prop          → vendor build properties
+└── manifest.xml        → HAL service registration</code></pre>
+      </div>
+
+      <p><strong>List HAL implementations:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">ls -la /mnt/vendor/lib64/hw/
+ls -la /mnt/vendor/lib/hw/</code></pre>
+      </div>
+
+      <p><strong>Look for camera, GPU, and radio libs:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">find /mnt/vendor -name "*camera*" -o -name "*adreno*" -o -name "*libril*" | head -30</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Identify needed blobs</h3>
+      <p>For a custom ROM, only the blobs your device tree needs are important. The standard reference is <strong>LineageOS extract-files.sh</strong> or the device's <code>proprietary-blobs.txt</code>:</p>
+
+      <p><strong>Approach A — Use the device tree's blob list:</strong></p>
+      <ol>
+        <li>Find your device's tree on GitHub: e.g. <code>github.com/LineageOS/android_device_&lt;vendor&gt;_&lt;device&gt;</code></li>
+        <li>Look for <code>proprietary-files.txt</code> in the root.</li>
+        <li>Each line specifies a blob: <code>-vendor/lib64/hw/camera.qcom.so</code> (leading <code>-</code> means strip the vendor prefix when placed in vendor partition).</li>
+      </ol>
+
+      <p><strong>Approach B — Auto-generate the list from vendor.img:</strong></p>
+      <p>Compare with system.img to find blobs not present in AOSP:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo mount -o loop,ro system_raw.img /mnt/system
+comm -23 \
+  <(find /mnt/vendor -type f -name '*.so' -printf '%P\n' | sort) \
+  <(find /mnt/system -type f -name '*.so' -printf '%P\n' | sort) \
+  > vendor_only_libs.txt
+cat vendor_only_libs.txt | head -20</code></pre>
+      </div>
+      <p>This lists vendor libraries that have no AOSP equivalent — prime candidates for extraction.</p>
+    </li>
+
+    <li>
+      <h3>7. Step 5 — Extract blobs</h3>
+      <p>Create the output device tree structure:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir -p proprietary/vendor/{lib,lib64,etc,bin,firmware,app}
+mkdir -p proprietary/vendor/lib/hw
+mkdir -p proprietary/vendor/lib64/hw
+mkdir -p proprietary/vendor/lib64/egl</code></pre>
+      </div>
+
+      <p><strong>Copy files manually:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Copy the entire vendor tree
+sudo cp -a /mnt/vendor/. ./proprietary/vendor/
+
+# Or specific files only
+sudo cp /mnt/vendor/lib64/hw/camera.qcom.so ./proprietary/vendor/lib64/hw/
+sudo cp -r /mnt/vendor/firmware/ ./proprietary/vendor/firmware/
+sudo cp /mnt/vendor/etc/camera/ -r ./proprietary/vendor/etc/</code></pre>
+      </div>
+
+      <p><strong>Or use a proper extractor script</strong> (recommended for maintainers):</p>
+      <p>LineageOS provides <code>extract_utils/extract_files.py</code> which reads <code>proprietary-files.txt</code> and creates the correct tree from mounted images automatically:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">git clone https://github.com/LineageOS/android_tools_extract-utils.git
+cd android_tools_extract-utils
+python3 extract_files.py \
+  -s /mnt/vendor \
+  -d /mnt/system \
+  --kang \
+  -o /path/to/device_tree</code></pre>
+      </div>
+      <p>This produces a tree ready for <code>vendor.mk</code> and <code>Android.bp</code>.</p>
+    </li>
+
+    <li>
+      <h3>8. Step 6 — Check dependencies</h3>
+      <p>Vendor blobs often depend on other vendor blobs. Missing dependencies = silent crashes at boot.</p>
+
+      <p><strong>Check a library's dependencies:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">readelf -d /mnt/vendor/lib64/hw/camera.qcom.so | grep NEEDED</code></pre>
+      </div>
+      <p>Output lists all <code>libXXX.so</code> files this blob requires. Ensure each of these also exists in <code>proprietary/vendor/lib64/</code> or AOSP's <code>system/lib64/</code>.</p>
+
+      <p><strong>Run a full dependency scan:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">for lib in proprietary/vendor/lib64/*.so; do
+  echo "=== $lib ==="
+  readelf -d "$lib" 2>/dev/null | grep NEEDED | awk '{print $NF}'
+done</code></pre>
+      </div>
+
+      <div class="warning">
+        <p><strong>Missing dependencies cause:</strong> black screen, camera FC (force close), no audio, bootloop at zygote. Always resolve dependency chains before building.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>9. Step 7 — Organize into a device tree</h3>
+      <p>Structure the extracted blobs for a device tree:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">device/myphone/mydevice/
+├── Android.bp
+├── Android.mk
+├── BoardConfig.mk
+├── device.mk
+├── proprietary-files.txt
+├── vendorsetup.sh
+├── extract-files.sh
+├── system.prop
+└── proprietary/
+    └── vendor/
+        ├── lib/
+        ├── lib64/
+        ├── etc/
+        ├── bin/
+        ├── firmware/
+        └── app/</code></pre>
+      </div>
+
+      <p><strong>Sample entry in <code>proprietary-files.txt</code>:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">-vendor/lib64/hw/camera.qcom.so
+-vendor/lib64/hw/camera.qcom.so:32
+-vendor/lib64/hw/sensors.ssc.so
+-vendor/lib64/libril-qc-qmi-1.so
+-vendor/etc/camera/camera_config.xml
+-vendor/firmware/wlan.elf</code></pre>
+      </div>
+      <p>The <code>:32</code> suffix indicates a 32-bit blob (usually <code>lib/</code> instead of <code>lib64/</code>).</p>
+
+      <p><strong>Sample entry in <code>vendor.mk</code>:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-make">PRODUCT_COPY_FILES += \
+  $(LOCAL_PATH)/proprietary/vendor/etc/camera/camera_config.xml:$(TARGET_COPY_OUT_VENDOR)/etc/camera/camera_config.xml \
+  $(LOCAL_PATH)/proprietary/vendor/firmware/wlan.elf:$(TARGET_COPY_OUT_VENDOR)/firmware/wlan.elf
+
+PRODUCT_PACKAGES += \
+  camera.qcom \
+  sensors.ssc \
+  libril-qc-qmi-1</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Step 8 — Vendor overlay (optional)</h3>
+      <p>Extract the vendor's <code>build.prop</code> and convert it into <code>system.prop</code> or <code>vendor.prop</code> overrides in your device tree:</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">grep -E '^(ro\.|persist\.)' /mnt/vendor/build.prop > proprietary/vendor.prop</code></pre>
+      </div>
+
+      <p>Add overrides in <code>device.mk</code>:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-make">TARGET_SYSTEM_PROP += $(LOCAL_PATH)/proprietary/vendor.prop</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>11. Verify the extracted blobs</h3>
+      <p>Before building, verify integrity:</p>
+
+      <p><strong>Check each blob is a valid ELF shared library:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">find proprietary/vendor -name "*.so" -exec file {} \; | grep -v "ELF"</code></pre>
+      </div>
+      <p>Any output (non-ELF files) means a corrupted extraction.</p>
+
+      <p><strong>Check architecture matches target:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file proprietary/vendor/lib64/*.so | head -5
+# ARM aarch64 = 64-bit arm
+# ARM 32-bit = for lib/ (32-bit) folder</code></pre>
+      </div>
+
+      <p><strong>Verify symbols are exported:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">nm -D proprietary/vendor/lib64/hw/camera.qcom.so | grep " T " | head -5</code></pre>
+      </div>
+      <p>If you see exported function symbols (T), the ELF is intact.</p>
+    </li>
+
+    <li>
+      <h3>12. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Mount fails with "unknown filesystem type"</td><td>Image is EROFS or sparse. Convert with <code>simg2img</code>, or use <code>fsck.erofs</code>.</td></tr>
+          <tr><td>Camera FC after custom ROM</td><td>Missing dependency or missing <code>/vendor/etc/camera/</code> config folder.</td></tr>
+          <tr><td>No audio in custom ROM</td><td>Missing <code>audio_policy_configuration.xml</code> or <code>audio.primary.*.so</code>.</td></tr>
+          <tr><td>Bootloop at zygote</td><td>Missing <code>manifest.xml</code> or HAL service registration.</td></tr>
+          <tr><td>Fingerprint not working</td><td>Missing <code>fingerprint.*.so</code> HAL + <code>persist</code> partition data.</td></tr>
+          <tr><td><code>readelf</code> shows NEEDED libs missing</td><td>Copy the missing dependencies recursively.</td></tr>
+          <tr><td>Blobs won't compile</td><td>Wrong path — check whether the blob belongs in <code>system/</code> or <code>vendor/</code>.</td></tr>
+          <tr><td>Widevine L1 lost</td><td>Missing <code>libwvhidl.so</code> + <code>liboemcrypto.so</code> + TEE blobs.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>13. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Install tools ----
+sudo apt install android-sdk-libsparse-utils erofs-utils git python3-pip
+pip3 install payload_dumper
+
+# ---- Extract from super.img ----
+simg2img super.img super_raw.img
+mkdir super_parts
+lpunpack super_raw.img super_parts/
+
+# ---- Convert sparse vendor ----
+simg2img vendor.img vendor_raw.img
+
+# ---- Mount vendor (ext4) ----
+sudo mkdir -p /mnt/vendor
+sudo mount -o loop,ro vendor_raw.img /mnt/vendor
+
+# ---- Mount vendor (EROFS) ----
+sudo mount -t erofs -o loop,ro vendor_raw.img /mnt/vendor
+
+# ---- Extract EROFS via fsck ----
+fsck.erofs --extract=./vendor_extracted vendor_raw.img
+
+# ---- Explore ----
+ls /mnt/vendor/lib64/hw/
+ls /mnt/vendor/firmware/
+find /mnt/vendor -name "*camera*" -o -name "*ril*"
+
+# ---- Copy blobs ----
+mkdir -p proprietary/vendor/lib64/hw
+sudo cp /mnt/vendor/lib64/hw/camera.qcom.so proprietary/vendor/lib64/hw/
+sudo cp -a /mnt/vendor/firmware/ proprietary/vendor/firmware/
+
+# ---- Verify ----
+file proprietary/vendor/lib64/hw/*.so
+readelf -d proprietary/vendor/lib64/hw/camera.qcom.so | grep NEEDED
+nm -D proprietary/vendor/lib64/hw/camera.qcom.so | grep " T "
+
+# ---- Auto-extract via LineageOS utils ----
+git clone https://github.com/LineageOS/android_tools_extract-utils.git
+python3 extract_files.py -s /mnt/vendor -d /mnt/system -o ./device_tree
+
+# ---- Unmount ----
+sudo umount /mnt/vendor</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>14. Best practices</h3>
+      <ul>
+        <li>✅ Work in Linux — WSL is possible but slow for large extractions.</li>
+        <li>✅ Use the exact stock firmware matching your current build.</li>
+        <li>✅ Check dependencies with <code>readelf -d</code> before building.</li>
+        <li>✅ Keep <code>proprietary-files.txt</code> in sync with extracted blobs.</li>
+        <li>✅ Store the extraction tree in git — makes regressions easy to trace.</li>
+        <li>✅ Match bitness: <code>lib/</code> = 32-bit ARM, <code>lib64/</code> = 64-bit aarch64.</li>
+        <li>✅ Re-extract after every firmware update — blobs change.</li>
+        <li>✅ Never use someone else's extracted blobs on your device — could break IMEI or security.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> a well-organized device tree can be built entirely from <code>extract-files.sh</code> + <code>proprietary-files.txt</code>. Maintainers usually ship those two scripts and no binary blobs — the blobs are extracted from the device at build time. If you are new to device trees, start with <a href="https://wiki.lineageos.org/devices" target="_blank" rel="noopener">LineageOS device wiki</a> to find one matching your model.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="extract-payload-bin-android-ota-firmware.html">Extract payload.bin from Android OTA Firmware</a></li>
+      <li><a href="extract-ofp-ops-firmware-files.html">Extract .ofp / .ops Firmware</a></li>
+      <li><a href="../android-generic/convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw</a></li>
+      <li><a href="../android-generic/check-file-system-system-img-windows.html">Check &amp; Repair system.img</a></li>
+      <li><a href="../android-generic/disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB</a></li>
+      <li><a href="../../android.html#firmware-extracting">Firmware Extracting category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/makefile.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

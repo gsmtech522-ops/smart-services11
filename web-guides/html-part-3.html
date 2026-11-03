@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۳: ٹیکسٹ فارمیٹنگ (Text Formatting)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.8;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #1e3a8a;
+        }
+        pre {
+            background: #e2e8f0;
+            padding: 12px;
+            border-radius: 6px;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #0f172a;
+            font-family: monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            text-align: right;
+        }
+        th {
+            background: #eff6ff;
+        }
+        .interactive-editor-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1e293b;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .editor-toolbar {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .editor-toolbar .actions button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .editor-toolbar .actions button.run-btn {
+            background: #10b981;
+        }
+        .code-input-area {
+            width: 100%;
+            height: 300px;
+            background: #1e293b;
+            color: #f8fafc;
+            border: none;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+        }
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #cbd5e1;
+            padding: 10px;
+        }
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #334155;
+        }
+        .preview-iframe {
+            width: 100%;
+            height: 250px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <h1>سبق ۳: ٹیکسٹ فارمیٹنگ (Text Formatting)</h1>
+    <p>جیسے MS Word میں bold، italic، underline — HTML میں بھی متن کو مختلف انداز دینے کے tags ہیں۔ Strong، em، b، i، u، mark، small، del، sub، sup — سب۔ Semantic (strong، em) اور presentational (b، i) کا فرق — accessibility کے لیے اہم۔</p>
+
+    <h3>1. Bold — Strong بمقابلہ b</h3>
+    <ul>
+        <li><strong>&lt;strong&gt;:</strong> اہم — semantic (screen reader زور دیتا)۔</li>
+        <li><strong>&lt;b&gt;:</strong> صرف موٹا — کوئی معنی نہیں۔</li>
+        <li>✅ ترجیح: <code dir="ltr" style="unicode-bidi:isolate">&lt;strong&gt;</code>۔</li>
+    </ul>
+
+    <h3>2. Italic — Em بمقابلہ i</h3>
+    <ul>
+        <li><strong>&lt;em&gt;:</strong> emphasis — زور۔</li>
+        <li><strong>&lt;i&gt;:</strong> صرف ترچھا — اصطلاحات، غیر ملکی الفاظ۔</li>
+        <li>✅ ترجیح: <code dir="ltr" style="unicode-bidi:isolate">&lt;em&gt;</code>۔</li>
+    </ul>
+
+    <h3>3. مزید فارمیٹنگ Tags</h3>
+    <ul>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;u&gt;</code> — underline۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;mark&gt;</code> — highlight (پیلا)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;small&gt;</code> — چھوٹا (footer، copyright)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;del&gt;</code> — cross-out (پرانی قیمت)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;ins&gt;</code> — نیا شامل (نیچے لکیر)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;sub&gt;</code> — subscript (H₂O)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;sup&gt;</code> — superscript (x²)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;code&gt;</code> — code text۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;pre&gt;</code> — preformatted (spacing محفوظ)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;blockquote&gt;</code> — quote۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;q&gt;</code> — inline quote۔</li>
+    </ul>
+
+    <h3>4. کوڈ کی مکمل مثال</h3>
+    <div class="interactive-editor-box">
+        <div class="editor-toolbar">
+            <span>HTML — formatting.html</span>
+            <div class="actions">
+                <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+            </div>
+        </div>
+        <textarea class="code-input-area" dir="ltr" spellcheck="false" style="direction:ltr;text-align:left;unicode-bidi:isolate"><!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ٹیکسٹ فارمیٹنگ</title>
+</head>
+<body>
+    <h1>متن کو خوبصورت بنانا</h1>
+
+    <p>یہ ایک <strong>نہایت اہم</strong> پیغام ہے۔</p>
+
+    <p>کسی خاص لفظ پر <em>زور دینے</em> کے لیے استعمال کریں۔</p>
+
+    <p>پروڈکٹ کی قیمت <del>Rs. 2000</del> کے بجائے اب <mark>Rs. 1500</mark> ہے۔</p>
+
+    <p>یہ <u>انڈر لائن</u> متن ہے۔</p>
+
+    <p>پانی کا فارمولا: H<sub>2</sub>O</p>
+    <p>مربع: x<sup>2</sup></p>
+
+    <p>یہ <small>چھوٹا متن</small> ہے — footer کے لیے۔</p>
+
+    <p>JavaScript میں <code>console.log()</code> استعمال ہوتا ہے۔</p>
+
+    <blockquote>
+        "علم حاصل کرو، چاہے چین جانا پڑے۔"
+    </blockquote>
+
+    <p><q>سیکھنا کبھی نہیں رکتا</q> — یہ اقتباس ہے۔</p>
+
+    <pre>
+function greet() {
+    console.log("سلام");
+    return true;
+}
+    </pre>
+
+    <small>© 2024 میرا پروجیکٹ</small>
+</body>
+</html></textarea>
+        <div class="preview-container">
+            <div class="preview-title">براؤزر میں رزلٹ:</div>
+            <iframe class="preview-iframe"></iframe>
+        </div>
+    </div>
+
+    <p><strong>▶ اس کوڈ کی وضاحت — قدم بہ قدم:</strong></p>
+    <ul>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;strong&gt;</code> — متن کو اہم بتاتا ہے۔ براؤزر اسے موٹا دکھاتا ہے اور screen reader زور دے کر پڑھتا ہے۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;em&gt;</code> — کسی لفظ پر زور دینے کے لیے؛ ظاہری شکل میں ترچھا ہوتا ہے۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;del&gt;</code> — اور <code dir="ltr" style="unicode-bidi:isolate">&lt;mark&gt;</code> — del پر لکیر کٹ جاتی ہے (پرانی قیمت) اور mark متن کو پیلے رنگ سے نمایاں کرتا ہے (نئی قیمت)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;u&gt;</code> — متن کے نیچے لکیر۔ احتیاط: لنک بھی انڈر لائن ہوتے ہیں، اس لیے عام متن پر کم استعمال کریں تاکہ لنک کا دھوکا نہ ہو۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;sub&gt;</code> — اور <code dir="ltr" style="unicode-bidi:isolate">&lt;sup&gt;</code> — sub متن کو نیچے (H₂O) اور sup اوپر (x²) کرتا ہے۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;small&gt;</code> — چھوٹا متن، عموماً footer کی تحریر یا نوٹ کے لیے۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;code&gt;</code> — کوڈ کا ٹکڑا، جو برابر چوڑائی والے فونٹ میں دکھتا ہے۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;blockquote&gt;</code> — اور <code dir="ltr" style="unicode-bidi:isolate">&lt;q&gt;</code> — blockquote لمبا اقتباس الگ بلاک میں دکھاتا ہے، جبکہ q جملے کے اندر چھوٹا اقتباس ہے (براؤزر خود quotation marks لگاتا ہے)۔</li>
+        <li><code dir="ltr" style="unicode-bidi:isolate">&lt;pre&gt;</code> — متن جیسا لکھا ہو ویسا ہی دکھاتا ہے، spaces اور نئی لائنوں سمیت؛ کوڈ کے بلاک کے لیے ضروری ہے۔</li>
+    </ul>
+
+    <h3>5. Semantic بمقابلہ Presentational</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Semantic (بہتر)</th>
+                <th>Presentational</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code dir="ltr" style="unicode-bidi:isolate">&lt;strong&gt;</code></td>
+                <td><code dir="ltr" style="unicode-bidi:isolate">&lt;b&gt;</code></td>
+            </tr>
+            <tr>
+                <td><code dir="ltr" style="unicode-bidi:isolate">&lt;em&gt;</code></td>
+                <td><code dir="ltr" style="unicode-bidi:isolate">&lt;i&gt;</code></td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>کیوں؟</strong> screen reader semantic tags سے زور دیتے — accessibility بہتر۔</p>
+
+    <h3>6. Nesting</h3>
+    <pre dir="ltr" style="text-align:left">
+✅ &lt;p&gt;یہ &lt;strong&gt;&lt;em&gt;بولڈ اور ترچھا&lt;/em&gt;&lt;/strong&gt; ہے۔&lt;/p&gt;
+
+❌ &lt;p&gt;یہ &lt;strong&gt;&lt;em&gt;غلط&lt;/strong&gt;&lt;/em&gt; ہے۔&lt;/p&gt;
+    </pre>
+
+    <h3>اہم باتیں</h3>
+    <ul>
+        <li>✅ <strong>strong/em ترجیح:</strong> accessibility۔</li>
+        <li>✅ <strong>Nesting:</strong> پہلے کھلا، آخر بند۔</li>
+        <li>✅ <strong>mark:</strong> highlight — search results، اہم الفاظ۔</li>
+        <li>✅ <strong>code + pre:</strong> code blocks — دونوں۔</li>
+        <li>✅ <strong>Overuse سے بچیں:</strong> ضرورت پر — ورنہ اثر ختم۔</li>
+    </ul>
+
+    <h3>عمل / مشق (Task)</h3>
+    <ol>
+        <li>ایک paragraph — 3 مختلف formatting۔</li>
+        <li>پروڈکٹ قیمت — del + mark۔</li>
+        <li>Code block — pre + code۔</li>
+        <li>ایک quote — blockquote۔</li>
+    </ol>
+
+    <script>
+        function runCodeFromEditor(btn) {
+            const container = btn.closest('.interactive-editor-box');
+            const code = container.querySelector('.code-input-area').value;
+            const iframe = container.querySelector('.preview-iframe');
+            iframe.srcdoc = code;
+        }
+
+        function copyCodeFromEditor(btn) {
+            const container = btn.closest('.interactive-editor-box');
+            const code = container.querySelector('.code-input-area').value;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('کوڈ کاپی ہو گیا ہے!');
+            });
+        }
+
+        window.onload = function() {
+            document.querySelectorAll('.run-btn').forEach(btn => runCodeFromEditor(btn));
+        };
+    </script>
+</body>
+</html>

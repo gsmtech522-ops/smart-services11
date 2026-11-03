@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۲: CSS Selectors — Class, ID اور ایلیمنٹس</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .description {
+            background-color: #eff6ff;
+            border-right: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #1e40af;
+            margin-bottom: 25px;
+        }
+        h3 {
+            color: #1e40af;
+            margin-top: 30px;
+            border-right: 4px solid #3b82f6;
+            padding-right: 10px;
+        }
+        h4 {
+            color: #334155;
+            margin-top: 20px;
+        }
+        ul, ol {
+            padding-right: 25px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background-color: #f1f5f9;
+            color: #d97706;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            display: inline-block;
+        }
+        /* Editor Box Fixes */
+        .interactive-editor-box {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid #334155;
+            direction: ltr;
+        }
+        .editor-toolbar {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: sans-serif;
+            font-size: 14px;
+            direction: ltr;
+        }
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: #f8fafc;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-left: 5px;
+            transition: background 0.2s;
+        }
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+        }
+        .editor-toolbar .actions button.run-btn:hover {
+            background: #15803d;
+        }
+        .code-input-area {
+            width: 100%;
+            height: 220px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+            outline: none;
+            line-height: 1.5;
+            tab-size: 4;
+        }
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+            direction: rtl;
+        }
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 5px;
+            font-family: sans-serif;
+        }
+        .preview-iframe {
+            width: 100%;
+            height: 180px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #ffffff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+    <div class="container">
+        <h1>سبق ۲: CSS Selectors — Class, ID اور ایلیمنٹس</h1>
+        <div class="description">CSS میں Selectors کا کام یہ طے کرنا ہے کہ کون سے HTML ایلیمنٹ پر کون سا ڈیزائن یا اسٹائل لاگو ہوگا۔ اگر آپ پیج کے تمام پیراگراف کا رنگ بدلنا چاہتے ہیں، یا صرف کسی ایک بٹن کا سائز بڑھانا چاہتے ہیں، تو اس کے لیے درست Selector کا انتخاب ضروری ہے۔</div>
+        <div class="lesson-body">
+            
+        <h3>بنیادی CSS Selectors</h3>
+        <ol type="A">
+            <li><strong>Element Selector (ٹیگ کا نام):</strong> یہ براہِ راست HTML ٹیگ کے نام سے کام کرتا ہے اور پیج پر موجود ان تمام ٹیگز کا ڈیزائن ایک ساتھ بدل دیتا ہے۔<br>مثال: <code>p { color: blue; }</code> (پیج کے تمام پیراگراف کا رنگ نیلا ہو جائے گا)</li>
+            <li><strong>Class Selector (کلاس، ڈاٹ <code>.</code> کے ساتھ):</strong> جب آپ کو کسی ایک یا ایک سے زیادہ مخصوص ایلیمنٹس کا ڈیزائن باقی ایلیمنٹس سے الگ کرنا ہو تو <code>class</code> کا استعمال کیا جاتا ہے۔ HTML میں <code>class="name"</code> لکھا جاتا ہے اور CSS میں اس کے نام کے آگے ڈاٹ (<code>.</code>) لگایا جاتا ہے۔<br>مثال: <code>.card { background-color: white; }</code></li>
+            <li><strong>ID Selector (آئی ڈی، ہیش <code>#</code> کے ساتھ):</strong> <code>id</code> کسی پیج میں صرف ایک ہی ایلیمنٹ کو دی جاتی ہے (یہ کسی ایک ایلیمنٹ کی منفرد شناخت ہوتی ہے)۔ CSS میں اس کے نام کے آگے ہیش (<code>#</code>) کا نشان لگایا جاتا ہے۔<br>مثال: <code>#main-header { font-size: 24px; }</code></li>
+        </ol>
+
+        <h3>کوڈ کی مثال</h3>
+        <h4>index.html</h4>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>HTML کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSS Selectors کی مثال</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 id="main-title">ویب ڈیولپمنٹ ٹیوٹوریل</h1>
+    <p>یہ ایک عام پیراگراف ہے جس پر Element Selector لاگو ہوگا۔</p>
+    <div class="card">
+        <h2>پہلا کارڈ</h2>
+        <p class="highlight">یہ اہم معلومات ہے جسے ہائی لائٹ کیا گیا ہے۔</p>
+    </div>
+    <div class="card">
+        <h2>دوسرا کارڈ</h2>
+        <p>عام متن</p>
+    </div>
+</body>
+</html>
+            </textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h4>style.css</h4>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>CSS کوڈ ایڈیٹر</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area">
+h2 {
+    color: #2c3e50;
+}
+.card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+.highlight {
+    color: #e74c3c;
+    font-weight: bold;
+}
+#main-title {
+    text-align: center;
+    color: #27ae60;
+}
+            </textarea>
+            <div class="preview-container">
+                <div class="preview-title">براؤزر میں رزلٹ:</div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <ul>
+            <li><strong>کلاس بنام آئی ڈی (Class vs ID):</strong> ایک ہی کلاس کا نام آپ پیج کے متعدد HTML ایلیمنٹس کو دے سکتے ہیں، لیکن ایک ID نام پورے پیج میں صرف ایک ہی ایلیمنٹ کے لیے استعمال ہونا چاہیے۔</li>
+            <li><strong>نام کا انتخاب:</strong> کلاس یا ID کا نام دیتے وقت چھوٹے حروف (small letters) استعمال کریں اور الفاظ کے درمیان ڈیش (<code>-</code>) لگائیں، جیسے <code>.main-btn</code> یا <code>#site-logo</code>۔</li>
+        </ul>
+        
+        </div>
+    </div>
+
+    <script>
+        function runCodeFromEditor(btn) {
+            const box = btn.closest('.interactive-editor-box');
+            const code = box.querySelector('.code-input-area').value;
+            const iframe = box.querySelector('.preview-iframe');
+            iframe.srcdoc = code;
+        }
+
+        function copyCodeFromEditor(btn) {
+            const box = btn.closest('.interactive-editor-box');
+            const code = box.querySelector('.code-input-area').value;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied! ✅';
+                setTimeout(() => btn.innerText = originalText, 2000);
+            });
+        }
+
+        // Auto-run all code editors on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.interactive-editor-box').forEach(box => {
+                const code = box.querySelector('.code-input-area').value;
+                const iframe = box.querySelector('.preview-iframe');
+                if (iframe && code) {
+                    iframe.srcdoc = code;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

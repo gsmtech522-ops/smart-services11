@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where to Find MTK Database Files (BPLGU &amp; MDDB) | Tech Learn</title>
+<meta name="description" content="Find and extract MediaTek BPLGU and MDDB modem database files from stock firmware or pull them from a live phone via ADB.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Where to Find MTK Database Files (BPLGU &amp; MDDB)</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Reference Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek devices needing SN Writer / Maui META</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>If you use <strong>Transsion AfterSales Tool</strong>, <strong>SN Writer</strong>, or <strong>MauiMETA</strong> for network repair, MTK database files are mandatory. Without them, the tool throws "Database File Missing" or "Failed to Parse Radio Parameter."</p>
+
+  <p>The two types are:</p>
+  <ul>
+    <li><strong>BPLGUInfoCustomAppSrcP…</strong> — modem database for 2G/3G/4G radio configurations</li>
+    <li><strong>MDDB.META…</strong> or <strong>APDB…</strong> — newer LTE/5G processor architecture database</li>
+  </ul>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Method 1 — Extract from official stock firmware</h3>
+
+      <p><strong>Scenario A — Standard scatter firmware:</strong></p>
+      <ol>
+        <li>Open the extracted firmware folder.</li>
+        <li>Look for <strong>database</strong> or <strong>DB</strong> sub-folder.</li>
+        <li>If none, look alongside <code>boot.img</code> and <code>system.img</code>.</li>
+        <li>Scan for files starting with <strong>BPLGUInfo…</strong> or <strong>MDDB…</strong> and copy them to your desktop.</li>
+      </ol>
+
+      <p><strong>Scenario B — Compressed firmware (Oppo/Realme .ofp, Xiaomi .tgz):</strong></p>
+      <ol>
+        <li>Download a firmware extraction tool matching the brand (Oppo OFP Extractor, Payload.bin Dumper).</li>
+        <li>Extract the container until raw images are visible.</li>
+        <li>Locate the integrated MDDB / BPLGU files in the extracted directory.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>2. Method 2 — Pull from a live Android device via ADB</h3>
+      <p>If you have a working phone of the same model, pull the database files directly. Android keeps a local copy so the modem can load them during boot.</p>
+
+      <p><strong>Step 1 — Enable USB Debugging and authorize PC.</strong></p>
+
+      <p><strong>Step 2 — Locate the files:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb shell "find /vendor/etc/mddb/ /system/etc/mddb/ /vendor/nvram/ -name '*BPLGU*' -o -name '*MDDB*'"</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Pull the files:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># For newer devices
+adb pull /vendor/etc/mddb/ C:\Users\Public\Desktop\
+
+# For older MTK directories
+adb pull /system/etc/firmware/ C:\Users\Public\Desktop\</code></pre>
+      </div>
+
+      <p>You now have authentic factory database files on your desktop, ready for SN Writer or META.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="restore-imei-sn-write-tool.html">Restore IMEI via SN Write Tool</a></li>
+      <li><a href="restore-imei-maui-meta.html">Restore via Maui META</a></li>
+      <li><a href="backup-nvram-nvdata-imei.html">Backup NVRAM / IMEI</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

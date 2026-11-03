@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Stick Figure Meme Video Generator</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        h1 { color: #58a6ff; text-shadow: 0 0 10px #58a6ff; font-size: 22px; text-align: center; margin: 10px 0; }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .controls {
+            background: #161b22;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 390px;
+            border: 1px solid #30363d;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+        .controls::-webkit-scrollbar { width: 8px; }
+        .controls::-webkit-scrollbar-track { background: #0d1117; }
+        .controls::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        
+        .controls h3 { 
+            margin: 0 0 10px 0; 
+            color: #58a6ff; 
+            border-bottom: 1px solid #30363d; 
+            padding-bottom: 5px; 
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .controls label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #8b949e;
+            font-size: 11px;
+        }
+        .controls input[type="text"], .controls input[type="file"], .controls select, .controls input[type="number"] {
+            width: 100%;
+            padding: 6px 8px;
+            margin-bottom: 8px;
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+        .controls input[type="text"]:focus, .controls input[type="number"]:focus, .controls select:focus {
+            border-color: #58a6ff;
+        }
+        .row { display: flex; gap: 5px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+        .row input[type="color"] { width: 34px; height: 30px; padding: 0; border: 1px solid #30363d; cursor: pointer; background: none; border-radius: 4px; }
+        .row input[type="number"] { width: 58px; margin-bottom: 0; }
+        .row select { margin-bottom: 0; flex: 1; }
+        .row label { margin-bottom: 0; font-size: 10px; white-space: nowrap; color: #8b949e; }
+        
+        .controls button {
+            width: 100%;
+            padding: 10px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .controls button:hover { background-color: #2ea043; }
+        .controls button:disabled { background-color: #555; cursor: not-allowed; }
+        .controls button.recording { background-color: #da3633; animation: pulse 1s infinite; }
+        .controls button.secondary { background-color: #21262d; border: 1px solid #30363d; font-size: 12px; padding: 8px; }
+        .controls button.secondary:hover { background-color: #30363d; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .canvas-container {
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 15px;
+            height: fit-content;
+        }
+        canvas {
+            border-radius: 5px;
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #30363d;
+        }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #ffcc00;
+            text-align: center;
+            min-height: 18px;
+            font-size: 12px;
+        }
+        .note {
+            font-size: 10px;
+            color: #8b949e;
+            margin-top: -5px;
+            margin-bottom: 8px;
+        }
+        .section-divider {
+            border-top: 1px dashed #30363d;
+            margin: 10px 0;
+        }
+        .gradient-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            background: #0d1117;
+            padding: 6px 8px;
+            border-radius: 5px;
+            border: 1px solid #30363d;
+        }
+        .gradient-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #58a6ff;
+        }
+        .gradient-toggle label {
+            margin: 0;
+            cursor: pointer;
+            color: #c9d1d9;
+            font-size: 11px;
+        }
+        .btn-group { display: flex; gap: 5px; }
+        .btn-group button { flex: 1; }
+        
+        @media (max-width: 850px) {
+            .canvas-container { position: relative; top: 0; }
+            .controls { width: 100%; max-width: 400px; }
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <h1>🎨 Ultimate اسٹک فگر میم ویڈیو جنریٹر</h1>
+
+    <div class="container">
+        <!-- کنٹرولز -->
+        <div class="controls">
+            
+            <!-- ٹیکسٹ -->
+            <h3>📝 ٹیکسٹ کنٹرولز</h3>
+            <label>اوپر کا ٹائٹل:</label>
+            <input type="text" id="titleText" value="ARRAY  LIST">
+            
+            <div class="row">
+                <div style="flex:1">
+                    <label>بائیں باکس کا ٹائٹل:</label>
+                    <input type="text" id="leftBoxTitle" value="ARRAY">
+                </div>
+                <div style="flex:1">
+                    <label>بائیں باکس کی ویلیو:</label>
+                    <input type="text" id="leftBoxValue" value="[10, 20, 30]">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div style="flex:1">
+                    <label>دائیں باکس کا ٹائٹل:</label>
+                    <input type="text" id="rightBoxTitle" value="LIST">
+                </div>
+                <div style="flex:1">
+                    <label>دائیں باکس کی ویلیو:</label>
+                    <input type="text" id="rightBoxValue" value="[10, 20, 30]">
+                </div>
+            </div>
+
+            <label>نیچے کا ٹیکسٹ:</label>
+            <input type="text" id="bottomText" value="TOH AYA KYA SAMAJH TOR TON ALIKUND REGORE">
+
+            <div class="section-divider"></div>
+
+            <!-- باکسز کی پوزیشن -->
+            <h3>📦 باکسز کی پوزیشن اور سائز</h3>
+            <label>بائیں باکس (X, Y):</label>
+            <div class="row">
+                <input type="number" id="leftBoxX" value="50" min="0" max="600">
+                <input type="number" id="leftBoxY" value="250" min="0" max="700">
+                <label>سائز (W, H):</label>
+                <input type="number" id="boxWidth" value="160" min="80" max="300">
+                <input type="number" id="boxHeight" value="70" min="50" max="200">
+            </div>
+            <label>دائیں باکس (X, Y):</label>
+            <div class="row">
+                <input type="number" id="rightBoxX" value="390" min="0" max="600">
+                <input type="number" id="rightBoxY" value="250" min="0" max="700">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- اسٹک فگر -->
+            <h3>🕺 اسٹک فگر</h3>
+            <label>پوزیشن (Pose):</label>
+            <select id="pose">
+                <option value="standing">🧍 کھڑا (Standing)</option>
+                <option value="armsUp">🙌 ہاتھ اٹھائے (Arms Up)</option>
+                <option value="sitting">🪑 بیٹھا (Sitting)</option>
+                <option value="running">🏃 دوڑتا ہوا (Running)</option>
+                <option value="thinking">🤔 سوچتا ہوا (Thinking)</option>
+                <option value="dancing">💃 ڈانس کرتا ہوا (Dancing)</option>
+            </select>
+
+            <label>تاثر (Expression):</label>
+            <select id="expression">
+                <option value="happy">😊 خوش (Happy)</option>
+                <option value="sad">😢 اداس (Sad)</option>
+                <option value="surprised">😲 حیران (Surprised)</option>
+                <option value="angry">😠 غصے والا (Angry)</option>
+                <option value="wink">😉 آنکھ مارنا (Wink)</option>
+            </select>
+
+            <label>سائز, X, Y, رنگ:</label>
+            <div class="row">
+                <input type="number" id="stickSize" value="1" min="0.5" max="2" step="0.1" title="سائز">
+                <input type="number" id="stickX" value="300" min="0" max="600" title="X">
+                <input type="number" id="stickY" value="420" min="0" max="700" title="Y">
+                <input type="color" id="stickColor" value="#000000" title="اسٹک فگر کا رنگ">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- بیک گراؤنڈ -->
+            <h3>🖼️ بیک گراؤنڈ</h3>
+            <label>کینوس کا بیک گراؤنڈ رنگ:</label>
+            <div class="row">
+                <input type="color" id="bgColor" value="#ffffff">
+                <label>بیک گراؤنڈ گریڈینٹ استعمال کریں:</label>
+                <input type="checkbox" id="useBgGradient" style="width:16px;height:16px;accent-color:#58a6ff;">
+                <input type="color" id="bgColor2" value="#e0e0e0">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- ٹائٹل گریڈینٹ -->
+            <h3>🌈 ٹائٹل گریڈینٹ</h3>
+            <div class="gradient-toggle">
+                <input type="checkbox" id="useGradient">
+                <label for="useGradient">ٹائٹل کے لیے گریڈینٹ استعمال کریں</label>
+            </div>
+            <label>ٹائٹل کے رنگ اور سائز:</label>
+            <div class="row">
+                <input type="color" id="titleColor1" value="#4da6ff">
+                <input type="color" id="titleColor2" value="#a64dff">
+                <input type="number" id="titleSize" value="40" min="20" max="70" title="سائز">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- نیچے والا ٹیکسٹ -->
+            <h3>📄 نیچے والا ٹیکسٹ</h3>
+            <div class="gradient-toggle">
+                <input type="checkbox" id="useBottomGradient">
+                <label for="useBottomGradient">نیچے والے ٹیکسٹ کے لیے گریڈینٹ</label>
+            </div>
+            <label>رنگ, آؤٹ لائن رنگ, سائز:</label>
+            <div class="row">
+                <input type="color" id="bottomColor1" value="#000000">
+                <input type="color" id="bottomColor2" value="#ff0000">
+                <input type="color" id="bottomOutlineColor" value="#ffffff">
+                <input type="number" id="bottomSize" value="28" min="15" max="50" title="سائز">
+                <input type="number" id="outlineWidth" value="4" min="0" max="10" title="آؤٹ لائن موٹائی">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- باکسز کے رنگ -->
+            <h3>🎨 باکسز کے رنگ</h3>
+            <div class="gradient-toggle">
+                <input type="checkbox" id="useBoxGradient">
+                <label for="useBoxGradient">باکسز کے بیک گراؤنڈ میں گریڈینٹ</label>
+            </div>
+            <label>باکس ٹیکسٹ رنگ:</label>
+            <div class="row">
+                <input type="color" id="boxColor" value="#4da6ff">
+                <input type="number" id="boxTextSize" value="16" min="10" max="30" title="ٹیکسٹ سائز">
+            </div>
+            <label>باکس بیک گراؤنڈ رنگ (گریڈینٹ کے لیے دو رنگ):</label>
+            <div class="row">
+                <input type="color" id="boxBgColor1" value="#ffffff">
+                <input type="color" id="boxBgColor2" value="#f0f0f0">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- فونٹ -->
+            <h3>🖋️ فونٹ</h3>
+            <select id="fontFamily">
+                <option value="Arial">Arial</option>
+                <option value="'Courier New', monospace">Courier New</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Impact">Impact</option>
+                <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                <option value="Georgia">Georgia</option>
+                <option value="'Trebuchet MS'">Trebuchet MS</option>
+            </select>
+
+            <div class="section-divider"></div>
+
+            <!-- آڈیو -->
+            <h3>🔊 آڈیو</h3>
+            <label>پس منظر کی آواز (MP3):</label>
+            <input type="file" id="audioUpload" accept="audio/mp3, audio/wav, audio/mpeg">
+            <label>والیوم: <span id="volumeValue">1.0</span></label>
+            <input type="range" id="audioVolume" min="0" max="1" step="0.1" value="1" style="width:100%; margin-bottom:10px;">
+
+            <div class="section-divider"></div>
+
+            <!-- ریکارڈنگ بٹن -->
+            <button id="recordBtn">🔴 ریکارڈنگ شروع کریں</button>
+            <div class="btn-group">
+                <button class="secondary" id="saveBtn">💾 سیٹنگز محفوظ کریں</button>
+                <button class="secondary" id="loadBtn">📂 سیٹنگز لوڈ کریں</button>
+            </div>
+            <button class="secondary" id="resetBtn">🔄 ری سیٹ کریں</button>
+            
+            <div id="status"></div>
+        </div>
+
+        <!-- کینوس -->
+        <div class="canvas-container">
+            <canvas id="memeCanvas" width="600" height="700"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('memeCanvas');
+        const ctx = canvas.getContext('2d');
+        const recordBtn = document.getElementById('recordBtn');
+        const statusDiv = document.getElementById('status');
+        const audioUpload = document.getElementById('audioUpload');
+        const audioVolume = document.getElementById('audioVolume');
+        const volumeValue = document.getElementById('volumeValue');
+
+        let animationId;
+        let startTime = Date.now();
+        let isRecording = false;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let audioContext, audioSource, audioDestination, audioElement;
+
+        // تمام ان پٹس
+        const inputIds = [
+            'titleText', 'leftBoxTitle', 'leftBoxValue', 'rightBoxTitle', 'rightBoxValue', 'bottomText',
+            'leftBoxX', 'leftBoxY', 'rightBoxX', 'rightBoxY', 'boxWidth', 'boxHeight',
+            'pose', 'expression', 'stickSize', 'stickX', 'stickY', 'stickColor',
+            'bgColor', 'useBgGradient', 'bgColor2',
+            'useGradient', 'titleColor1', 'titleColor2', 'titleSize',
+            'useBottomGradient', 'bottomColor1', 'bottomColor2', 'bottomOutlineColor', 'bottomSize', 'outlineWidth',
+            'useBoxGradient', 'boxColor', 'boxTextSize', 'boxBgColor1', 'boxBgColor2',
+            'fontFamily'
+        ];
+
+        const inputs = {};
+        inputIds.forEach(id => { inputs[id] = document.getElementById(id); });
+
+        // آڈیو والیوم
+        audioVolume.addEventListener('input', () => {
+            volumeValue.textContent = audioVolume.value;
+            if (audioElement) audioElement.volume = parseFloat(audioVolume.value);
+        });
+
+        // گریڈینٹ ٹیکسٹ ڈرائنگ
+        function drawGradientText(text, x, y, font, color1, color2, useGradient, textAlign = 'center') {
+            ctx.font = font;
+            ctx.textAlign = textAlign;
+            const metrics = ctx.measureText(text);
+            const textWidth = metrics.width;
+
+            if (useGradient) {
+                const gradient = ctx.createLinearGradient(x - textWidth / 2, 0, x + textWidth / 2, 0);
+                gradient.addColorStop(0, color1);
+                gradient.addColorStop(1, color2);
+                ctx.fillStyle = gradient;
+            } else {
+                ctx.fillStyle = color1;
+            }
+            ctx.shadowColor = color1;
+            ctx.shadowBlur = 10;
+            ctx.fillText(text, x, y);
+            ctx.shadowBlur = 0;
+        }
+
+        // مین ڈرائنگ فنکشن
+        function drawMeme() {
+            const elapsed = (Date.now() - startTime) / 1000;
+
+            // بیک گراؤنڈ
+            const bgColor = inputs.bgColor.value;
+            if (inputs.useBgGradient.checked) {
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, bgColor);
+                gradient.addColorStop(1, inputs.bgColor2.value);
+                ctx.fillStyle = gradient;
+            } else {
+                ctx.fillStyle = bgColor;
+            }
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // اہم ویلیوز
+            const titleColor1 = inputs.titleColor1.value;
+            const titleColor2 = inputs.titleColor2.value;
+            const titleSize = parseInt(inputs.titleSize.value);
+            const bottomColor1 = inputs.bottomColor1.value;
+            const bottomColor2 = inputs.bottomColor2.value;
+            const bottomOutline = inputs.bottomOutlineColor.value;
+            const bottomSize = parseInt(inputs.bottomSize.value);
+            const outlineWidth = parseInt(inputs.outlineWidth.value);
+            const boxColor = inputs.boxColor.value;
+            const boxBgColor1 = inputs.boxBgColor1.value;
+            const boxBgColor2 = inputs.boxBgColor2.value;
+            const boxTextSize = parseInt(inputs.boxTextSize.value);
+            const font = inputs.fontFamily.value;
+            const expression = inputs.expression.value;
+            const pose = inputs.pose.value;
+            const useGradient = inputs.useGradient.checked;
+            const useBottomGradient = inputs.useBottomGradient.checked;
+            const useBoxGradient = inputs.useBoxGradient.checked;
+            const stickSize = parseFloat(inputs.stickSize.value);
+            const stickX = parseInt(inputs.stickX.value);
+            const stickY = parseInt(inputs.stickY.value);
+            const stickColor = inputs.stickColor.value;
+            const boxWidth = parseInt(inputs.boxWidth.value);
+            const boxHeight = parseInt(inputs.boxHeight.value);
+
+            // ٹائٹل
+            const titleText = inputs.titleText.value;
+            const titleParts = titleText.split(' ');
+            const leftWord = titleParts[0] || '';
+            const rightWord = titleParts[2] || titleParts[1] || '';
+            
+            const leftChars = Math.min(leftWord.length, Math.floor(elapsed * 5));
+            const rightChars = Math.min(rightWord.length, Math.floor(Math.max(0, elapsed - 0.5) * 5));
+
+            if (leftChars > 0) {
+                drawGradientText(
+                    leftWord.substring(0, leftChars),
+                    canvas.width / 2 - 90, 80,
+                    `bold ${titleSize}px ${font}`,
+                    titleColor1, titleColor2, useGradient
+                );
+            }
+            
+            ctx.fillStyle = '#000000';
+            ctx.font = `bold ${titleSize * 0.75}px ${font}`;
+            ctx.textAlign = 'center';
+            if (elapsed > 0.5) ctx.fillText('', canvas.width / 2, 75);
+
+            if (rightChars > 0) {
+                drawGradientText(
+                    rightWord.substring(0, rightChars),
+                    canvas.width / 2 + 90, 80,
+                    `bold ${titleSize}px ${font}`,
+                    titleColor1, titleColor2, useGradient
+                );
+            }
+
+            // باکسز
+            if (elapsed > 1.0) {
+                const offset = Math.max(0, 50 - (elapsed - 1.0) * 100);
+                drawBox(
+                    parseInt(inputs.leftBoxX.value) - offset,
+                    parseInt(inputs.leftBoxY.value),
+                    boxWidth, boxHeight,
+                    inputs.leftBoxTitle.value, inputs.leftBoxValue.value,
+                    boxColor, boxBgColor1, boxBgColor2, useBoxGradient, font, boxTextSize
+                );
+            }
+            if (elapsed > 1.3) {
+                const offset = Math.max(0, 50 - (elapsed - 1.3) * 100);
+                drawBox(
+                    parseInt(inputs.rightBoxX.value) + offset,
+                    parseInt(inputs.rightBoxY.value),
+                    boxWidth, boxHeight,
+                    inputs.rightBoxTitle.value, inputs.rightBoxValue.value,
+                    boxColor, boxBgColor1, boxBgColor2, useBoxGradient, font, boxTextSize
+                );
+            }
+
+            // اسٹک فگر
+            const bounce = Math.sin(elapsed * 5) * 5;
+            drawStickFigure(stickX, stickY + bounce, elapsed, expression, pose, stickSize, stickColor);
+
+            // نیچے کا ٹیکسٹ
+            if (elapsed > 2.0) {
+                const alpha = Math.min(1, (elapsed - 2.0) * 2);
+                ctx.globalAlpha = alpha;
+                
+                ctx.font = `bold ${bottomSize}px ${font}`;
+                ctx.strokeStyle = bottomOutline;
+                ctx.lineWidth = outlineWidth;
+                ctx.textAlign = 'center';
+                
+                wrapGradientText(
+                    inputs.bottomText.value,
+                    canvas.width / 2, 600,
+                    canvas.width - 60,
+                    bottomSize + 7,
+                    bottomColor1, bottomColor2, useBottomGradient
+                );
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        function wrapGradientText(text, x, y, maxWidth, lineHeight, color1, color2, useGradient) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+                
+                if (testWidth > maxWidth && n > 0) {
+                    const trimmed = line.trim();
+                    // آؤٹ لائن
+                    if (parseInt(inputs.outlineWidth.value) > 0) ctx.strokeText(trimmed, x, currentY);
+                    drawGradientText(trimmed, x, currentY, ctx.font, color1, color2, useGradient, 'center');
+                    line = words[n] + ' ';
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            const trimmed = line.trim();
+            if (parseInt(inputs.outlineWidth.value) > 0) ctx.strokeText(trimmed, x, currentY);
+            drawGradientText(trimmed, x, currentY, ctx.font, color1, color2, useGradient, 'center');
+        }
+
+        function drawBox(x, y, w, h, title, value, color, bgColor1, bgColor2, useGradient, font, textSize) {
+            // بیک گراؤنڈ (گریڈینٹ کے ساتھ)
+            if (useGradient) {
+                const gradient = ctx.createLinearGradient(x, y, x + w, y + h);
+                gradient.addColorStop(0, bgColor1);
+                gradient.addColorStop(1, bgColor2);
+                ctx.fillStyle = gradient;
+            } else {
+                ctx.fillStyle = bgColor1;
+            }
+            
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 5;
+            roundRect(ctx, x, y, w, h, 10, true, false);
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+
+            // بارڈر
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            roundRect(ctx, x, y, w, h, 10, false, true);
+
+            ctx.font = `bold ${textSize}px ${font}`;
+            ctx.fillStyle = color;
+            ctx.textAlign = 'left';
+            ctx.fillText(title, x + 15, y + 25);
+
+            ctx.font = `${textSize}px ${font}`;
+            ctx.fillStyle = '#333333';
+            ctx.fillText(value, x + 15, y + 50);
+        }
+
+        function drawStickFigure(cx, cy, elapsed, expression, pose, scale, color) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+            ctx.translate(-cx, -cy);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 4 / scale;
+            ctx.lineCap = 'round';
+
+            // سر
+            ctx.beginPath();
+            ctx.arc(cx, cy - 80, 40, 0, Math.PI * 2);
+            ctx.stroke();
+
+            const blink = Math.sin(elapsed * 3) > 0.9 ? 0.1 : 1;
+            
+            // تاثرات
+            if (expression === 'happy') {
+                ctx.beginPath();
+                ctx.ellipse(cx - 15, cy - 90, 4, 4 * blink, 0, 0, Math.PI * 2);
+                ctx.ellipse(cx + 15, cy - 90, 4, 4 * blink, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx, cy - 75, 20, 0.1 * Math.PI, 0.9 * Math.PI);
+                ctx.stroke();
+            } else if (expression === 'sad') {
+                ctx.beginPath();
+                ctx.ellipse(cx - 15, cy - 88, 4, 4 * blink, 0, 0, Math.PI * 2);
+                ctx.ellipse(cx + 15, cy - 88, 4, 4 * blink, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(cx - 22, cy - 100);
+                ctx.lineTo(cx - 8, cy - 96);
+                ctx.moveTo(cx + 22, cy - 100);
+                ctx.lineTo(cx + 8, cy - 96);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(cx, cy - 60, 15, 1.1 * Math.PI, 1.9 * Math.PI);
+                ctx.stroke();
+            } else if (expression === 'surprised') {
+                ctx.beginPath();
+                ctx.arc(cx - 15, cy - 90, 7, 0, Math.PI * 2);
+                ctx.arc(cx + 15, cy - 90, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx, cy - 65, 10, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (expression === 'angry') {
+                ctx.beginPath();
+                ctx.ellipse(cx - 15, cy - 88, 4, 4 * blink, 0, 0, Math.PI * 2);
+                ctx.ellipse(cx + 15, cy - 88, 4, 4 * blink, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(cx - 25, cy - 100);
+                ctx.lineTo(cx - 8, cy - 95);
+                ctx.moveTo(cx + 25, cy - 100);
+                ctx.lineTo(cx + 8, cy - 95);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx - 15, cy - 65);
+                ctx.lineTo(cx + 15, cy - 65);
+                ctx.stroke();
+            } else if (expression === 'wink') {
+                ctx.beginPath();
+                ctx.ellipse(cx - 15, cy - 90, 4, 4 * blink, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(cx + 8, cy - 90);
+                ctx.lineTo(cx + 22, cy - 90);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(cx, cy - 75, 18, 0.1 * Math.PI, 0.9 * Math.PI);
+                ctx.stroke();
+            }
+
+            // پوزیشنز
+            if (pose === 'standing') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 40);
+                ctx.lineTo(cx, cy + 60);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx - 50, cy + 40);
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx + 50, cy + 40);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx - 40, cy + 150);
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx + 40, cy + 150);
+                ctx.stroke();
+            } else if (pose === 'armsUp') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 40);
+                ctx.lineTo(cx, cy + 60);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx - 45, cy - 70);
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx + 45, cy - 70);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx - 40, cy + 150);
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx + 40, cy + 150);
+                ctx.stroke();
+            } else if (pose === 'sitting') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 40);
+                ctx.lineTo(cx, cy + 30);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx - 40, cy + 30);
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx + 40, cy + 30);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy + 30);
+                ctx.lineTo(cx - 50, cy + 60);
+                ctx.lineTo(cx - 50, cy + 120);
+                ctx.moveTo(cx, cy + 30);
+                ctx.lineTo(cx + 50, cy + 60);
+                ctx.lineTo(cx + 50, cy + 120);
+                ctx.stroke();
+            } else if (pose === 'running') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 40);
+                ctx.lineTo(cx + 10, cy + 50);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx - 50, cy - 30);
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx + 50, cy + 30);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx + 10, cy + 50);
+                ctx.lineTo(cx - 40, cy + 130);
+                ctx.moveTo(cx + 10, cy + 50);
+                ctx.lineTo(cx + 60, cy + 120);
+                ctx.stroke();
+            } else if (pose === 'thinking') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 40);
+                ctx.lineTo(cx, cy + 60);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx - 30, cy - 50);
+                ctx.lineTo(cx - 10, cy - 70);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx + 50, cy + 40);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx - 40, cy + 150);
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx + 40, cy + 150);
+                ctx.stroke();
+            } else if (pose === 'dancing') {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 40);
+                ctx.lineTo(cx, cy + 60);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx - 60, cy - 60);
+                ctx.moveTo(cx, cy - 10);
+                ctx.lineTo(cx + 60, cy + 20);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx - 60, cy + 130);
+                ctx.moveTo(cx, cy + 60);
+                ctx.lineTo(cx + 60, cy + 130);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            if (fill) ctx.fill();
+            if (stroke) ctx.stroke();
+        }
+
+        function animate() {
+            drawMeme();
+            if (isRecording) {
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+
+        async function startRecording() {
+            isRecording = true;
+            startTime = Date.now();
+            recordBtn.innerText = '⏹️ ریکارڈنگ بند کریں اور ڈاؤن لوڈ کریں';
+            recordBtn.classList.add('recording');
+            statusDiv.innerText = 'ریکارڈنگ جاری ہے... اپنی مرضی سے بند کریں۔';
+            
+            animate();
+
+            const canvasStream = canvas.captureStream(30);
+            let combinedStream = canvasStream;
+            
+            if (audioUpload.files.length > 0) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    audioElement = new Audio(URL.createObjectURL(audioUpload.files[0]));
+                    audioElement.loop = true;
+                    audioElement.volume = parseFloat(audioVolume.value);
+                    
+                    audioSource = audioContext.createMediaElementSource(audioElement);
+                    audioDestination = audioContext.createMediaStreamDestination();
+                    audioSource.connect(audioDestination);
+                    audioSource.connect(audioContext.destination);
+                    
+                    await audioElement.play();
+                    const audioTrack = audioDestination.stream.getAudioTracks()[0];
+                    combinedStream.addTrack(audioTrack);
+                } catch (e) {
+                    console.error("آڈیو لوڈ نہیں ہو سکی:", e);
+                }
+            }
+
+            let options = { mimeType: 'video/webm; codecs=vp9,opus' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'video/webm; codecs=vp8,opus' };
+            }
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options = { mimeType: 'video/webm' };
+            }
+
+            mediaRecorder = new MediaRecorder(combinedStream, options);
+            recordedChunks = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ultimate-stick-meme.webm';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                statusDiv.innerText = "✅ ویڈیو کامیابی سے ڈاؤن لوڈ ہو گئی!";
+                recordBtn.innerText = '🔴 ریکارڈنگ شروع کریں';
+                recordBtn.classList.remove('recording');
+                isRecording = false;
+                
+                if (audioElement) {
+                    audioElement.pause();
+                    audioElement.currentTime = 0;
+                }
+                if (audioContext) audioContext.close();
+            };
+
+            mediaRecorder.start();
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                isRecording = false;
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        recordBtn.addEventListener('click', () => {
+            if (!isRecording) startRecording();
+            else stopRecording();
+        });
+
+        // سیٹنگز محفوظ کرنا
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const settings = {};
+            inputIds.forEach(id => {
+                const el = inputs[id];
+                if (el.type === 'checkbox') settings[id] = el.checked;
+                else settings[id] = el.value;
+            });
+            localStorage.setItem('memeSettings', JSON.stringify(settings));
+            statusDiv.innerText = "💾 سیٹنگز محفوظ ہو گئیں!";
+        });
+
+        // سیٹنگز لوڈ کرنا
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            const saved = localStorage.getItem('memeSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                inputIds.forEach(id => {
+                    if (settings[id] !== undefined) {
+                        const el = inputs[id];
+                        if (el.type === 'checkbox') el.checked = settings[id];
+                        else el.value = settings[id];
+                    }
+                });
+                statusDiv.innerText = "📂 سیٹنگز لوڈ ہو گئیں!";
+                startTime = Date.now();
+                drawMeme();
+            } else {
+                statusDiv.innerText = "کوئی محفوظ سیٹنگ نہیں ملی!";
+            }
+        });
+
+        // ری سیٹ
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('کیا آپ واقعی ری سیٹ کرنا چاہتے ہیں؟')) {
+                location.reload();
+            }
+        });
+
+        // ایونٹ لسنرز
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', () => {
+                if (!isRecording) { startTime = Date.now(); drawMeme(); }
+            });
+            input.addEventListener('change', () => {
+                if (!isRecording) { startTime = Date.now(); drawMeme(); }
+            });
+        });
+
+        drawMeme();
+    </script>
+</body>
+</html>

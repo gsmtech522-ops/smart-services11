@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سبق ۱: Python کا تعارف، Setup اور پہلا Program</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #2563eb;
+            --border-color: #e2e8f0;
+            --code-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .category {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #475569;
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent-color);
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 6px;
+        }
+
+        ul, ol {
+            margin-right: 24px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 14px;
+            border-radius: 8px;
+            direction: ltr;
+            text-align: left;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        .interactive-editor-box {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .editor-toolbar {
+            background: #1e293b;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .editor-toolbar .actions button {
+            background: #334155;
+            color: #ffffff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 6px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .editor-toolbar .actions button:hover {
+            background: #475569;
+        }
+
+        .editor-toolbar .actions button.run-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .code-input-area {
+            width: 100%;
+            height: 220px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .code-input-area:focus {
+            outline: none;
+        }
+
+        .preview-container {
+            background: #ffffff;
+            border-top: 2px solid #334155;
+            padding: 10px;
+        }
+
+        .preview-title {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 120px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body>
+
+    <div class="container">
+        <span class="category">Python گائیڈ</span>
+        <h1>سبق ۱: Python کا تعارف، Setup اور پہلا Program</h1>
+        
+        <div class="description">
+            Python دنیا کی سب سے مقبول اور آسان پروگرامنگ زبان ہے۔ ویب ڈویلپمنٹ، Data Science، AI/ML، Automation، scripting — ہر جگہ استعمال۔ سادہ syntax، بڑی community، 400k+ packages — beginner کے لیے بہترین۔ اس سبق میں install، پہلا program، اور بنیادیات۔
+        </div>
+
+        <h3>1. Python کیا ہے؟</h3>
+        <ul>
+            <li><strong>High-level Language:</strong> انسان کے قریب — پڑھنا آسان۔</li>
+            <li><strong>Interpreted:</strong> compile نہیں — line by line چلتی ہے۔</li>
+            <li><strong>Dynamically Typed:</strong> variable کا type خود سمجھ لیتی ہے۔</li>
+            <li><strong>Multi-paradigm:</strong> OOP، functional، procedural — سب۔</li>
+            <li><strong>Cross-platform:</strong> Windows، Mac، Linux — ہر جگہ۔</li>
+            <li><strong>Batteries included:</strong> standard library بہت بڑی۔</li>
+        </ul>
+
+        <h3>2. Python کہاں استعمال؟</h3>
+        <ul>
+            <li><strong>Web Development:</strong> Django، Flask، FastAPI۔</li>
+            <li><strong>Data Science:</strong> Pandas، NumPy، Matplotlib۔</li>
+            <li><strong>AI/Machine Learning:</strong> TensorFlow، PyTorch، scikit-learn۔</li>
+            <li><strong>Automation:</strong> scripts، web scraping، bots۔</li>
+            <li><strong>DevOps:</strong> Ansible، cloud scripts۔</li>
+            <li><strong>Scientific Computing:</strong> research، simulation۔</li>
+            <li><strong>Game Development:</strong> Pygame۔</li>
+            <li><strong>Desktop Apps:</strong> Tkinter، PyQt۔</li>
+        </ul>
+
+        <h3>3. Python کیوں؟</h3>
+        <ul>
+            <li>✅ <strong>آسان:</strong> JavaScript سے سیکھنا آسان — سادہ syntax۔</li>
+            <li>✅ <strong>Community:</strong> بہت بڑی — help آسانی سے ملے گی۔</li>
+            <li>✅ <strong>Jobs:</strong> demand زیادہ — AI کا دور۔</li>
+            <li>✅ <strong>Versatile:</strong> ہر domain میں۔</li>
+            <li>✅ <strong>Packages:</strong> PyPI پر 400k+ libraries۔</li>
+            <li>✅ <strong>Reading:</strong> code پڑھنا آسان — team work۔</li>
+        </ul>
+
+        <h3>4. Setup</h3>
+        <p><strong>قدم 1:</strong> <a href="https://python.org/downloads" target="_blank">python.org</a> سے Python 3.12+ نصب کریں۔</p>
+        <p><strong>قدم 2:</strong> Install کے وقت "Add Python to PATH" ضرور چیک کریں (Windows)۔</p>
+        <p><strong>قدم 3:</strong> Terminal میں چیک کریں:</p>
+        <pre>
+python --version
+pip --version
+        </pre>
+
+        <h3>5. Editor</h3>
+        <ul>
+            <li><strong>VS Code:</strong> best — Python extension کے ساتھ۔</li>
+            <li><strong>PyCharm:</strong> full IDE — بہت features۔</li>
+            <li><strong>Jupyter Notebook:</strong> data science کے لیے۔</li>
+            <li><strong>Thonny:</strong> beginners کے لیے — سادہ۔</li>
+            <li><strong>IDLE:</strong> Python کے ساتھ آتا ہے۔</li>
+        </ul>
+
+        <h3>6. پہلا Program</h3>
+        <p><code>hello.py</code> بنائیں:</p>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>Python — hello.py</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area"># میرا پہلا Python پروگرام
+
+print("سلام دنیا!")
+
+print("میرا نام علی ہے")
+
+# Variables
+name = "علی"
+age = 25
+city = "لاہور"
+
+print(f"نام: {name}")
+print(f"عمر: {age}")
+print(f"شہر: {city}")
+
+# Simple calculation
+a = 10
+b = 20
+print(f"{a} + {b} = {a + b}")
+
+# Multiple values
+print("Python", "ایک", "زبان", "ہے", sep=" | ")</textarea>
+            <div class="preview-container">
+                <div class="preview-title">Terminal میں چلائیں: <code>python hello.py</code></div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>7. Python کا بنیادی ڈھانچہ</h3>
+        <ul>
+            <li><strong>Indentation:</strong> 4 spaces — Python میں لازمی۔</li>
+            <li><strong>Comments:</strong> <code>#</code> single line۔</li>
+            <li><strong>Case-sensitive:</strong> <code>name</code> ≠ <code>Name</code>۔</li>
+            <li><strong>Line = Statement:</strong> سیمیکولن ضروری نہیں۔</li>
+            <li><strong>Strings:</strong> سنگل یا ڈبل quotes — دونوں۔</li>
+        </ul>
+
+        <h3>8. Interactive Shell (REPL)</h3>
+        <pre>
+python
+>>> 2 + 3
+5
+>>> "سلام"
+'سلام'
+>>> exit()
+        </pre>
+
+        <h3>9. Test — اپنی سمجھ</h3>
+        <div class="interactive-editor-box">
+            <div class="editor-toolbar">
+                <span>Python — test.py</span>
+                <div class="actions">
+                    <button onclick="copyCodeFromEditor(this)">Copy 📋</button>
+                    <button class="run-btn" onclick="runCodeFromEditor(this)">Run 🚀</button>
+                </div>
+            </div>
+            <textarea class="code-input-area"># Print — مختلف طریقے
+print("سادہ print")
+print("دو", "الفاظ", sep="-")
+print("بغیر new line کے", end=" ")
+print("یہ اسی لائن میں")
+
+# f-string (formatted string)
+name = "حسن"
+age = 30
+print(f"{name} کی عمر {age} سال ہے")
+
+# Calculation
+print(f"2 + 3 = {2 + 3}")
+print(f"2 ** 10 = {2 ** 10}")
+
+# Multi-line string
+message = '''
+یہ multi-line string ہے
+کئی لائنوں میں
+'''
+print(message)</textarea>
+            <div class="preview-container">
+                <div class="preview-title">Terminal میں چلائیں: <code>python test.py</code></div>
+                <iframe class="preview-iframe"></iframe>
+            </div>
+        </div>
+
+        <h3>اہم باتیں</h3>
+        <ul>
+            <li>✅ <strong>Indentation لازمی:</strong> 4 spaces — Python کی پہچان۔</li>
+            <li>✅ <strong>f-string:</strong> variable کو string میں — <code>f"سلام {name}"</code>۔</li>
+            <li>✅ <strong>print بہترین دوست:</strong> debugging کے لیے۔</li>
+            <li>✅ <strong>VS Code:</strong> extension کے ساتھ — auto-complete، run۔</li>
+            <li>✅ <strong>REPL:</strong> <code>python</code> سے — experiment کریں۔</li>
+        </ul>
+
+        <h3>عمل / مشق (Task)</h3>
+        <ol>
+            <li>Python نصب کریں — version چیک کریں۔</li>
+            <li>VS Code نصب — Python extension۔</li>
+            <li><code>hello.py</code> بنائیں — اپنا تعارف۔</li>
+            <li>f-string سے مختلف 5 prints۔</li>
+            <li>REPL میں 5 calculations۔</li>
+        </ol>
+    </div>
+
+    <script>
+        async function copyCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const codeText = textArea.value;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(codeText);
+                } else {
+                    textArea.select();
+                    document.execCommand('copy');
+                }
+
+                const originalText = buttonElement.innerText;
+                buttonElement.innerText = "Copied! ✅";
+                buttonElement.style.backgroundColor = "#16a34a";
+
+                setTimeout(() => {
+                    buttonElement.innerText = originalText;
+                    buttonElement.style.backgroundColor = "";
+                }, 2000);
+            } catch (err) {
+                console.error('کاپی کرنے میں ناکامی:', err);
+                alert('کپی کرنے میں مسئلہ پیش آیا!');
+            }
+        }
+
+        function runCodeFromEditor(buttonElement) {
+            const editorBox = buttonElement.closest('.interactive-editor-box');
+            const textArea = editorBox.querySelector('.code-input-area');
+            const iframe = editorBox.querySelector('.preview-iframe');
+            
+            const code = textArea.value;
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body { font-family: monospace; padding: 10px; background: #0f172a; color: #38bdf8; font-size: 13px; margin: 0; }
+                        .log { color: #38bdf8; margin-bottom: 4px; border-bottom: 1px solid #1e293b; padding-bottom: 2px; }
+                        .info { color: #94a3b8; font-style: italic; margin-bottom: 6px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="info">> Terminal Output Simulation:</div>
+                    <div id="console-output"></div>
+                    <script>
+                        const output = document.getElementById('console-output');
+                        function appendLog(msg) {
+                            const div = document.createElement('div');
+                            div.className = 'log';
+                            div.textContent = '> ' + msg;
+                            output.appendChild(div);
+                        }
+                        const codeStr = ${JSON.stringify(code)};
+                        const lines = codeStr.split('\n');
+                        lines.forEach(l => {
+                            let trimmed = l.trim();
+                            if(trimmed.startsWith('print(')) {
+                                let content = trimmed.substring(6, trimmed.length - 1);
+                                appendLog(content);
+                            }
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+        }
+    </script>
+</body>
+</html>

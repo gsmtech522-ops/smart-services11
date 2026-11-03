@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enable USB Debugging &amp; OEM Unlocking on Android — Step-by-Step Guide | Tech Learn</title>
+<meta name="description" content="Learn how to enable Developer Options, USB Debugging and OEM Unlocking on any Android phone. Required for ADB, Fastboot, flashing and firmware repair.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+</head>
+<body class="guide-page">
+
+<!-- ==================== HEADER ==================== -->
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<!-- ==================== BREADCRUMB ==================== -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#getting-started">Getting Started</a></li>
+  </ol>
+</nav>
+
+<!-- ==================== GUIDE ==================== -->
+<article>
+  <h1>Enable USB Debugging &amp; OEM Unlocking on Android Phone</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~3 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Android 8 – 15 (Samsung, Xiaomi, Realme, Oppo, Vivo, Infinix, Tecno, Google Pixel)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Before connecting your Android device to a PC for ADB / Fastboot operations, firmware flashing, or driver setup, you must enable <strong>USB Debugging</strong> and <strong>OEM Unlocking</strong> from Developer Options. Without these two settings, ADB will not detect your phone, and Fastboot commands like <code>flashing unlock</code> will be rejected.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Overview — what each setting does</h3>
+      <table>
+        <thead>
+          <tr><th>Setting</th><th>Purpose</th><th>Required for</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Developer Options</strong></td>
+            <td>Hidden menu where advanced settings live</td>
+            <td>Enabling USB Debugging and OEM Unlocking</td>
+          </tr>
+          <tr>
+            <td><strong>USB Debugging</strong></td>
+            <td>Allows ADB commands over USB</td>
+            <td>ADB, sideload, logcat, file transfer, service tools</td>
+          </tr>
+          <tr>
+            <td><strong>OEM Unlocking</strong></td>
+            <td>Allows the bootloader to be unlocked</td>
+            <td>Fastboot unlock, custom recovery, custom ROM</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>Important:</strong> OEM Unlocking may be greyed out on some phones (especially carrier-locked Samsung and Xiaomi devices still inside their waiting period). If it is disabled, wait the required time or check with the manufacturer.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Step-by-step: enable Developer Options</h3>
+      <ol>
+        <li>Open <strong>Settings</strong> on your Android phone.</li>
+        <li>Go to <strong>About Phone</strong>.</li>
+        <li>Locate the <strong>Build Number</strong> entry.
+          <ul>
+            <li><strong>Samsung:</strong> Settings → About phone → Software information → Build number</li>
+            <li><strong>Xiaomi / Redmi / POCO:</strong> Settings → About phone → MIUI / HyperOS version</li>
+            <li><strong>Realme / Oppo:</strong> Settings → About device → Version</li>
+            <li><strong>Vivo:</strong> Settings → System management → About phone → Software version</li>
+            <li><strong>Google Pixel / stock Android:</strong> Settings → About phone → Build number</li>
+          </ul>
+        </li>
+        <li>Tap <strong>Build Number 7 times</strong> in a row.</li>
+        <li>After the first few taps, a countdown appears: <em>"You are now 3 steps away from being a developer"</em>.</li>
+        <li>When you have tapped 7 times, you will see: <em>"You are now a developer!"</em></li>
+      </ol>
+      <figure>
+        <img src="../../images/enable-usb-debugging-android1.jpg" alt="About Phone screen showing Build Number" style="max-width:100%; height:auto; border-radius:8px; margin:1rem 0;">
+        <figcaption>Locate <strong>Build Number</strong> inside About Phone (may be under Software Information).</figcaption>
+      </figure>
+    </li>
+
+    <li>
+      <h3>3. Step-by-step: open Developer Options</h3>
+      <ol>
+        <li>Go back to the main <strong>Settings</strong> menu.</li>
+        <li>Find <strong>Developer Options</strong> — its location differs per brand:
+          <ul>
+            <li><strong>Samsung:</strong> Settings → Developer options (at the bottom)</li>
+            <li><strong>Xiaomi / Redmi / POCO:</strong> Settings → Additional settings → Developer options</li>
+            <li><strong>Realme / Oppo:</strong> Settings → Additional settings → Developer options</li>
+            <li><strong>Vivo:</strong> Settings → System management → Developer options</li>
+            <li><strong>Pixel / stock Android:</strong> Settings → System → Developer options</li>
+          </ul>
+        </li>
+        <li>Open it. You will see a long list of advanced settings.</li>
+      </ol>
+      <figure>
+        <img src="../../images/enable-usb-debugging-android2.jpg" alt="Developer Options menu" style="max-width:100%; height:auto; border-radius:8px; margin:1rem 0;">
+        <figcaption>Open <strong>Developer Options</strong> — usually at the bottom of Settings.</figcaption>
+      </figure>
+    </li>
+
+    <li>
+      <h3>4. Step-by-step: enable USB Debugging and OEM Unlocking</h3>
+      <ol>
+        <li>Inside <strong>Developer Options</strong>, scroll down and toggle <strong>USB Debugging</strong> to ON.</li>
+        <li>Toggle <strong>OEM Unlocking</strong> to ON as well.</li>
+        <li>Read the confirmation dialogs (especially for OEM Unlocking, since unlocking the bootloader wipes all data).</li>
+        <li>Tap <strong>Enable</strong> or <strong>OK</strong> on both dialogs.</li>
+      </ol>
+      <figure>
+        <img src="../../images/enable-usb-debugging-android3.jpg" alt="USB Debugging and OEM Unlocking toggles" style="max-width:100%; height:auto; border-radius:8px; margin:1rem 0;">
+        <figcaption>Toggle on <strong>USB Debugging</strong> and <strong>OEM Unlocking</strong>.</figcaption>
+      </figure>
+      <div class="warning">
+        <p><strong>OEM Unlocking warning:</strong> turning this on allows the bootloader to be unlocked. Unlocking the bootloader <strong>wipes all data</strong> on most phones and may void warranty. Only do this on a device you own and are prepared to reset.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Verify the settings are active</h3>
+      <p>Confirm that USB Debugging is actually working by connecting the phone to a PC:</p>
+      <ol>
+        <li>Connect the phone to the PC via a data USB cable.</li>
+        <li>Open <strong>Device Manager</strong> (<kbd>Win</kbd> + <kbd>X</kbd> → Device Manager).</li>
+        <li>Look under <strong>Universal Serial Bus devices</strong> or <strong>Android Device</strong>. You should see <strong>Android ADB Interface</strong> (or your phone's model name) with no warning icon.</li>
+        <li>Open a terminal in your <code>platform-tools</code> folder and run:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">adb devices</code></pre>
+      </div>
+      <p>The first time, the phone will show a prompt: <strong>"Allow USB debugging?"</strong> — tick <strong>Always allow from this computer</strong> and tap <strong>Allow</strong>.</p>
+      <p>Run the command again. You should see your device listed with the word <strong>device</strong>:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">List of devices attached
+R58M123ABCD     device</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Driver verification &amp; setup</h3>
+      <p>When you connect your phone to the PC, open <strong>Device Manager</strong> (<kbd>Win</kbd> + <kbd>X</kbd> → Device Manager).</p>
+      <p>If you see <strong>Android ADB Interface</strong> (or <strong>Unknown device</strong>) with a <strong>yellow warning triangle</strong> under <em>Other devices</em>, the proper drivers are not installed yet.</p>
+      <figure>
+        <img src="../../images/enable-usb-debugging-android4.jpg" alt="Device Manager showing yellow warning on Android ADB Interface" style="max-width:100%; height:auto; border-radius:8px; margin:1rem 0;">
+        <figcaption>Yellow warning icon = missing or incorrect driver.</figcaption>
+      </figure>
+      <p>To fix this, install the official ADB and Fastboot drivers:</p>
+      <div class="note">
+        <p>👉 <a href="adb-fastboot-setup-windows.html"><strong>How to Setup ADB and Fastboot on Windows PC</strong></a> — complete step-by-step guide with automatic installer and manual Google Platform Tools methods.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OEM Unlocking option is greyed out</td>
+            <td>Carrier-locked phones or Xiaomi waiting period. Wait 7–168 hours depending on brand, or contact the carrier.</td>
+          </tr>
+          <tr>
+            <td>Developer Options not appearing</td>
+            <td>Tap Build Number 7 times again — some brands require extra taps. Check you tapped the right Build Number (not Android version).</td>
+          </tr>
+          <tr>
+            <td>USB Debugging won't stay on</td>
+            <td>Turn off "Verify apps over USB" in Developer Options, or reboot and re-enable.</td>
+          </tr>
+          <tr>
+            <td>"adb: device unauthorized"</td>
+            <td>Unlock the phone and tap <strong>Allow</strong> on the USB debugging prompt. If no prompt appears, run <code>adb kill-server</code> then <code>adb start-server</code>.</td>
+          </tr>
+          <tr>
+            <td>"adb: no devices found"</td>
+            <td>Wrong cable (charge-only), wrong USB port, or missing drivers. Try a different cable and USB 2.0 port.</td>
+          </tr>
+          <tr>
+            <td>Phone does not appear in Device Manager</td>
+            <td>Install Google USB Drivers — see the ADB &amp; Fastboot setup guide linked above.</td>
+          </tr>
+          <tr>
+            <td>Warning icon persists after driver install</td>
+            <td>Uninstall the device in Device Manager, replug, and let Windows reinstall. Or disable driver signature enforcement on Windows 11.</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>8. Safety &amp; legal notes</h3>
+      <ul>
+        <li>✅ USB Debugging and OEM Unlocking are <strong>safe</strong> to enable — they don't change anything by themselves.</li>
+        <li>✅ You can turn them off again at any time from Developer Options.</li>
+        <li>⚠️ <strong>OEM Unlocking + Fastboot unlock</strong> wipes all data. Back up first.</li>
+        <li>⚠️ Unlocking the bootloader voids warranty on most phones and may trigger Knox (Samsung) or SafetyNet/Play Integrity warnings.</li>
+        <li>🚫 Never enable these settings on someone else's phone without permission — it is a legal and privacy violation.</li>
+        <li>🚫 Do not use USB Debugging to bypass another person's lock screen, FRP, or Google account. Illegal in most countries.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>9. What's next?</h3>
+      <p>Once USB Debugging and OEM Unlocking are on, you can:</p>
+      <ul>
+        <li>Install and verify <a href="adb-fastboot-setup-windows.html">ADB &amp; Fastboot on Windows</a></li>
+        <li>Run <code>adb devices</code> and confirm the connection</li>
+        <li>Unlock the bootloader with <code>fastboot flashing unlock</code> (supported devices)</li>
+        <li>Flash stock firmware to unbrick a phone</li>
+        <li>Explore chipset-specific tools: <a href="../../android.html#mediatek">MediaTek</a>, <a href="../../android.html#qualcomm">Qualcomm</a>, <a href="../../android.html#spd">SPD</a></li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>10. Quick reference — commands after enabling</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Confirm ADB sees the phone ----
+adb devices
+
+# ---- Reboot into Fastboot / Bootloader ----
+adb reboot bootloader
+
+# ---- Confirm Fastboot sees the phone ----
+fastboot devices
+
+# ---- Unlock bootloader (supported devices, wipes data) ----
+fastboot flashing unlock
+
+# ---- Return to normal system ----
+fastboot reboot</code></pre>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> bookmark this page and use <kbd>Ctrl</kbd>+<kbd>F</kbd> to search any step. If your brand isn't listed in the Developer Options section above, the setting lives somewhere under <em>Settings → About Phone</em> → tap <strong>Build Number</strong> 7 times. That trick works on every Android phone.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="adb-fastboot-setup-windows.html">How to Setup ADB &amp; Fastboot on Windows PC</a></li>
+      <li><a href="../../android.html#adb-fastboot">ADB &amp; Fastboot category</a></li>
+      <li><a href="../../android.html#driver-installation">Driver installation</a></li>
+      <li><a href="../../android.html#bootloader-rooting">Bootloader &amp; rooting</a></li>
+      <li><a href="../../android.html#firmware-flashing">Firmware flashing</a></li>
+      <li><a href="../../android.html#pattern-unlock">Pattern &amp; screen lock unlock</a></li>
+    </ul>
+  </div>
+</article>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<!-- highlight.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => {
+      button.innerText = "Copy";
+      button.classList.remove("copied");
+    }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+
+</body>
+</html>

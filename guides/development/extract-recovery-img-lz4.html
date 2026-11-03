@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extract recovery.img from recovery.img.lz4 | Tech Learn</title>
+<meta name="description" content="Unpack .lz4 compressed partition images on Windows PC or Android using LZ4 tool or ZArchiver.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">⚡</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#development">Development</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Extract recovery.img from recovery.img.lz4</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Beginner</span></dd>
+    <dt>Time</dt>
+    <dd>~3 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Samsung, Xiaomi and other OEMs using LZ4 compression</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern firmware often ships partition images compressed as <code>.lz4</code> — especially Samsung. To root with Magisk, patch stock recovery, or build a custom TWRP, you must first extract the raw <code>recovery.img</strong> from <code>recovery.img.lz4</code>.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What is an LZ4 file?</h3>
+      <p>LZ4 is a lossless compression algorithm focusing on extremely fast compression/decompression. Android OEMs use it to reduce firmware size without slowing restoration. Standard tools like WinRAR or 7-Zip cannot extract individual <code>.img</code> files without the LZ4 binary.</p>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — Windows (recommended)</h3>
+      <p><strong>Prerequisites:</strong></p>
+      <ul>
+        <li><strong>recovery.img.lz4</strong> file (extracted from AP or firmware zip).</li>
+        <li><strong>LZ4 Binary Tool</strong> for Windows (official release).</li>
+      </ul>
+
+      <p><strong>Step-by-step:</strong></p>
+      <ol>
+        <li>Download &amp; extract the LZ4 tool → you'll see <code>lz4.exe</code>.</li>
+        <li>Copy <code>recovery.img.lz4</code> into the same folder as <code>lz4.exe</code>.</li>
+        <li><strong>Drag-and-drop trick:</strong> click and drag <code>recovery.img.lz4</code> onto the <code>lz4.exe</code> icon and release.</li>
+        <li>A brief CMD window flashes — decompression runs.</li>
+        <li>Within seconds, <strong>recovery.img</strong> appears in the same folder.</li>
+      </ol>
+
+      <p><strong>Alternative — Command line:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">lz4 -d recovery.img.lz4 recovery.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — Android (on-device via ZArchiver)</h3>
+      <ol>
+        <li>Install <strong>ZArchiver</strong> from Play Store.</li>
+        <li>Navigate to the folder containing <code>recovery.img.lz4</code>.</li>
+        <li>Tap the file → pop-up menu.</li>
+        <li>Select <strong>"Extract here"</strong> or <strong>"Extract to .//"</strong>.</li>
+        <li>ZArchiver outputs <code>recovery.img</code> in the same directory.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Next steps</h3>
+      <ul>
+        <li><strong>For Magisk root:</strong> transfer <code>recovery.img</code> to your phone, open Magisk → "Select and Patch a File".</li>
+        <li><strong>For Odin flashing:</strong> re-compress the patched recovery as <code>.tar</code> using 7-Zip so Odin recognizes it.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>5. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Corrupted Archive</strong></td><td>Firmware zip corrupted during download. Re-download via SamFirm, Frija or official source.</td></tr>
+          <tr><td>lz4.exe crashes instantly</td><td>Wrong architecture — download the 64-bit build for modern Windows.</td></tr>
+          <tr><td>Output is 0 bytes</td><td>Source <code>.lz4</code> file is truncated — re-extract from the original firmware zip.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="extract-boot-payload-bin.html">Extract boot.img from payload.bin</a></li>
+      <li><a href="create-flashable-zip.html">Create custom flashable ZIP</a></li>
+      <li><a href="../../android.html#development">Development category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

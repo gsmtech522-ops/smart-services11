@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Mount &amp; Extract ext4 Android Images on Windows | Tech Learn</title>
+<meta name="description" content="Complete guide to mount or extract ext4 Android system.img, userdata.img and vendor.img on Windows using 7-Zip, WSL2, LinuxReader and Pengwin.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Mount &amp; Extract ext4 Android Images on Windows</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Windows 10/11 — system.img, vendor.img, userdata.img, super.img</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Windows cannot natively mount Linux <strong>ext4</strong> filesystems, so Android partition images like <code>system.img</code>, <code>vendor.img</code> and <code>userdata.img</code> cannot be opened with a double-click. Fortunately, several tools let you <strong>read</strong> (and in some cases <strong>write</strong>) ext4 images on Windows. This guide covers all working methods, from the simplest read-only extraction to full read-write mounting.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. First — check if the image is actually ext4</h3>
+      <p>Many Android images are <strong>sparse</strong> (magic <code>3A FF 26 ED</code>), not raw ext4. Windows tools will fail on sparse images. Convert first.</p>
+
+      <p><strong>Check file type in PowerShell:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">$bytes = [System.IO.File]::ReadAllBytes("C:\firmware\system.img")[0..3]
+[System.BitConverter]::ToString($bytes)</code></pre>
+      </div>
+      <ul>
+        <li><code>3A-FF-26-ED</code> → sparse. Convert with <code>simg2img</code> first .[citation:1][citation:4]</li>
+        <li><code>53-EF</code> at offset 1080 → raw ext4. Ready to mount.</li>
+      </ul>
+
+      <p><strong>Convert sparse to raw (WSL or simg2img.exe):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img system.img system_raw.img</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Why convert?</strong> A sparse image is a container format — tools like 7-Zip and LinuxReader cannot parse the ext4 filesystem inside until it is converted to raw .[citation:1]</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Method 1 — 7-Zip (easiest, read-only, no install)</h3>
+      <p>7-Zip has built-in read-only support for ext2/ext3/ext4. It parses the filesystem directly without mounting — perfect for quick file extraction .[citation:3]</p>
+
+      <ol>
+        <li>Install <strong>7-Zip</strong> (latest version).</li>
+        <li>Right-click your <code>system_raw.img</code> → <strong>7-Zip → Open archive</strong>.</li>
+        <li>Browse the filesystem tree inside the image.</li>
+        <li>To extract files: select them → right-click → <strong>Extract to…</strong></li>
+      </ol>
+
+      <div class="warning">
+        <p><strong>Read-only:</strong> 7-Zip cannot write back into the image. If you need to modify files, use WSL2 or Pengwin .[citation:3]</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Method 2 — WSL2 (read-write, recommended)</h3>
+      <p>WSL2 runs a real Linux kernel, so you can mount ext4 images properly and modify them. Best for technicians who need to edit <code>system.img</code> .[citation:8][citation:12]</p>
+
+      <p><strong>Step 1 — Install WSL2 (once):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">wsl --install -d Ubuntu</code></pre>
+      </div>
+      <p>Reboot, complete Ubuntu setup.</p>
+
+      <p><strong>Step 2 — Copy image into WSL home:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cp /mnt/c/firmware/system_raw.img ~/system_raw.img</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Important:</strong> do not loop-mount directly from <code>/mnt/c/</code>. Copy the image to the WSL filesystem first — mounting over the Windows bridge is unreliable .[citation:8]</p>
+      </div>
+
+      <p><strong>Step 3 — Mount and edit:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo mkdir -p /mnt/system
+sudo mount -o loop,rw ~/system_raw.img /mnt/system
+ls /mnt/system</code></pre>
+      </div>
+
+      <p><strong>Step 4 — Modify files, then unmount:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo cp ~/MyApp.apk /mnt/system/system/app/MyApp/
+sudo umount /mnt/system
+sudo e2fsck -f -y ~/system_raw.img</code></pre>
+      </div>
+
+      <p><strong>Step 5 — Access from Windows (read-only through WSL):</strong></p>
+      <p>Open File Explorer and navigate to:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">\\wsl$\Ubuntu\mnt\system</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Method 3 — LinuxReader (read-only, GUI)</h3>
+      <p>DiskInternals LinuxReader is a free Windows app that reads ext2/ext3/ext4 images without installing a filesystem driver .[citation:6][citation:11]</p>
+
+      <ol>
+        <li>Download and install <strong>LinuxReader</strong> from diskinternals.com.</li>
+        <li>Launch the app.</li>
+        <li>Click <strong>Drives → Mount Image</strong>.</li>
+        <li>Browse to your <code>system_raw.img</code> → Open.</li>
+        <li>Browse the filesystem tree.</li>
+        <li>To extract a file: right-click → <strong>Save</strong> → choose destination.</li>
+      </ol>
+
+      <div class="note">
+        <p><strong>LinuxReader also opens sparse images directly?</strong> No — convert with <code>simg2img</code> first. LinuxReader only handles raw ext4 .[citation:11]</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Method 4 — Pengwin (native drive letter, read-write)</h3>
+      <p>Pengwin is a Rust-based ext4 driver that mounts images as a real Windows drive letter using WinFsp. It is read-only by default, and read-write with the <code>--rw</code> flag .[citation:7]</p>
+
+      <p><strong>Step 1 — Install WinFsp:</strong></p>
+      <p>Download and run the WinFsp installer (Core component is enough).</p>
+
+      <p><strong>Step 2 — Download <code>pengwin.exe</code>:</strong></p>
+      <p>Place it anywhere on your PATH.</p>
+
+      <p><strong>Step 3 — Mount the image:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">pengwin mount C:\firmware\system_raw.img Z:</code></pre>
+      </div>
+      <p>The image appears as drive <code>Z:</code> in File Explorer.</p>
+
+      <p><strong>Step 4 — Read-write mode (optional):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">pengwin mount --rw C:\firmware\system_raw.img Z:</code></pre>
+      </div>
+
+      <p><strong>Step 5 — Unmount when done:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">pengwin unmount Z:</code></pre>
+      </div>
+
+      <div class="note">
+        <p><strong>Use case:</strong> Pengwin is ideal when you need a native drive letter but cannot use WSL (e.g. the ext4 partition is on the same physical disk as Windows, which WSL refuses to mount) .[citation:7]</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Quick comparison</h3>
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>Read</th><th>Write</th><th>Drive letter</th><th>Setup</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>7-Zip</strong></td><td>✅</td><td>❌</td><td>❌ (archive view)</td><td>None</td></tr>
+          <tr><td><strong>WSL2</strong></td><td>✅</td><td>✅</td><td>Via <code>\\wsl$</code></td><td>WSL install</td></tr>
+          <tr><td><strong>LinuxReader</strong></td><td>✅</td><td>❌</td><td>❌ (GUI only)</td><td>None</td></tr>
+          <tr><td><strong>Pengwin</strong></td><td>✅</td><td>✅</td><td>✅ (real drive)</td><td>WinFsp + exe</td></tr>
+          <tr><td><strong>Ext2Fsd</strong></td><td>✅</td><td>✅</td><td>✅</td><td>Kernel driver (risky)</td></tr>
+        </tbody>
+      </table>
+      <div class="warning">
+        <p><strong>Ext2Fsd warning:</strong> it installs a kernel driver and has caused data corruption on ext4 volumes. Avoid it unless you accept the risk .[citation:6]</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Handling super.img (dynamic partitions)</h3>
+      <p>On Android 10+, <code>system.img</code> and <code>vendor.img</code> may be inside <code>super.img</code> as logical partitions. You cannot mount <code>super.img</code> directly as ext4.</p>
+
+      <ol>
+        <li>Convert sparse super to raw:</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img super.img super_raw.img</code></pre>
+      </div>
+      <ol start="2">
+        <li>Extract logical partitions with <code>lpunpack</code> (WSL):</li>
+      </ol>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">lpunpack super_raw.img ./output/</code></pre>
+      </div>
+      <ol start="3">
+        <li>You now have <code>system.img</code>, <code>vendor.img</code>, <code>product.img</code> as separate raw ext4 images.</li>
+        <li>Mount each with the methods above.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>7-Zip says "Cannot open file as archive"</td><td>Image is sparse. Convert with <code>simg2img</code> first .[citation:1]</td></tr>
+          <tr><td>WSL mount fails "wrong fs type"</td><td>Image is sparse or EROFS. Convert to raw ext4.</td></tr>
+          <tr><td>WSL mount fails "already mounted"</td><td>Another WSL instance has it open. Run <code>wsl --shutdown</code> and retry.</td></tr>
+          <tr><td>LinuxReader shows nothing</td><td>Image is sparse or not ext4. Convert first.</td></tr>
+          <tr><td>Pengwin mount fails "dirty journal"</td><td>Filesystem was not cleanly unmounted. Use <code>--rw</code> to replay the journal .[citation:7]</td></tr>
+          <tr><td>WSL cannot mount a partition on the same disk as Windows</td><td>WSL refuses. Use Pengwin instead .[citation:7]</td></tr>
+          <tr><td>Files vanish after unmount</td><td>You may have mounted read-only (<code>ro</code>). Use <code>-o loop,rw</code>.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Convert sparse to raw ----
+simg2img system.img system_raw.img
+
+# ---- 7-Zip (read-only) ----
+# Right-click system_raw.img → 7-Zip → Open archive
+
+# ---- WSL2 (read-write) ----
+cp /mnt/c/firmware/system_raw.img ~/system_raw.img
+sudo mkdir -p /mnt/system
+sudo mount -o loop,rw ~/system_raw.img /mnt/system
+# edit files...
+sudo umount /mnt/system
+sudo e2fsck -f -y ~/system_raw.img
+# Access from Windows: \\wsl$\Ubuntu\mnt\system
+
+# ---- LinuxReader (read-only) ----
+# Drives → Mount Image → select system_raw.img
+
+# ---- Pengwin (read-write, drive letter) ----
+pengwin mount C:\firmware\system_raw.img Z:
+pengwin mount --rw C:\firmware\system_raw.img Z:
+pengwin unmount Z:
+
+# ---- Extract logical partitions from super.img ----
+simg2img super.img super_raw.img
+lpunpack super_raw.img ./output/
+
+# ---- Shut down WSL if mount is stuck ----
+wsl --shutdown</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Always check if the image is sparse before mounting.</li>
+        <li>✅ Convert to raw ext4 with <code>simg2img</code> first .[citation:1]</li>
+        <li>✅ Use <strong>7-Zip</strong> for quick read-only extraction — no install needed.</li>
+        <li>✅ Use <strong>WSL2</strong> for read-write modifications .[citation:8]</li>
+        <li>✅ Copy images into WSL home directory before mounting — do not mount from <code>/mnt/c/</code>.</li>
+        <li>✅ Run <code>e2fsck</code> after every modification.</li>
+        <li>✅ Use <strong>Pengwin</strong> if you need a real drive letter or cannot use WSL .[citation:7]</li>
+        <li>✅ Avoid <strong>Ext2Fsd</strong> — it has corrupted ext4 volumes.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if you only need to pull a few files (e.g. an APK or config from <code>system.img</code>), 7-Zip is the fastest path. If you need to modify <code>system.img</code> and flash it back, use WSL2 — it is the most reliable read-write method on Windows.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw with simg2img</a></li>
+      <li><a href="check-file-system-system-img-windows.html">Check &amp; Repair system.img on Windows</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="../firmware-extracting/extract-payload-bin-android-ota-firmware.html">Extract payload.bin from Android OTA</a></li>
+      <li><a href="../firmware-extracting/extract-proprietary-vendor-blobs-android.html">Extract Proprietary Vendor Blobs</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

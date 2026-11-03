@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Android Kitchen? Is It Still Useful for ROM Modification? | Tech Learn</title>
+<meta name="description" content="Honest review of Android Kitchen tools, their history from dsixda to SuperR's Kitchen, and whether they are still useful for editing MediaTek and Unisoc firmware.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>What is Android Kitchen? Is It Still Useful for ROM Modification?</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Explainer / Overview</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">All Levels</span></dd>
+    <dt>Read Time</dt>
+    <dd>~8 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Custom ROM builders, technicians, MediaTek/Unisoc firmware editors</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>An honest review of Android Kitchen tools — their history, evolution, and whether they are still handy for editing MediaTek and Unisoc firmware in 2026.</p>
+
+  <p>If you have ever wanted to customize an Android firmware package — removing heavy carrier bloatware, adding pre-rooted kernels, or modifying system-level apps — you have likely stumbled upon the term <strong>"Android Kitchen"</strong>.</p>
+
+  <p>But what exactly is an Android Kitchen? Is it modern software, or an outdated tool from the past? Most importantly — is it still useful for a professional technician or developer? Let's break down the truth.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What is an Android Kitchen?</h3>
+      <p>In the Android development world, an Android Kitchen is not a single piece of software — it is a <strong>compilation of automated scripts and tools</strong> packaged into one command-line or graphical interface.</p>
+
+      <p>Its primary purpose is to act as a workspace where you "cook" (modify) custom or stock ROMs. Instead of manually running dozens of complex Linux commands to unpack, edit, and repack system files, the Kitchen automates the sequence.</p>
+
+      <p><strong>A typical Android Kitchen allows you to:</strong></p>
+      <ul>
+        <li>Decompress/unpack stock firmware files (<code>system.img</code>, <code>boot.img</code>, <code>.pac</code>, <code>.tar</code> bundles).</li>
+        <li>Deodex system applications for easier modification.</li>
+        <li>Inject root access (Magisk or older SuperSU).</li>
+        <li>Add custom scripts, tweaks, or optimizations.</li>
+        <li>Repack everything back into a flashable ZIP or factory-loadable firmware image.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Is it new or old? (History)</h3>
+      <p>The original concept of Android Kitchen is quite old. It has gone through distinct eras:</p>
+
+      <p><strong>Classical Era (Dsixda's Kitchen)</strong></p>
+      <p>The most famous tool, <em>dsixda's Android Kitchen</em>, was created over a decade ago during Android 2.x–4.x. It was a text-based terminal script running on Ubuntu or Cygwin. Today it is completely dead and obsolete — Android's partition structures have shifted too far.</p>
+
+      <p><strong>Modern Era (SuperR's Kitchen &amp; CRB)</strong></p>
+      <p>The concept evolved. Modern alternatives like <strong>SuperR's Kitchen</strong>, <strong>CRB Android Kitchen</strong>, and <strong>Tickle My Android</strong> were built to handle newer Android versions. They read dynamic partitions, sparse layouts, and modern compression systems.</p>
+    </li>
+
+    <li>
+      <h3>3. Is it still handy? (The honest answer)</h3>
+      <p>Short answer: <strong>it depends on what you are trying to achieve.</strong></p>
+
+      <p><strong>Where it is very handy:</strong></p>
+      <ul>
+        <li><strong>Debloating &amp; customizing:</strong> making a lighter, faster version of an official stock ROM for a MediaTek or Unisoc device by removing heavy system apps. A kitchen makes it fast to unpack, delete bloatware, and rebuild the flashable image.</li>
+        <li><strong>Adding custom tweaks:</strong> easy environment to inject custom boot animations, pre-configured settings, or custom frameworks without rewriting binary code from scratch.</li>
+      </ul>
+
+      <p><strong>Where it falls short (limitations):</strong></p>
+      <ul>
+        <li><strong>Modern security restraints:</strong> modern Android uses extreme security architectures — read-only file layers, EROFS or F2FS filesystems, and strict cryptographic dm-verity checks. Cooking a ROM inside a kitchen can trigger a bootloop or a Red State / Secure Boot error unless you know exactly how to disable those verifications manually.</li>
+        <li><strong>Learning curve:</strong> it is not a one-click magic button. You still need a solid understanding of partition nodes, file permissions, and system mounting parameters to avoid bricking target devices.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>4. Comparison table</h3>
+      <table>
+        <thead>
+          <tr><th>Pros</th><th>Cons</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Automates complex unpacking and repacking steps</td>
+            <td>Original tools are obsolete; modern versions can be paid or complex</td>
+          </tr>
+          <tr>
+            <td>Perfect for building light, custom system modifications</td>
+            <td>Modifying newer security structures requires manual bypasses</td>
+          </tr>
+          <tr>
+            <td>Saves hours compared to raw command-line tools</td>
+            <td>Risk of bootloops if permissions (<code>set_metadata</code>) aren't configured perfectly</td>
+          </tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>5. Where an Android Kitchen fits in a modern workflow</h3>
+      <p>Think of an Android Kitchen as an <strong>assembly-line wrapper</strong> around the individual tools you would otherwise run manually:</p>
+      <table>
+        <thead>
+          <tr><th>Manual tool</th><th>What the Kitchen automates</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>simg2img</code> / <code>img2simg</code></td><td>Sparse ↔ raw image conversion</td></tr>
+          <tr><td><code>lpunpack</code> / <code>lpmake</code></td><td>Dynamic partition extraction and rebuild</td></tr>
+          <tr><td><code>fsck.erofs</code> / <code>mkfs.erofs</code></td><td>EROFS extraction and repack</td></tr>
+          <tr><td><code>magiskboot</code></td><td>boot/recovery ramdisk unpack/repack</td></tr>
+          <tr><td><code>avbtool</code></td><td>AVB footer removal and re-signing</td></tr>
+          <tr><td><code>set_metadata</code> in updater-script</td><td>SELinux context application on repack</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <p><strong>Best combination:</strong> use an Android Kitchen for the assembly line, and use individual tools (see related guides) whenever the Kitchen fails on a specific partition or modern filesystem.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Modern Android security you must know before cooking</h3>
+      <p>Before you modify a modern stock ROM, understand these constraints:</p>
+      <ul>
+        <li><strong>Dynamic partitions</strong> — system/vendor/product live inside <code>super.img</code>. Kitchen must support <code>lpunpack</code>/<code>lpmake</code>.</li>
+        <li><strong>EROFS</strong> — read-only compressed filesystem on many Android 11+ devices. Needs <code>fsck.erofs</code>/<code>mkfs.erofs</code>.</li>
+        <li><strong>dm-verity &amp; AVB</strong> — modifying a partition breaks its hash. Must disable verity or re-sign.</li>
+        <li><strong>SELinux contexts</strong> — new files need correct <code>u:object_r:system_file:s0</code> (or device-specific) contexts, or boot will fail.</li>
+        <li><strong>A/B slots</strong> — modified partition must be flashed to both slots or you will bootloop after OTA.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>7. Recommended workflow — Kitchen + manual tools</h3>
+      <ol>
+        <li><strong>Extract firmware</strong> with the Kitchen.</li>
+        <li><strong>Unpack partitions</strong> (Kitchen for common formats; manual <code>simg2img</code>/<code>lpunpack</code> if the Kitchen fails).</li>
+        <li><strong>Modify files</strong> (Kitchen GUI or direct mount).</li>
+        <li><strong>Repack</strong> (Kitchen).</li>
+        <li><strong>Fix metadata</strong> — if boot fails, manually add SELinux contexts and verify vbmeta.</li>
+        <li><strong>Flash and test</strong> with <code>fastboot boot</code> where possible.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>8. Conclusion</h3>
+      <p>While the classical Android Kitchen belongs to the history books of early mobile modding, modern platform kitchens remain a handy asset for dedicated repairers and ROM builders. They bridge the gap between heavy command-line terminal scripts and a streamlined workflow.</p>
+      <p>However, to work safely on modern Android security environments, a kitchen must always be paired with up-to-date knowledge of boot security bypasses — <strong>dm-verity, AVB, SELinux, dynamic partitions, and EROFS</strong>.</p>
+      <p>Have you ever attempted to cook a stock firmware package using an Android Kitchen? Which tool version are you experimenting with? Share your build in the comments section below.</p>
+    </li>
+
+    <li>
+      <h3>9. Further reading</h3>
+      <ul>
+        <li><a href="../../android.html#android-generic">Android Generic reference guides</a></li>
+        <li><a href="../../android.html#firmware-extracting">Firmware extraction tools</a></li>
+        <li><a href="unpack-repack-android-boot-recovery-img.html">Unpack &amp; Repack boot.img / recovery.img</a></li>
+        <li><a href="unpack-super-img-dynamic-partitions.html">Unpack &amp; Repack super.img</a></li>
+        <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB</a></li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> Kitchen tools evolve slowly — a tool that works for Android 12 may fail on Android 14 EROFS images. Always keep a fallback set of raw tools (<code>simg2img</code>, <code>lpunpack</code>, <code>fsck.erofs</code>, <code>magiskboot</code>, <code>avbtool</code>) available so you are never blocked.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="unpack-repack-android-boot-recovery-img.html">Unpack &amp; Repack boot.img / recovery.img</a></li>
+      <li><a href="unpack-super-img-dynamic-partitions.html">Unpack &amp; Repack super.img (Dynamic Partitions)</a></li>
+      <li><a href="unpack-erofs-system-images-android.html">Unpack EROFS System Images</a></li>
+      <li><a href="unpack-signed-boot-recovery-system-img.html">Unpack Signed boot/recovery/system Images</a></li>
+      <li><a href="verify-contents-vbmeta-image-avb.html">Verify vbmeta Image Contents &amp; AVB</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

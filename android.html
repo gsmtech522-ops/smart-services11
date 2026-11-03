@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Android Tutorials – ADB, MediaTek, Qualcomm, SPD, Flashing &amp; Repair | Tech Learn</title>
+<meta name="description" content="Android repair tutorials: ADB &amp; Fastboot, MediaTek, Qualcomm, SPD, firmware flashing, pattern unlock, IMEI repair, network fix and troubleshooting.">
+<link rel="stylesheet" href="styles/style.css">
+<link rel="stylesheet" href="styles/guide.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<!--
+  HOW TO ADD A GUIDE
+  1. Copy a file from guides/ and edit it.
+  2. Find the topic below and turn it into a link:
+     <li><a href="guides/your-file.html">Topic name</a> <span class="tag">Beginner</span></li>
+  3. To add a new topic, copy any <li> line inside the right category.
+  Topics without a link are planned guides (shown in grey).
+  Add open to a <details> tag to make that category start expanded.
+-->
+
+<!-- ==================== HEADER ==================== -->
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🤖</span>
+    <h1>Android</h1>
+    <p>Complete Android repair hub — general guides plus chipset-specific tools for ADB, Fastboot, MediaTek, Qualcomm and SPD.</p>
+  </div>
+  <nav class="header-info">
+    <a href="index.html">← Mobile Technique</a>
+    <span class="badge">Android 8 – 15</span>
+  </nav>
+</header>
+
+<!-- ==================== BREADCRUMB ==================== -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html">Mobile Technique</a></li>
+    <li>Android</li>
+  </ol>
+</nav>
+
+<!-- ==================== GUIDES ==================== -->
+<article>
+  <p>Tap a category to open its guides. Grey items are planned.</p>
+
+  <!-- ==================== 1. GETTING STARTED ==================== -->
+  <details class="level-group" id="getting-started" open>
+    <summary>Getting Started</summary>
+    <ul class="guide-index">
+      <li class="planned">Identify your Android phone model and chipset</li>
+      <li class="planned">Check Android version, build number and security patch</li>
+      <li class="planned">Before you flash: backup data and IMEI</li>
+      <li class="planned">Safely prepare your PC for Android repair</li>
+      <li class="planned">Enable Developer Options and USB debugging</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 2. ADB & FASTBOOT ==================== -->
+  <details class="level-group" id="adb-fastboot">
+    <summary>⚡ ADB &amp; Fastboot</summary>
+    <ul class="guide-index">
+      <li><a href="guides/adb-fastboot/adb-fastboot-setup-windows.html">How to Setup ADB & Fastboot on Windows PC</a>
+      <li><a href="guides/adb-fastboot/enable-usb-debugging-oem-unlocking.html">Enable USB Debugging & OEM Unlocking on Android Phone</a>
+      <li><a href="guides/adb-fastboot/adb-fastboot-commands-cheatsheet.html">The Ultimate ADB and Fastboot Commands Cheat Sheet</a>
+      <li><a href="guides/adb-fastboot/adb-fastboot-errors-troubleshooting.html">ADB & Fastboot Errors Troubleshooting Guide</a>
+      <li><a href="guides/adb-fastboot/backup-android-firmware-adb-fastboot.html">How to Backup Android Firmware Using ADB & Fastboot</a>
+      <li><a href="guides/adb-fastboot/backup-restore-apk-data-adb.html">Backup & Restore APK + App Data Using ADB</a>
+       <li><a href="guides/adb-fastboot/boot-into-recovery-adb-command.html">Boot into Recovery Mode Using ADB Command</a>
+       <li><a href="guides/adb-fastboot/boot-recovery-from-fastboot.html">Boot into Recovery from Fastboot Mode</a>
+       <li><a href="guides/adb-fastboot/capture-logcat-kernel-logs-adb.html">Capture Logcat & Kernel Logs via ADB</a>
+       <li><a href="guides/adb-fastboot/change-resolution-dpi-adb.html">Change Display Resolution & DPI via ADB</a>
+        <li><a href="guides/adb-fastboot/debloat-android-adb.html">Debloat Android & Remove System Apps via ADB (No Root)</a>
+       <li><a href="guides/adb-fastboot/extract-hidden-fastboot-commands.html">Discover & Extract Hidden Fastboot Commands</a>
+       <li><a href="guides/adb-fastboot/fastbootd-vs-standard-fastboot.html">Fastbootd Mode vs Standard Fastboot Mode</a>
+       <li><a href="guides/adb-fastboot/find-app-package-name-uid-adb.html">Find Installed App Package Name & UID via ADB</a>
+       <li><a href="guides/adb-fastboot/fix-dm-verity-vbmeta.html">Fix DM-Verity & Boot Verification Errors via VBMeta</a>
+       <li><a href="guides/adb-fastboot/flash-stock-firmware-adb-fastboot.html">How to Flash Stock Firmware Using ADB & Fastboot</a>
+       <li><a href="guides/adb-fastboot/screenshot-screen-record-adb.html">Take Screenshots & Screen Recordings via ADB</a>
+       <li><a href="guides/adb-fastboot/sideload-zip-via-adb.html">How to Sideload Flashable Zip Files Using ADB</a>
+       <li class="planned">Install platform-tools on Windows, Linux and macOS</li>
+      <li class="planned">Fix "adb device not recognized"</li>
+      <li class="planned">Push and pull files with ADB</li>
+      <li class="planned">Sideload an OTA update with ADB</li>
+      <li class="planned">Flash boot, recovery and system images with Fastboot</li>
+      <li class="planned">Unlock the bootloader via Fastboot</li>
+      <li class="planned">Danger: fastboot erase and format commands</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 3. MEDIATEK ==================== -->
+  <details class="level-group" id="mediatek">
+    <summary>🟢 MediaTek</summary>
+    <ul class="guide-index">
+      <li><a href="guides/mediatek/install-mtk-vcom-drivers.html">Install MediaTek (MTK) VCOM Drivers on Windows</a>
+      <li><a href="guides/mediatek/backup-mtk-master-guide.html">How to Backup MediaTek Firmware — Master Guide</a>
+       <li><a href="guides/mediatek/backup-mtk-miracle-box.html">Backup MediaTek Firmware via Miracle Box / Miracle Thunder</a>
+       <li><a href="guides/mediatek/backup-mtk-mtkclient.html">Backup MediaTek Firmware via MTKClient</a>
+       <li><a href="guides/mediatek/backup-mtk-sp-flash-tool.html">Backup MediaTek Firmware via SP Flash Tool (Readback)</a>
+      <li><a href="guides/mediatek/install-mtk-vcom-drivers.html">Install MediaTek (MTK) VCOM Drivers on Windows</a>
+      <li><a href="guides/mediatek/backup-nvram-nvdata-imei.html">Backup & Restore MTK NVRAM, NVDATA and IMEI</a>
+      <li><a href="guides/mediatek/bypass-mediatek-sla-daa.html">Bypass MediaTek SLA/DAA Security Protection</a>
+      <li><a href="guides/mediatek/create-scatter-file-wwr-mtk-tool.html">Create a Scatter File Using WWR MTK Tool</a>
+     <li><a href="guides/mediatek/erase-frp-pin-mtkclient.html">Erase FRP and PIN/Pattern Locks using MTKClient</a>
+     <li><a href="guides/mediatek/flash-mtk-master-guide.html">How to Flash MediaTek Firmware — Master Guide</a>
+      <li><a href="guides/mediatek/flash-mtk-miracle-box.html">Flash MediaTek Stock Firmware via Miracle Box</a>
+      <li><a href="guides/mediatek/flash-mtk-mtkclient.html">Flash MediaTek Firmware via MTKClient</a>
+      <li><a href="guides/mediatek/flash-mtk-sp-flash-tool.html">Flash MediaTek Stock Firmware via SP Flash Tool</a>
+       <li><a href="guides/mediatek/generate-checksum-ini.html">Generate checksum.ini for MTK Scatter ROM</a>
+       <li><a href="guides/mediatek/install-libusb-win32-filter.html">Install LibUSB-win32 Filter Driver</a>
+       <li><a href="guides/mediatek/install-mtk-drivers-pdanet.html">Install MTK USB Drivers Using PdaNet</a>
+      <li><a href="guides/mediatek/mediatek-frp-bypass-spflash.html">Bypass FRP on MediaTek via SP Flash Tool</a>
+      <li><a href="guides/mediatek/mediatek-partition-map-explained.html">MediaTek Partition Map Explained</a>
+      <li><a href="guides/mediatek/miracle-box-overview.html">Miracle Box & Miracle Thunder Overview</a>
+      <li><a href="guides/mediatek/mtk-database-bplgu-mddb.html">Where to Find MTK Database Files (BPLGU & MDDB)</a>
+      <li><a href="guides/mediatek/spflash-tool-overview.html">What is SP Flash Tool? Complete Guide & Bio</a>
+      <li><a href="guides/mediatek/restore-imei-maui-meta.html">Restore Baseband & IMEI via Maui META</a>
+      <li><a href="guides/mediatek/restore-imei-sn-write-tool.html">Restore Null/Invalid IMEI via SN Write Tool</a>
+      <li><a href="guides/mediatek/sp-flash-tool-errors.html">Common SP Flash Tool Errors & Fixes</a>
+      <li><a href="guides/mediatek/wwr-mtk-tool-overview.html">WWR MTK Tool — Complete Overview</a>
+        <li><a href="guides/mediatek/mtkclient-overview-setup.html">What is MTKClient? Overview & Setup Guide</a>
+      <li class="planned">Install MediaTek USB drivers (VCOM, Preloader)</li>
+      <li class="planned">SP Flash Tool: install, configure and use</li>
+      <li class="planned">Read and understand scatter files</li>
+      <li class="planned">BROM mode and Preloader mode explained</li>
+      <li class="planned">Unbrick a dead MediaTek phone</li>
+      <li class="planned">Backup and restore IMEI with SN Writer</li>
+      <li class="planned">Fix "BROM ERROR" messages</li>
+      <li class="planned">Disable DA protection (auth files) safely</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 4. QUALCOMM ==================== -->
+  <details class="level-group" id="qualcomm">
+    <summary>🔵 Qualcomm</summary>
+    <ul class="guide-index">
+      <li><a href="qualcomm.html">Qualcomm — complete guide</a> <span class="tag">All Levels</span></li>
+      <li class="planned">Install Qualcomm USB drivers (QDLoader 9008)</li>
+      <li class="planned">Enter EDL mode (9008) safely</li>
+      <li class="planned">QFIL: flash and unbrick Snapdragon phones</li>
+      <li class="planned">QPST for advanced Qualcomm operations</li>
+      <li class="planned">Firehose loaders (programmer files) explained</li>
+      <li class="planned">Backup and restore IMEI / NVRAM on Qualcomm</li>
+      <li class="planned">Fix baseband "unknown" issues</li>
+      <li class="planned">Unlock bootloader on Qualcomm devices</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 5. SPD (Spreadtrum / Unisoc) ==================== -->
+  <details class="level-group" id="spd">
+    <summary>🟣 SPD (Spreadtrum / Unisoc)</summary>
+    <ul class="guide-index">
+      <li><a href="spd.html">SPD — complete guide</a> <span class="tag">All Levels</span></li>
+      <li class="planned">Install SPD / Unisoc USB drivers</li>
+      <li class="planned">ResearchDownload tool setup</li>
+      <li class="planned">Flash PAC firmware files</li>
+      <li class="planned">Unbrick a dead Spreadtrum phone</li>
+      <li class="planned">Backup and restore IMEI on SPD devices</li>
+      <li class="planned">Fix USB not detecting in ResearchDownload</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 6. ANDROID GENERIC ==================== -->
+  <details class="level-group" id="android-generic">
+    <summary>📱 Android Generic</summary>
+    <ul class="guide-index">
+      <li><a href="guides/android-generic/find-usb-vid-pid.html">How to Find Android USB Vendor ID (VID) & Product ID (PID)</a></li>
+      <li class="planned">Remove pattern / PIN / password (own device only)</li>
+      <li class="planned">Remove FRP after factory reset (own device only)</li>
+      <li class="planned">Fix boot loop without losing data</li>
+      <li class="planned">Safe mode and diagnostic service codes</li>
+      <li class="planned">Factory reset — when and how</li>
+      <li class="planned">Recover data from a locked or dead phone</li>
+      <li class="planned">Fix "no command" and recovery errors</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 7. FIRMWARE FLASHING ==================== -->
+  <details class="level-group" id="firmware-flashing">
+    <summary>💾 Firmware Flashing</summary>
+    <ul class="guide-index">
+      <li class="planned">Where to download safe, official firmware</li>
+      <li class="planned">Check firmware compatibility (region, model, build)</li>
+      <li class="planned">Flash stock firmware with Odin (Samsung)</li>
+      <li class="planned">Flash stock firmware with SP Flash Tool (MediaTek)</li>
+      <li class="planned">Flash stock firmware with QFIL (Qualcomm)</li>
+      <li class="planned">Flash stock firmware with ResearchDownload (SPD)</li>
+      <li class="planned">Update firmware without a PC (OTA / sideload)</li>
+      <li class="planned">Unbrick after a failed flash</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 8. PATTERN / SCREEN LOCK UNLOCK ==================== -->
+  <details class="level-group" id="pattern-unlock">
+    <summary>🔓 Pattern / Screen Lock Unlock</summary>
+    <ul class="guide-index">
+      <li class="planned">Remove pattern lock on your own device (safe methods)</li>
+      <li class="planned">Remove PIN / password without losing data</li>
+      <li class="planned">Use "Find My Device" to unlock safely</li>
+      <li class="planned">Samsung "Find My Mobile" unlock</li>
+      <li class="planned">Xiaomi / Redmi unlock methods (own device)</li>
+      <li class="planned">FRP removal (own device only — legal note)</li>
+      <li class="planned">Google account verification bypass — legal warnings</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 9. DRIVER INSTALLATION ==================== -->
+  <details class="level-group" id="driver-installation">
+    <summary>🖥️ Driver Installation</summary>
+    <ul class="guide-index">
+      <li class="planned">Install Android USB drivers on Windows</li>
+      <li class="planned">Install Google USB Driver for ADB / Fastboot</li>
+      <li class="planned">Install MediaTek VCOM and Preloader drivers</li>
+      <li class="planned">Install Qualcomm QDLoader 9008 driver</li>
+      <li class="planned">Install SPD / Unisoc drivers</li>
+      <li class="planned">Install Samsung USB drivers and Smart Switch</li>
+      <li class="planned">Fix "device not recognized" in Device Manager</li>
+      <li class="planned">Disable driver signature enforcement (if needed)</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 10. IMEI REPAIR ==================== -->
+  <details class="level-group" id="imei-repair">
+    <summary>📡 IMEI Repair</summary>
+    <ul class="guide-index">
+      <li class="planned">Back up your IMEI and NVRAM before flashing</li>
+      <li class="planned">Restore IMEI from your own backup (MediaTek)</li>
+      <li class="planned">Restore IMEI from your own backup (Qualcomm)</li>
+      <li class="planned">Restore IMEI from your own backup (Samsung)</li>
+      <li class="planned">Fix "null IMEI" and "unknown baseband"</li>
+      <li class="planned">Understand IMEI, MEID and IMEI2</li>
+      <li class="planned">Legal note: IMEI changes are illegal in most countries</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 11. NETWORK FIX ==================== -->
+  <details class="level-group" id="network-fix">
+    <summary>📶 Network Fix</summary>
+    <ul class="guide-index">
+      <li class="planned">Fix "no signal" and "no service"</li>
+      <li class="planned">Fix "no SIM detected" errors</li>
+      <li class="planned">APN setup for any carrier</li>
+      <li class="planned">Reset network settings safely</li>
+      <li class="planned">Fix weak Wi-Fi and mobile data</li>
+      <li class="planned">Unlock network / carrier lock (own device only)</li>
+      <li class="planned">Fix "Emergency calls only" message</li>
+      <li class="planned">Band unlocking (advanced, risky)</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 12. BOOTLOADER & ROOTING ==================== -->
+  <details class="level-group" id="bootloader-rooting">
+    <summary>🔐 Bootloader &amp; Rooting</summary>
+    <ul class="guide-index">
+      <li class="planned">Unlock bootloader on supported devices</li>
+      <li class="planned">Install TWRP custom recovery</li>
+      <li class="planned">Root safely with Magisk</li>
+      <li class="planned">Hide root from banking apps</li>
+      <li class="planned">Install a custom ROM safely</li>
+      <li class="planned">Restore stock firmware and unroot</li>
+      <li class="planned">Fix a soft-bricked phone</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 13. FLASHING TOOLS ==================== -->
+  <details class="level-group" id="flashing-tools">
+    <summary>🛠️ Flashing Tools</summary>
+    <ul class="guide-index">
+      <li class="planned">Odin (Samsung) — install and use</li>
+      <li class="planned">SP Flash Tool (MediaTek) — install and use</li>
+      <li class="planned">QFIL and QPST (Qualcomm) — install and use</li>
+      <li class="planned">ResearchDownload (SPD) — install and use</li>
+      <li class="planned">Mi Flash Tool (Xiaomi)</li>
+      <li class="planned">Chimera, UnlockTool and paid service tools overview</li>
+      <li class="planned">Avoid fake, scam and malware tools</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 14. DEAD BOOT & HARDWARE REPAIR ==================== -->
+  <details class="level-group" id="dead-boot-hardware">
+    <summary>⚡ Dead Boot &amp; Hardware Repair</summary>
+    <ul class="guide-index">
+      <li class="planned">Revive a fully dead phone (no power, no display)</li>
+      <li class="planned">Fix boot loops and stuck at logo</li>
+      <li class="planned">Fix charging issues and dead USB ports</li>
+      <li class="planned">Replace a screen (basic repair)</li>
+      <li class="planned">Water damage — first aid and cleanup</li>
+      <li class="planned">Diagnose a short circuit on the board</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 15. BATTERY, CHARGING & POWER ==================== -->
+  <details class="level-group" id="battery-power">
+    <summary>🔋 Battery, Charging &amp; Power</summary>
+    <ul class="guide-index">
+      <li class="planned">Diagnose battery drain</li>
+      <li class="planned">Fix charging problems (fast, slow, none)</li>
+      <li class="planned">Replace a battery safely</li>
+      <li class="planned">Fix power button issues</li>
+      <li class="planned">Check battery health and cycle count</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 16. DATA RECOVERY ==================== -->
+  <details class="level-group" id="data-recovery">
+    <summary>💾 Data Recovery</summary>
+    <ul class="guide-index">
+      <li class="planned">Recover photos, contacts and messages from a dead phone</li>
+      <li class="planned">Recover data before flashing or resetting</li>
+      <li class="planned">Recover deleted files from internal storage</li>
+      <li class="planned">Recover data from an SD card</li>
+      <li class="planned">Use ADB backup and restore</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 17. DIAGNOSTICS & TESTING ==================== -->
+  <details class="level-group" id="diagnostics">
+    <summary>🧪 Diagnostics &amp; Testing</summary>
+    <ul class="guide-index">
+      <li class="planned">Use secret service codes to test hardware</li>
+      <li class="planned">Test touch, camera, sensors and speakers</li>
+      <li class="planned">Read logs with ADB logcat</li>
+      <li class="planned">Diagnose hardware faults before repair</li>
+      <li class="planned">Battery, screen and charging tests</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 18. BRAND-SPECIFIC GUIDES ==================== -->
+  <details class="level-group" id="brand-specific">
+    <summary>🏷️ Brand-Specific Guides</summary>
+    <ul class="guide-index">
+      <li><a href="samsung.html">Samsung — full repair guide</a> <span class="tag">All Levels</span></li>
+      <li class="planned">Xiaomi / Redmi / POCO guides</li>
+      <li class="planned">Realme, Oppo and Vivo guides</li>
+      <li class="planned">Infinix, Tecno and Itel guides</li>
+      <li class="planned">Huawei and Honor guides</li>
+      <li class="planned">Nokia and Motorola guides</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 20. DEVELOPMENT ==================== -->
+  <details class="level-group" id="development">
+    <summary>🛠️ Development & 📦 Firmware Extracting</summary>
+    <ul class="guide-index">
+      <li><a href="guides/development/create-flashable-zip.html">Create a Custom Flashable ZIP for MTK & Unisoc Devices</a></li>
+      <li><a href="guides/development/extract-boot-payload-bin.html">Extract boot.img from payload.bin for Rooting</a></li>
+      <li><a href="guides/development/extract-recovery-img-lz4.html">Extract recovery.img from recovery.img.lz4</a></li>
+      <li class="planned">Install Android Studio on Windows and Linux</li>
+      <li class="planned">Build a custom TWRP recovery</li>
+      <li class="planned">Build a custom ROM from source</li>
+      <li class="planned">Create Magisk modules</li>
+      <li class="planned">Use Termux as a mini Linux environment</li>
+      <li class="planned">Run Python on Android</li>
+    </ul>
+  </details>
+
+  <!-- ==================== 21. LEGAL & SAFETY ==================== -->
+  <details class="level-group" id="legal-safety">
+    <summary>⚖️ Legal &amp; Safety</summary>
+    <ul class="guide-index">
+      <li class="planned">Warranty and repair laws</li>
+      <li class="planned">IMEI change laws in Pakistan, India and worldwide</li>
+      <li class="planned">Unlocking other people's phones is illegal</li>
+      <li class="planned">Safe flashing practices (backup first!)</li>
+      <li class="planned">Recognize scam and malware tools</li>
+      <li class="planned">Data privacy when repairing customer devices</li>
+    </ul>
+  </details>
+
+</article>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash MediaTek Stock Firmware via Miracle Box | Tech Learn</title>
+<meta name="description" content="Step-by-step guide to flash MediaTek stock firmware, scatter files, and unbrick devices using Miracle Box / Miracle Thunder.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">🛠️</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#mediatek">MediaTek</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>Flash MediaTek Stock Firmware via Miracle Box</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>All MediaTek devices supported by Miracle Box</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>When repairing or unbricking MediaTek devices, <strong>Miracle Box</strong> provides a fast GUI to flash stock firmware without command-line setups. Its one-click write feature is a favorite for busy service centers.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Prerequisites</h3>
+      <ul>
+        <li>MediaTek VCOM USB drivers installed.</li>
+        <li>Miracle Box / Miracle Thunder software with dongle or loader.</li>
+        <li>Official stock ROM with valid <code>Android_scatter.txt</code> or <code>.bin</code>.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>2. Step 1 — Open and configure</h3>
+      <ol>
+        <li>Launch Miracle Box / Miracle Thunder as Administrator.</li>
+        <li>Click the <strong>MediaTek (MTK)</strong> tab.</li>
+        <li>Select the <strong>Write</strong> radio button (or <em>Write Flash</em>).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>3. Step 2 — Load scatter &amp; boot platform</h3>
+      <ol>
+        <li>Click the folder icon next to the Scatter File field.</li>
+        <li>Choose your <code>MT6xxx_Android_scatter.txt</code>.</li>
+        <li>The partition layout appears (boot, recovery, system, userdata…).</li>
+        <li>In <strong>Choose Boot</strong>, select the matching platform (e.g. <strong>8th Boot (MT65xx/MT67xx)</strong> or Auto-Detect for Helio).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>4. Step 3 — Trigger &amp; connect</h3>
+      <ol>
+        <li>Click the green <strong>Start</strong> button.</li>
+        <li>Log shows <code>Waiting for USB Port…</code></li>
+        <li>Power off the phone.</li>
+        <li>Hold <kbd>Volume Down</kbd> (or both volume keys).</li>
+        <li>Connect USB.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>5. Step 4 — Complete flashing</h3>
+      <ol>
+        <li>Miracle Box detects the device, connects to Preloader/BROM, and starts writing partitions.</li>
+        <li>A progress bar fills as each partition is written.</li>
+        <li><strong>Do not disconnect!</strong></li>
+        <li>Wait until <code>Write Complete!</code> or <code>Process Done!</code></li>
+        <li>Disconnect, hold Power 10s to boot. First boot 5–10 minutes.</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>6. Troubleshooting</h3>
+
+      <p><strong>Boot loading error / stuck at 0–5%</strong></p>
+      <p>Fix: modern MTK processors require SLA/DAA bypass — run MTK Auth Bypass Tool before clicking Start, or select a higher boot profile.</p>
+
+      <p><strong>USB Port Not Found</strong></p>
+      <p>Fix: reinstall VCOM drivers, check Device Manager, use direct motherboard USB port.</p>
+
+      <p><strong>Stuck on boot logo after flash</strong></p>
+      <p>Fix: enter Stock Recovery (<kbd>Power</kbd>+<kbd>Volume Up</kbd>) → <strong>Wipe Data / Factory Reset</strong>, or use Miracle Box's Format / Reset option.</p>
+    </li>
+
+  </ol>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="flash-mtk-sp-flash-tool.html">Flash via SP Flash Tool</a></li>
+      <li><a href="flash-mtk-mtkclient.html">Flash via MTKClient</a></li>
+      <li><a href="miracle-box-overview.html">Miracle Box overview</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

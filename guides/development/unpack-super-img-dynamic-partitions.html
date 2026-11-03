@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Unpack &amp; Repack super.img Dynamic Partitions | Tech Learn</title>
+<meta name="description" content="Complete guide to unpack and repack Android super.img (dynamic partitions) using lpunpack, lpmake, simg2img and img2simg on Linux/WSL.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Unpack &amp; Repack super.img (Dynamic Partitions)</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Advanced Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~20 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Android 10+ devices with dynamic partitions (Pixel, Xiaomi, OnePlus, Samsung, Realme)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Starting with Android 10, Google introduced <strong>dynamic partitions</strong>. Instead of fixed <code>system</code>, <code>vendor</code>, <code>product</code>, <code>odm</code>, and <code>system_ext</code> partitions, the storage is now organized as a single physical <code>super</code> partition containing multiple <strong>logical partitions</strong>. The sizes of these logical partitions can be adjusted at flash time. This makes Android updates and GSI (Generic System Image) installs much more flexible — but it also makes extraction more complicated. This guide covers the complete <code>super.img</code> unpack/repack workflow.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Understanding super.img</h3>
+      <p><code>super.img</code> contains a metadata header describing the layout of all logical partitions inside:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">super.img (physical partition)
+├── metadata (layout descriptor: slot count, block device size, group definitions)
+├── system (logical partition)
+├── vendor (logical partition)
+├── product (logical partition)
+├── odm (logical partition)
+├── system_ext (logical partition)
+└── (A/B devices have _a and _b copies of each)</code></pre>
+      </div>
+      <p>Because the metadata is not a standard filesystem, you cannot mount <code>super.img</code> directly. You must first <strong>unpack</strong> it into individual partition images.</p>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Linux environment</strong> — Ubuntu 20.04+ or WSL2 (Windows Subsystem for Linux).</li>
+        <li><strong>lpunpack</strong> and <strong>lpmake</strong> — part of the <code>android-sdk-libsparse-utils</code> or AOSP <code>system/extras/</code>.</li>
+        <li><strong>simg2img</strong> and <strong>img2simg</strong> — for sparse ↔ raw conversion.</li>
+        <li>At least <strong>20–30 GB free disk</strong> for a full unpack/repack cycle.</li>
+      </ul>
+
+      <p><strong>Install the tools on Ubuntu / WSL2:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo apt update
+sudo apt install android-sdk-libsparse-utils lpunpack lpmake -y</code></pre>
+      </div>
+      <p>Verify:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">lpunpack --help
+lpmake --help
+simg2img --help</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Check if super.img is sparse or raw</h3>
+      <p>Most stock firmware ships <code>super.img</code> as <strong>sparse</strong> (magic <code>3A FF 26 ED</code>). <code>lpunpack</code> only handles <strong>raw</strong> super images, so conversion is usually required.</p>
+
+      <p><strong>Check the file:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file super.img
+xxd -l 4 super.img</code></pre>
+      </div>
+      <p>If magic is <code>3AFF26ED</code>, it is sparse.</p>
+
+      <p><strong>Convert sparse to raw:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img super.img super_raw.img</code></pre>
+      </div>
+      <div class="note">
+        <p><strong>Disk space:</strong> a 4 GB sparse super expands to 6–8 GB raw. Ensure enough free disk.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Inspect the super image</h3>
+      <p>Before extracting, get partition info:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">lpdump super_raw.img</code></pre>
+      </div>
+      <p>Output shows all logical partitions with their group, size, and slot:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">Slot 0:
+  Metadata version: 10.2
+  Metadata size: 764 bytes
+  Metadata max size: 65536 bytes
+  Slot suffix: _a
+  Group: main, size=4294967296
+  Block device table: size=4294967296, alignment=1048576, alignment_offset=0
+  Partition: system, group=main, size=2147483648
+  Partition: vendor, group=main, size=1073741824
+  Partition: product, group=main, size=1073741824
+Slot 1:
+  ...</code></pre>
+      </div>
+      <p>Note the exact partition names — <code>system_a</code>, <code>vendor_a</code>, etc. — because <code>lpunpack</code> will use these names when extracting.</p>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Extract logical partitions with lpunpack</h3>
+      <p><strong>Extract all partitions:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir -p super_parts
+lpunpack --slot=0 super_raw.img super_parts/</code></pre>
+      </div>
+      <p>Output files:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">super_parts/
+├── system_a.img
+├── vendor_a.img
+├── product_a.img
+├── odm_a.img
+├── system_ext_a.img
+└── ...</code></pre>
+      </div>
+
+      <p><strong>Extract only a specific partition:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">lpunpack --slot=0 -p system super_raw.img super_parts/</code></pre>
+      </div>
+
+      <p><strong>Extract for slot B (A/B devices):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">lpunpack --slot=1 super_raw.img super_parts/</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Modify extracted partitions</h3>
+      <p>Each extracted partition image is a full filesystem image (ext4 or EROFS). To modify contents:</p>
+
+      <p><strong>Convert sparse to raw if needed:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">simg2img super_parts/system_a.img system_a_raw.img</code></pre>
+      </div>
+
+      <p><strong>Mount and edit ext4:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo mkdir -p /mnt/system
+sudo mount -o loop,rw system_a_raw.img /mnt/system
+# edit files
+sudo umount /mnt/system</code></pre>
+      </div>
+
+      <p><strong>Or extract EROFS:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo fsck.erofs --extract=./system_out system_a_raw.img
+# modify files
+mkfs.erofs -zlz4hc system_a_new.img ./system_out</code></pre>
+      </div>
+
+      <p><strong>Convert back to sparse (if needed for flashing):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">img2simg system_a_new.img system_a_sparse.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Step 5 — Repack the new super.img with lpmake</h3>
+      <p>After modifying partitions, rebuild the <code>super.img</code> with <code>lpmake</code>. You must specify:</p>
+      <ul>
+        <li><strong>Device size</strong> — the physical size of the super partition (see <code>lpdump</code> output)</li>
+        <li><strong>Metadata size</strong> — usually 65536 bytes</li>
+        <li><strong>Metadata slots</strong> — 2 (for A/B devices) or 3 (for A/B + snapshot)</li>
+        <li><strong>Group</strong> — usually "main" with full size allocation</li>
+        <li><strong>Partitions</strong> — each partition with its group, size, and image path</li>
+      </ul>
+
+      <p><strong>Basic lpmake example (Pixel 6-style super):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">lpmake --device-size 6442450944 \
+  --metadata-size 65536 \
+  --metadata-slots 2 \
+  --group main:6442450944 \
+  --partition system:readonly:2147483648:main \
+  --partition vendor:readonly:1073741824:main \
+  --partition product:readonly:1073741824:main \
+  --partition odm:readonly:524288000:main \
+  --partition system_ext:readonly:524288000:main \
+  --image system=system_a_new.img \
+  --image vendor=vendor_a.img \
+  --image product=product_a.img \
+  --image odm=odm_a.img \
+  --image system_ext=system_ext_a.img \
+  --sparse \
+  --output super_new.img</code></pre>
+      </div>
+
+      <p><strong>Flags explained:</strong></p>
+      <ul>
+        <li><code>--device-size</code> — the physical partition size (must match your device's actual super partition).</li>
+        <li><code>--metadata-size</code> — 65536 bytes is standard.</li>
+        <li><code>--metadata-slots</code> — 2 for A/B, 3 for A/B + virtual snapshots.</li>
+        <li><code>--group main:size</code> — group name and available size.</li>
+        <li><code>--partition name:readonly:size:group</code> — define each logical partition.</li>
+        <li><code>--image name=path</code> — source image for each partition.</li>
+        <li><code>--sparse</code> — output sparse (for fastboot / SP Flash Tool).</li>
+        <li><code>--output</code> — final <code>super.img</code> path.</li>
+      </ul>
+
+      <div class="warning">
+        <p><strong>Size matching:</strong> if the total sizes exceed <code>--device-size</code>, lpmake fails. If smaller, it still works but wastes space. Match your device's actual super partition size from <code>lpdump</code>.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>8. Step 6 — Verify and flash</h3>
+      <p><strong>Verify the new super.img:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file super_new.img
+lpdump super_new.img</code></pre>
+      </div>
+      <p>Compare the partition list with the original — it should match except for modified sizes.</p>
+
+      <p><strong>Flash with fastboot:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Reboot to fastbootd (userspace fastboot — needed for super flashing)
+adb reboot fastboot
+fastboot devices
+
+# Flash the new super
+fastboot flash super super_new.img
+
+# If A/B device, also flash to slot B
+fastboot flash super_b super_new.img
+
+# Reboot
+fastboot reboot</code></pre>
+      </div>
+      <p><strong>Or flash via SP Flash Tool / Odin</strong> depending on your device — place the super.img in the correct firmware folder and flash normally.</p>
+    </li>
+
+    <li>
+      <h3>9. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>lpunpack: invalid super header</code></td><td>Image is sparse — run <code>simg2img</code> first .</td></tr>
+          <tr><td><code>lpunpack: no partitions extracted</code></td><td>Wrong slot selected. Try <code>--slot=1</code> instead of <code>--slot=0</code> .</td></tr>
+          <tr><td><code>lpmake: total size exceeds device size</code></td><td>Shrink one partition size, or increase <code>--device-size</code>.</td></tr>
+          <tr><td>Fastboot rejects super flash</td><td>You are in standard fastboot, not fastbootd. Use <code>adb reboot fastboot</code> .</td></tr>
+          <tr><td>Device bootloop after flashing</td><td>Missing vbmeta match or wrong slot size. Re-flash original super, then retry.</td></tr>
+          <tr><td>Cannot read partition metadata</td><td>Partition might be corrupted or encrypted. Re-extract from firmware.</td></tr>
+          <tr><td>Super image is bigger than partition</td><td>Flash will fail. Re-run lpmake with a smaller total.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>10. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Install tools ----
+sudo apt install android-sdk-libsparse-utils lpunpack lpmake -y
+
+# ---- Check sparse vs raw ----
+file super.img
+xxd -l 4 super.img
+
+# ---- Convert sparse to raw ----
+simg2img super.img super_raw.img
+
+# ---- Inspect ----
+lpdump super_raw.img
+
+# ---- Extract all partitions (slot A) ----
+mkdir -p super_parts
+lpunpack --slot=0 super_raw.img super_parts/
+
+# ---- Extract only system ----
+lpunpack --slot=0 -p system super_raw.img super_parts/
+
+# ---- Extract slot B ----
+lpunpack --slot=1 super_raw.img super_parts/
+
+# ---- Modify a partition (ext4 example) ----
+simg2img super_parts/system_a.img system_a_raw.img
+sudo mount -o loop,rw system_a_raw.img /mnt/system
+# edit files
+sudo umount /mnt/system
+img2simg system_a_raw.img system_a_sparse.img
+
+# ---- Repack super.img ----
+lpmake --device-size 6442450944 \
+  --metadata-size 65536 \
+  --metadata-slots 2 \
+  --group main:6442450944 \
+  --partition system:readonly:2147483648:main \
+  --partition vendor:readonly:1073741824:main \
+  --partition product:readonly:1073741824:main \
+  --partition odm:readonly:524288000:main \
+  --partition system_ext:readonly:524288000:main \
+  --image system=system_a_sparse.img \
+  --image vendor=vendor_a.img \
+  --image product=product_a.img \
+  --image odm=odm_a.img \
+  --image system_ext=system_ext_a.img \
+  --sparse \
+  --output super_new.img
+
+# ---- Flash via fastbootd ----
+adb reboot fastboot
+fastboot devices
+fastboot flash super super_new.img
+fastboot reboot</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>11. Best practices</h3>
+      <ul>
+        <li>✅ Always work on a <strong>copy</strong> of super.img — never modify the original.</li>
+        <li>✅ Check if the image is sparse before unpacking.</li>
+        <li>✅ Note exact partition sizes from <code>lpdump</code> — mismatches break lpmake.</li>
+        <li>✅ Flash <code>super</code> via <strong>fastbootd</strong>, not standard fastboot .</li>
+        <li>✅ Keep the original super.img for recovery if the modified version fails.</li>
+        <li>✅ Use <code>--sparse</code> output for fastboot; without it, the image can be 2× larger.</li>
+        <li>✅ After A/B flash, flash both slots or the device will bootloop on slot switch.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> if your goal is only to <strong>extract files</strong> (e.g. pull an APK from <code>system</code>), you do not need to repack super. Extract with <code>lpunpack</code>, mount the partition, extract the files. Repacking is only needed if you plan to <strong>flash</strong> the modified super back to the device.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw with simg2img</a></li>
+      <li><a href="unpack-erofs-system-images-android.html">Unpack EROFS System Images</a></li>
+      <li><a href="mount-ext4-android-images-windows.html">Mount &amp; Extract ext4 Android Images</a></li>
+      <li><a href="unpack-signed-boot-recovery-system-img.html">Unpack Signed boot/recovery/system Images (AVB)</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

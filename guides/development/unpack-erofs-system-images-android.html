@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Unpack EROFS System Images on Android | Tech Learn</title>
+<meta name="description" content="Complete guide to extract and repack EROFS system.img from Android 11+ devices using erofs-utils (fsck.erofs, mkfs.erofs) on Linux or WSL.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📱</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#android-generic">Android Generic</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Unpack EROFS System Images on Android</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Advanced</span></dd>
+    <dt>Time</dt>
+    <dd>~15 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Android 11+ devices with EROFS system/vendor partitions (Huawei, Honor, many modern SoCs)</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Starting with Android 11, many manufacturers (especially Huawei/Honor) ship <code>system.img</code> and <code>vendor.img</code> as <strong>EROFS</strong> (Enhanced Read-Only File System) instead of ext4. EROFS is optimized for read-only performance and compression — but it cannot be mounted read-write or extracted with 7-Zip. You need <code>erofs-utils</code> on Linux or WSL to unpack and repack it [citation:1][citation:5].</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. Identify if your image is EROFS</h3>
+      <p>Check the magic bytes with a hex editor or PowerShell:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell">$bytes = [System.IO.File]::ReadAllBytes("C:\firmware\system.img")[1024..1027]
+[System.BitConverter]::ToString($bytes)</code></pre>
+      </div>
+      <p>If the output is <code>E2-E1-F5-E0</code> at offset 1024, the image is EROFS. If it is <code>53-EF</code>, it is ext4 — use the ext4 guide instead.</p>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Linux environment</strong> — Ubuntu 20.04+ (native or WSL2). EROFS tools are not available for native Windows.</li>
+        <li><strong>erofs-utils</strong> package installed.</li>
+        <li>At least <strong>5–10 GB free disk</strong> for the extracted filesystem.</li>
+        <li>The <code>system.img</code> extracted from your firmware package (or from <code>super.img</code> via <code>lpunpack</code>).</li>
+      </ul>
+
+      <p><strong>Install erofs-utils:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo apt update
+sudo apt install erofs-utils -y</code></pre>
+      </div>
+      <p>Verify the tools:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fsck.erofs --version
+mkfs.erofs --version
+dump.erofs --version</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Inspect the EROFS image (optional)</h3>
+      <p>Before extracting, you can analyze the image structure:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">dump.erofs system.img</code></pre>
+      </div>
+      <p>This shows superblock info, compression algorithm, block size, and file count — useful for verifying the image is not corrupted [citation:1][citation:8].</p>
+    </li>
+
+    <li>
+      <h3>4. Step 2 — Extract the EROFS image with fsck.erofs</h3>
+      <p><code>fsck.erofs</code> is the official extraction tool. It verifies integrity and extracts all files [citation:7][citation:12].</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkdir -p extracted_system
+sudo fsck.erofs --extract=./extracted_system system.img</code></pre>
+      </div>
+
+      <p><strong>Options explained:</strong></p>
+      <ul>
+        <li><code>--extract=DIR</code> — extract to the specified directory.</li>
+        <li><code>--no-preserve</code> — skip preserving UID/GID/permissions (useful on WSL where you are not root).</li>
+        <li><code>--overwrite</code> — overwrite existing files in the output directory.</li>
+        <li><code>--no-sbcrc</code> — skip superblock checksum verification (use only if the image fails checksum due to modification).</li>
+      </ul>
+
+      <p><strong>Recommended command for WSL (non-root):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">sudo fsck.erofs --extract=./extracted_system --no-preserve --overwrite system.img</code></pre>
+      </div>
+
+      <div class="note">
+        <p><strong>Note:</strong> <code>fsck.erofs</code> extraction is single-threaded and can be slow on large images. Extended attributes (xattrs) are not extracted by default — add <code>--xattrs</code> if you need SELinux contexts [citation:1][citation:12].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Step 3 — Explore and modify the extracted filesystem</h3>
+      <p>After extraction, you get a directory tree identical to the original <code>/system</code> partition:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">extracted_system/
+├── app/
+├── bin/
+├── etc/
+├── framework/
+├── lib/
+├── lib64/
+├── priv-app/
+├── build.prop
+└── ...</code></pre>
+      </div>
+      <p>You can now add, remove, or modify files directly in this directory.</p>
+    </li>
+
+    <li>
+      <h3>6. Step 4 — Repack the EROFS image with mkfs.erofs</h3>
+      <p>After modifications, rebuild the EROFS image:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkfs.erofs -zlz4hc -Enoinline_data system_new.img ./extracted_system</code></pre>
+      </div>
+
+      <p><strong>Common flags:</strong></p>
+      <ul>
+        <li><code>-z lz4hc</code> — use LZ4 HC compression (most Android devices use this) [citation:4][citation:13].</li>
+        <li><code>-E noinline_data</code> — disable inline data for better compatibility with older kernels.</li>
+        <li><code>--file-contexts=plat_file_contexts</code> — include SELinux file contexts (required if your device uses SELinux and you modified files) [citation:10].</li>
+        <li><code>-T &lt;timestamp&gt;</code> — set a fixed timestamp for reproducible builds.</li>
+      </ul>
+
+      <p><strong>Example with SELinux contexts (recommended for stock ROMs):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">mkfs.erofs -zlz4hc \
+  --file-contexts=./plat_file_contexts \
+  system_new.img ./extracted_system</code></pre>
+      </div>
+      <div class="warning">
+        <p><strong>File contexts:</strong> if you do not include <code>--file-contexts</code>, the repacked image will be missing SELinux labels, and the device may fail to boot or show permission errors. Extract <code>plat_file_contexts</code> from the original firmware or the device's <code>/system/etc/selinux/</code> before repacking [citation:10].</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Step 5 — Verify and flash</h3>
+      <p><strong>Verify the new image:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file system_new.img
+dump.erofs system_new.img</code></pre>
+      </div>
+      <p>Output should confirm: <code>EROFS filesystem</code> with your chosen compression.</p>
+
+      <p><strong>Flash the image:</strong></p>
+      <ul>
+        <li>For devices with <code>super.img</code> (dynamic partitions): repack into <code>super.img</code> with <code>lpmake</code>, then flash via fastboot.</li>
+        <li>For devices with direct <code>system</code> partition: <code>fastboot flash system system_new.img</code>.</li>
+        <li>For SP Flash Tool / Odin: convert to sparse with <code>img2simg</code> if required by the tool.</li>
+      </ul>
+    </li>
+
+    <li>
+      <h3>8. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>fsck.erofs: command not found</code></td><td>Install <code>erofs-utils</code> package. On WSL, run <code>sudo apt install erofs-utils</code>.</td></tr>
+          <tr><td>Extraction fails with "invalid magic"</td><td>Image is not EROFS, or is truncated. Re-extract from the firmware.</td></tr>
+          <tr><td>Extraction fails on WSL with permission errors</td><td>Use <code>--no-preserve</code> to skip UID/GID preservation.</td></tr>
+          <tr><td>Repacked image fails to boot</td><td>Missing <code>--file-contexts</code> (SELinux). Rebuild with the correct contexts file.</td></tr>
+          <tr><td>Repacked image is much larger than original</td><td>Use <code>-zlz4hc</code> with a high level (e.g. <code>-zlz4hc,12</code>), or check that the original used a different compression algorithm.</td></tr>
+          <tr><td>Device bootloop after flashing EROFS image</td><td>dm-verity/AVB is rejecting the modified image. Disable verity/vbmeta first, or re-sign the image if you have OEM keys.</td></tr>
+          <tr><td>Cannot mount EROFS image on Windows</td><td>EROFS is Linux-only. Use WSL2 or a Linux VM.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>9. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Install tools ----
+sudo apt install erofs-utils -y
+
+# ---- Inspect ----
+dump.erofs system.img
+
+# ---- Extract ----
+mkdir -p extracted_system
+sudo fsck.erofs --extract=./extracted_system system.img
+
+# For WSL (non-root):
+sudo fsck.erofs --extract=./extracted_system --no-preserve --overwrite system.img
+
+# With xattrs (SELinux contexts):
+sudo fsck.erofs --extract=./extracted_system --xattrs system.img
+
+# ---- Repack ----
+mkfs.erofs -zlz4hc system_new.img ./extracted_system
+
+# With SELinux file contexts:
+mkfs.erofs -zlz4hc --file-contexts=./plat_file_contexts system_new.img ./extracted_system
+
+# ---- Verify ----
+file system_new.img
+dump.erofs system_new.img
+
+# ---- Flash (fastboot) ----
+fastboot flash system system_new.img
+
+# ---- Convert to sparse (if needed for SP Flash Tool/Odin) ----
+img2simg system_new.img system_sparse.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>10. Best practices</h3>
+      <ul>
+        <li>✅ Always work on a copy of the original image.</li>
+        <li>✅ Use <code>dump.erofs</code> first to confirm the image is valid and check compression type.</li>
+        <li>✅ On WSL, always use <code>--no-preserve</code> to avoid permission errors.</li>
+        <li>✅ Include <code>--file-contexts</code> when repacking stock ROMs — otherwise SELinux will block files at boot.</li>
+        <li>✅ Match the original compression algorithm (<code>lz4hc</code> is most common on Android).</li>
+        <li>✅ Test on a non-critical device first if possible.</li>
+        <li>✅ Back up EFS/NVRAM before flashing any modified system image.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> EROFS is read-only by design — you cannot mount it read-write like ext4. The extract → modify → repack workflow is the only way to change files inside an EROFS <code>system.img</code>. If your device uses <code>super.img</code> (dynamic partitions), first extract <code>system.img</code> with <code>lpunpack</code>, then follow this guide [citation:5][citation:9].</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="mount-ext4-android-images-windows.html">Mount &amp; Extract ext4 Android Images on Windows</a></li>
+      <li><a href="convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw with simg2img</a></li>
+      <li><a href="check-file-system-system-img-windows.html">Check &amp; Repair system.img on Windows</a></li>
+      <li><a href="disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB on Android</a></li>
+      <li><a href="../firmware-extracting/extract-proprietary-vendor-blobs-android.html">Extract Proprietary Vendor Blobs</a></li>
+      <li><a href="../../android.html#android-generic">Android Generic category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Extract payload.bin from Android OTA Firmware | Tech Learn</title>
+<meta name="description" content="Complete guide to extract payload.bin Android OTA firmware using payload-dumper-go and Python payload_dumper. Extract boot, system, vendor, super and all partition images.">
+<link rel="stylesheet" href="../../styles/style.css">
+<link rel="stylesheet" href="../../styles/guide.css">
+<link rel="stylesheet" href="../../styles/code-highlight.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-35KJ2SWW3C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-35KJ2SWW3C');
+</script>
+</head>
+<body class="guide-page">
+
+<header>
+  <div class="site-header">
+    <span class="brand-icon">📦</span>
+    <h1>Tech Learn</h1>
+    <p>Mobile repair tutorials</p>
+  </div>
+  <nav class="header-info">
+    <a href="../../android.html">← Android</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="../../../index.html">Home</a></li>
+    <li><a href="../../index.html">Mobile Technique</a></li>
+    <li><a href="../../android.html">Android</a></li>
+    <li><a href="../../android.html#firmware-extracting">Firmware Extracting</a></li>
+  </ol>
+</nav>
+
+<article>
+  <h1>How to Extract payload.bin from Android OTA Firmware</h1>
+
+  <dl class="guide-meta">
+    <dt>Type</dt>
+    <dd>Step-by-Step Guide</dd>
+    <dt>Level</dt>
+    <dd><span class="tag">Intermediate</span></dd>
+    <dt>Time</dt>
+    <dd>~10 minutes</dd>
+    <dt>Applies to</dt>
+    <dd>Google Pixel, OnePlus, Xiaomi, Realme, Motorola, Asus, and all Android 10+ A/B devices</dd>
+    <dt>Last updated</dt>
+    <dd><time>YYYY-MM-DD</time></dd>
+  </dl>
+
+  <p>Modern Android OTA firmware packages no longer ship loose <code>boot.img</code>, <code>system.img</code> or <code>vendor.img</code> files. Instead, all partitions are packed inside a single <strong>payload.bin</strong> container, which is further stored inside the OTA <code>.zip</code> along with a <code>payload_properties.txt</code> file. Extracting partitions from <code>payload.bin</code> is a mandatory step for rooting with Magisk, custom ROM installation, or firmware analysis.</p>
+
+  <h2>Reference</h2>
+  <ol class="steps">
+
+    <li>
+      <h3>1. What is payload.bin?</h3>
+      <p><code>payload.bin</code> is an <strong>Android OTA payload</strong> — a compressed, chunk-based archive introduced with Android 7 (Pixel) and mandatory since Android 10 for A/B devices. It contains:</p>
+      <ul>
+        <li><strong>Manifest</strong> — a protobuf-encoded index of all partitions and their block ranges</li>
+        <li><strong>Partition images</strong> — <code>boot</code>, <code>system</code>, <code>vendor</code>, <code>product</code>, <code>odm</code>, <code>system_ext</code>, <code>vbmeta</code>, <code>dtbo</code>, <code>super</code> (for dynamic partitions), <code>modem</code>, <code>preloader</code> (on some devices)</li>
+        <li><strong>Delta data</strong> — if the OTA is incremental, only changed blocks are stored</li>
+      </ul>
+      <p>Because it is not a standard ZIP, tools like 7-Zip cannot extract it — you need a payload dumper.</p>
+
+      <p><strong>OTA zip structure:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">firmware.zip
+├── payload.bin
+├── payload_properties.txt
+├── care_map.pb
+├── metadata
+└── META-INF/
+    └── com/
+        └── android/
+            ├── metadata
+            └── otacert</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>2. Prerequisites</h3>
+      <ul>
+        <li><strong>Full OTA firmware ZIP</strong> matching your device's exact build number.</li>
+        <li><strong>7-Zip</strong> or <strong>WinRAR</strong> for extracting the ZIP.</li>
+        <li><strong>Payload dumper</strong> tool (Go or Python version).</li>
+        <li>At least <strong>8–30 GB free disk space</strong> — extracted partitions total 5–15 GB typically.</li>
+        <li>Windows 10/11, Linux, or macOS.</li>
+      </ul>
+      <div class="warning">
+        <p><strong>Full OTA only:</strong> <strong>incremental/delta OTAs</strong> only contain changes from a previous build. Their <code>payload.bin</code> cannot be extracted to full partition images. Always download the <strong>Full OTA</strong> for your exact current build.</p>
+      </div>
+    </li>
+
+    <li>
+      <h3>3. Step 1 — Extract the OTA zip</h3>
+      <ol>
+        <li>Download the Full OTA zip for your device.</li>
+        <li>Right-click the zip → <strong>7-Zip → Extract to folder</strong>.</li>
+        <li>Inside the extracted folder, locate <code>payload.bin</code> (usually 1–4 GB) and <code>payload_properties.txt</code>.</li>
+      </ol>
+      <p>Copy <code>payload.bin</code> to a working folder where you will run the extractor, e.g. <code>C:\payload_extract\</code>.</p>
+    </li>
+
+    <li>
+      <h3>4. Method 1 — payload-dumper-go (fastest, recommended)</h3>
+      <p>A single-binary Go tool that extracts partitions in seconds. No Python installation needed.</p>
+
+      <p><strong>Step 1 — Download the binary.</strong></p>
+      <p>Get the latest release from GitHub: <code>ssut/payload-dumper-go</code>. Download the <code>.exe</code> for Windows (or the Linux binary for Linux).</p>
+
+      <p><strong>Step 2 — Place everything in one folder.</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">C:\payload_extract\
+├── payload-dumper-go.exe
+└── payload.bin</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Extract ALL partitions:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">payload-dumper-go payload.bin</code></pre>
+      </div>
+      <p>Output partitions appear in a folder named <code>extracted_YYYYMMDD_HHMMSS\</code>.</p>
+
+      <p><strong>Step 4 — Extract only specific partitions (faster, saves space):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Extract only boot.img (for Magisk root)
+payload-dumper-go -p boot payload.bin
+
+# Extract boot and vbmeta together
+payload-dumper-go -p boot,vbmeta payload.bin
+
+# Extract super (dynamic partitions) and dtbo
+payload-dumper-go -p super,dtbo payload.bin
+
+# Extract init_boot (Android 13+ devices)
+payload-dumper-go -p init_boot payload.bin</code></pre>
+      </div>
+
+      <p><strong>Step 5 — Specify output folder manually:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">payload-dumper-go -o output_folder payload.bin</code></pre>
+      </div>
+
+      <p><strong>Step 6 — List partitions without extracting:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">payload-dumper-go -l payload.bin</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>5. Method 2 — Python payload_dumper (cross-platform)</h3>
+      <p>Useful if you prefer Python or need to run on macOS without Go.</p>
+
+      <p><strong>Step 1 — Install.</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">pip install payload_dumper</code></pre>
+      </div>
+
+      <p><strong>Step 2 — Extract all partitions.</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">payload_dumper payload.bin</code></pre>
+      </div>
+
+      <p><strong>Step 3 — Extract specific partitions.</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># Extract only boot
+payload_dumper --partitions boot payload.bin
+
+# Multiple partitions
+payload_dumper --partitions boot,system,vendor payload.bin
+
+# Custom output directory
+payload_dumper --out output_folder payload.bin</code></pre>
+      </div>
+
+      <p><strong>Step 4 — Extract incremental OTA (advanced, requires old images):</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">payload_dumper --diff --old_images ./old_firmware/ payload.bin</code></pre>
+      </div>
+      <p>This works only when you provide the exact previous build's partition images.</p>
+    </li>
+
+    <li>
+      <h3>6. Method 3 — payload_dumper source script (manual)</h3>
+      <p>If the <code>pip</code> package does not work for your Python version, clone and run the source directly.</p>
+
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">git clone https://github.com/vm03/payload_dumper.git
+cd payload_dumper
+pip install -r requirements.txt
+python payload_dumper.py payload.bin</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>7. Understanding the output</h3>
+      <p>After extraction, you will typically see:</p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-plaintext">extracted/
+├── boot.img              ← kernel + ramdisk (Magisk target)
+├── init_boot.img         ← Android 13+ GKI root target
+├── dtbo.img              ← device tree overlay
+├── vbmeta.img            ← AVB metadata
+├── vbmeta_system.img     ← system verification
+├── super.img             ← dynamic partitions container
+├── system.img            ← A-only: main system
+├── vendor.img            ← A-only: vendor HAL
+├── product.img           ← A-only: product
+├── odm.img               ← A-only: OEM binaries
+├── system_ext.img        ← A-only: system extension
+├── modem.img             ← baseband firmware
+├── modemst1.img          ← Qualcomm modem NVRAM copy 1
+├── modemst2.img          ← Qualcomm modem NVRAM copy 2
+├── fsg.img               ← Qualcomm FSG
+├── persist.img           ← sensors, fingerprint data
+├── dtbo.img              ← device tree
+├── metadata.img          ← FBE keys
+└── ...</code></pre>
+      </div>
+
+      <table>
+        <thead>
+          <tr><th>Partition</th><th>Purpose</th><th>Typical use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>boot.img</code></td><td>Linux kernel + ramdisk</td><td>Magisk root (pre-Android 13)</td></tr>
+          <tr><td><code>init_boot.img</code></td><td>init binary + boot ramdisk</td><td>Magisk root (Android 13+ GKI)</td></tr>
+          <tr><td><code>vbmeta.img</code></td><td>AVB signature metadata</td><td>Disable verity/verification</td></tr>
+          <tr><td><code>super.img</code></td><td>Dynamic partitions container</td><td>Custom ROM, GSI</td></tr>
+          <tr><td><code>system.img</code></td><td>Android framework</td><td>Patching system apps</td></tr>
+          <tr><td><code>vendor.img</code></td><td>HAL drivers</td><td>Custom ROM prep</td></tr>
+          <tr><td><code>modem.img</code></td><td>Baseband firmware</td><td>Network repair</td></tr>
+          <tr><td><code>modemst1/2.img</code></td><td>Qualcomm NVRAM mirrors</td><td>IMEI backup/restore</td></tr>
+          <tr><td><code>fsg.img</code></td><td>Golden backup</td><td>Baseband recovery</td></tr>
+          <tr><td><code>persist.img</code></td><td>Sensors, fingerprint</td><td>Sensor/fingerprint repair</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>8. Verify extracted images</h3>
+      <p>After extraction, confirm each partition is valid before using:</p>
+
+      <p><strong>Check filesystem type:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">file boot.img
+file system.img
+file super.img</code></pre>
+      </div>
+
+      <p><strong>Check magic bytes manually:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># First 4 bytes of any image
+xxd -l 4 boot.img
+
+# For ext4, magic 53EF appears at offset 1080
+xxd -l 4 -s 1080 system.img
+
+# For sparse, magic 3AFF26ED appears at offset 0
+xxd -l 4 system.img</code></pre>
+      </div>
+
+      <p><strong>Verify sizes make sense:</strong></p>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-powershell"># Windows PowerShell
+Get-ChildItem *.img | Select-Object Name, @{N='MB';E={[math]::Round($_.Length/1MB,2)}}</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>9. Common use cases</h3>
+
+      <p><strong>Root with Magisk:</strong></p>
+      <ol>
+        <li>Extract <code>boot.img</code> (or <code>init_boot.img</code> on Android 13+).</li>
+        <li>Push to device: <code>adb push boot.img /sdcard/Download/</code></li>
+        <li>Open Magisk → Install → Select and Patch a File.</li>
+        <li>Pull patched image and flash via fastboot:
+          <div class="code-container">
+            <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code class="language-bash">fastboot flash boot magisk_patched_XXXXX.img</code></pre>
+          </div>
+        </li>
+      </ol>
+
+      <p><strong>Extract super.img partitions:</strong></p>
+      <ol>
+        <li>Extract <code>super.img</code> with payload-dumper-go.</li>
+        <li>Convert to raw: <code>simg2img super.img super_raw.img</code></li>
+        <li>Use <code>lpunpack</code> to split into individual partitions.</li>
+        <li>Modify and repack with <code>lpmake</code>.</li>
+      </ol>
+
+      <p><strong>Backup modem/IMEI partitions:</strong></p>
+      <ol>
+        <li>Extract <code>modemst1</code>, <code>modemst2</code>, <code>fsg</code>.</li>
+        <li>Store in cloud (they contain your IMEI calibration).</li>
+      </ol>
+    </li>
+
+    <li>
+      <h3>10. Troubleshooting</h3>
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>"Unsupported payload version"</td><td>Incremental OTA — download Full OTA instead.</td></tr>
+          <tr><td>Extractor hangs or crashes</td><td>Insufficient RAM (needs 4 GB+). Close other apps.</td></tr>
+          <tr><td>Extracted images are 0 KB</td><td>Delta OTA — Full OTA required. Or payload.bin truncated.</td></tr>
+          <tr><td>"No partitions extracted"</td><td>Wrong option syntax. Use <code>-p</code> with partition names, or <code>-l</code> to list first.</td></tr>
+          <tr><td>Extracted boot.img won't patch in Magisk</td><td>Wrong file — Android 13+ needs <code>init_boot.img</code> instead of <code>boot.img</code>.</td></tr>
+          <tr><td>Cannot extract super.img partitions</td><td>super.img must be converted to raw with <code>simg2img</code> first, then <code>lpunpack</code>.</td></tr>
+          <tr><td>Out of disk space</td><td>Full extraction needs 10–30 GB. Extract only needed partitions.</td></tr>
+          <tr><td>payload_dumper: ModuleNotFoundError</td><td>Run <code>pip install -r requirements.txt</code> in the cloned folder.</td></tr>
+        </tbody>
+      </table>
+    </li>
+
+    <li>
+      <h3>11. Complete command reference</h3>
+      <div class="code-container">
+        <button type="button" class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash"># ---- Extract OTA zip first ----
+# Right-click .zip → 7-Zip → Extract to folder
+
+# ---- payload-dumper-go (Go, fastest) ----
+payload-dumper-go payload.bin                                # all
+payload-dumper-go -p boot payload.bin                        # boot only
+payload-dumper-go -p boot,init_boot,vbmeta payload.bin       # select
+payload-dumper-go -p super,dtbo,modem payload.bin            # super etc.
+payload-dumper-go -o output_folder payload.bin               # custom dir
+payload-dumper-go -l payload.bin                             # list only
+
+# ---- Python payload_dumper ----
+pip install payload_dumper
+payload_dumper payload.bin
+payload_dumper --partitions boot payload.bin
+payload_dumper --partitions boot,system,vendor payload.bin
+payload_dumper --out output_folder payload.bin
+payload_dumper --diff --old_images ./old/ payload.bin
+
+# ---- Manual source script ----
+git clone https://github.com/vm03/payload_dumper.git
+cd payload_dumper
+pip install -r requirements.txt
+python payload_dumper.py payload.bin
+
+# ---- Verify output ----
+file boot.img
+file system.img
+xxd -l 4 -s 1080 system.img       # 53EF = ext4
+xxd -l 4 boot.img                 # 3AFF26ED = sparse
+
+# ---- Convert sparse if needed ----
+simg2img system.img system_raw.img
+img2simg system_raw.img system_sparse.img</code></pre>
+      </div>
+    </li>
+
+    <li>
+      <h3>12. Best practices</h3>
+      <ul>
+        <li>✅ Always download the <strong>Full OTA</strong> — incremental payloads cannot be fully extracted.</li>
+        <li>✅ Match the exact build number currently running on your device.</li>
+        <li>✅ Extract only what you need — saves time and disk space.</li>
+        <li>✅ Verify extracted images with <code>file</code> and <code>xxd</code> before using.</li>
+        <li>✅ For Android 13+, always use <code>init_boot.img</code> for Magisk, not <code>boot.img</code>.</li>
+        <li>✅ Back up <code>modemst1</code>, <code>modemst2</code>, <code>fsg</code> if you extracted them — they contain IMEI calibration.</li>
+        <li>✅ Keep the original OTA zip in case you need to re-extract.</li>
+      </ul>
+    </li>
+
+  </ol>
+
+  <div class="note">
+    <p><strong>Tip:</strong> after extracting <code>boot.img</code> (or <code>init_boot.img</code>) for Magisk patching, always disable DM-Verity and AVB via <code>fastboot --disable-verity --disable-verification flash vbmeta vbmeta.img</code> before flashing custom recovery or modified partitions. Otherwise the device will bootloop.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related guides</h2>
+    <ul>
+      <li><a href="../development/extract-boot-payload-bin.html">Extract boot.img from payload.bin (root-focused)</a></li>
+      <li><a href="extract-ofp-ops-firmware-files.html">Extract .ofp / .ops Firmware</a></li>
+      <li><a href="../android-generic/convert-sparse-to-raw-img-simg2img.html">Convert Sparse Image to Raw</a></li>
+      <li><a href="../android-generic/disable-dm-verity-avb-android.html">Disable DM-Verity &amp; AVB</a></li>
+      <li><a href="../android-generic/check-file-system-system-img-windows.html">Check &amp; Repair system.img</a></li>
+      <li><a href="../../android.html#firmware-extracting">Firmware Extracting category</a></li>
+    </ul>
+  </div>
+</article>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2026 Tech Learn — Made for everyday tech tutorials</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/plaintext.min.js"></script>
+<script>
+function copyCode(button) {
+  const codeBlock = button.nextElementSibling.querySelector('code');
+  navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+    button.innerText = "Copied!";
+    button.classList.add("copied");
+    setTimeout(() => { button.innerText = "Copy"; button.classList.remove("copied"); }, 2000);
+  }).catch(err => console.error("Failed to copy: ", err));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("pre code").forEach(b => hljs.highlightElement(b));
+});
+</script>
+</body>
+</html>
